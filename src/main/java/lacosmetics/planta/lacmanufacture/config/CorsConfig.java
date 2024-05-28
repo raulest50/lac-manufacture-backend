@@ -22,7 +22,7 @@ public class CorsConfig {
         var urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         var corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://vps-4126991-x.dattaweb.com"));
 
         corsConfiguration.setAllowedHeaders(List.of(
                 ORIGIN,
