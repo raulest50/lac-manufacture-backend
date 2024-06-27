@@ -11,6 +11,9 @@ COPY gradle gradle
 COPY build.gradle.kts build.gradle.kts
 COPY settings.gradle.kts settings.gradle.kts
 
+# Ensure gradlew has execute permissions
+RUN chmod +x gradlew
+
 # Copy the project source code
 COPY src src
 
