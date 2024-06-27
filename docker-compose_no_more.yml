@@ -10,7 +10,7 @@ services:
   spring-app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_old
     container_name: spring-app
     restart: always
     ports:
