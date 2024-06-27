@@ -27,14 +27,20 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.session:spring-session-core")
 
+	runtimeOnly("org.postgresql:postgresql")
+
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 
 	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("com.mysql:mysql-connector-j")
+	//runtimeOnly("com.mysql:mysql-connector-j") // ya no uso mysql sino postgres pq es la disponible en render
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	//testImplementation("org.springframework.security:spring-security-test")
 }
+
+
+// tambien como ya no usare multicontainer app, posiblemente estos task aca abajo ya no sean necesarios pero
+// igual los dejo de referencia.
 
 tasks.withType<Test> {
 	useJUnitPlatform()

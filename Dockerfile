@@ -11,3 +11,4 @@ COPY ${JAR_FILE} lac-manufacture-v1.jar
 EXPOSE 8080
 
 ENTRYPOINT ["java","-jar","/app/lac-manufacture-v1.jar"]
+

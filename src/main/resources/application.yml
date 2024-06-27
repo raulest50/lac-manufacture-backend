@@ -8,12 +8,17 @@ spring:
 
   datasource:
     #url: jdbc:mysql://localhost:3306/lacm-planta?createDatabaseIfNotExist=true
-    url: jdbc:mysql://mysql-container:3306/lacm-planta?createDatabaseIfNotExist=true
-    username: root
-    password: la1234
+    #url: jdbc:mysql://mysql-container:3306/lacm-planta?createDatabaseIfNotExist=true
+    # url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a.oregon-postgres.render.com:5432/lacmdb # external
+    url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a:5432/lacmdb # internal url
+    username: spring
+    password: R4f4MR3HqoqhperVwOUvMDqP0vzsmdd4
     #driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
+
   jpa:
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    #database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     generate-ddl: true
     show-sql: true
     hibernate:
@@ -21,7 +26,8 @@ spring:
     properties:
       hibernate:
         globally_quoted_identifiers: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        #dialect: org.hibernate.dialect.MySQL8Dialect
+        #dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
   servlet:
     multipart:

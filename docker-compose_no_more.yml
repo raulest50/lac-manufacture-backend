@@ -1,3 +1,11 @@
+
+# at first i had planed this app to be multicontainer so i wanted at first to use docker and
+# host a sql database and a spring app. but now i changed my mind. Currently i want to
+# host spring app as a instance web app on render and having my db as a separate entity
+# i'm gessing this is going to improve and facilitate the dev and deployment cycle. so therefore
+# this file has to be removed but instead i renamed it and kept it for future reference just in case.
+
+
 services:
   spring-app:
     build:
