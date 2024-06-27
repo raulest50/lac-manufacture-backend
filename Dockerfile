@@ -20,6 +20,7 @@ RUN ./gradlew clean build -x test
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} lac-manufacture-v1.jar
 
-EXPOSE 8080 # Expose the port the app runs on
+# Expose the port the app runs on
+EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/lac-manufacture-v1.jar"]
 
