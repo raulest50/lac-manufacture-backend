@@ -29,9 +29,9 @@ RUN ls -la
 RUN ./gradlew clean build -x test
 RUN ls -la
 RUN echo "build folder:"
-RUN ls /build -la
+RUN ls ./build -la
 
-ARG JAR_FILE=build/libs/*.jar
+ARG JAR_FILE=./build/libs/*.jar
 COPY ${JAR_FILE} lac-manufacture-v1.jar
 
 # Expose the port the app runs on
