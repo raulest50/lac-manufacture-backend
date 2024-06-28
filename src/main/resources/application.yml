@@ -9,7 +9,7 @@ spring:
   datasource:
     #url: jdbc:mysql://localhost:3306/lacm-planta?createDatabaseIfNotExist=true
     #url: jdbc:mysql://mysql-container:3306/lacm-planta?createDatabaseIfNotExist=true
-    # url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a.oregon-postgres.render.com:5432/lacmdb # external
+    #url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a.oregon-postgres.render.com:5432/lacmdb # external
     url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a:5432/lacmdb # internal url
     username: spring
     password: R4f4MR3HqoqhperVwOUvMDqP0vzsmdd4
