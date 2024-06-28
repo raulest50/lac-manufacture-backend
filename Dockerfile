@@ -40,7 +40,7 @@ RUN ls ./build/libs -la
 
 #ARG JAR_FILE=./build/libs/lac-manufacture-v1.jar
 #COPY ${JAR_FILE} lac-manufacture-v1.jar
-COPY --form=build /build/libs/lac-manufacture-v1.jar lac-manufacture-v1.jar
+COPY --from=build /build/libs/lac-manufacture-v1.jar lac-manufacture-v1.jar
 
 # Expose the port the app runs on
 EXPOSE 8080
