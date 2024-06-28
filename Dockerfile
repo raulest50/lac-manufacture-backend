@@ -30,9 +30,11 @@ RUN ./gradlew clean build -x test
 RUN ls -la
 RUN echo "build folder:"
 RUN ls ./build -la
+RUN ls ./build/libs -la
 
-ARG JAR_FILE=./build/libs/*.jar
-COPY ${JAR_FILE} lac-manufacture-v1.jar
+#ARG JAR_FILE=./build/libs/lac-manufacture-v1.jar
+#COPY ${JAR_FILE} lac-manufacture-v1.jar
+COPY ./build/libs/lac-manufacture-v1.jar lac-manufacture-v1
 
 # Expose the port the app runs on
 EXPOSE 8080
