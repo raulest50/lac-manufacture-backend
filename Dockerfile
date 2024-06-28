@@ -1,5 +1,4 @@
-
-FROM amazoncorretto:21
+FROM gradle:8.1.1-jdk17-alpine AS build
 
 LABEL authors="raul esteban" version="dev-1" description="Spring Boot Docker Image"
 
@@ -32,9 +31,16 @@ RUN echo "build folder:"
 RUN ls ./build -la
 RUN ls ./build/libs -la
 
+
+FROM amazoncorretto:21
+RUN echo "AMAZON CORETTO"
+RUN ls -la
+RUN ls ./build -la
+RUN ls ./build/libs -la
+
 #ARG JAR_FILE=./build/libs/lac-manufacture-v1.jar
 #COPY ${JAR_FILE} lac-manufacture-v1.jar
-COPY ./build/libs/*-all.jar lac-manufacture-v1
+COPY --form=build /build/libs/lac-manufacture-v1.jar lac-manufacture-v1.jar
 
 # Expose the port the app runs on
 EXPOSE 8080
