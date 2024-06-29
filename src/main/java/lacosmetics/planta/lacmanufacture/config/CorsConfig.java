@@ -22,7 +22,7 @@ public class CorsConfig {
         var urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         var corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "https://lac-manufacture-backend.onrender.com"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "https://lac-manufacture-backend.onrender.com", "http://lac-manufacture-backend.onrender.com"));
 
         corsConfiguration.setAllowedHeaders(List.of(
                 ORIGIN,
