@@ -7,10 +7,10 @@ spring:
     additional-location: classpath:application-secrets.properties
 
   datasource:
-    #url: jdbc:mysql://localhost:3306/lacm-planta?createDatabaseIfNotExist=true
-    #url: jdbc:mysql://mysql-container:3306/lacm-planta?createDatabaseIfNotExist=true
-    #url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a.oregon-postgres.render.com:5432/lacmdb # external
-    url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a:5432/lacmdb # internal url
+    #url: jdbc:mysql://mysql-container:3306/lacm-planta?createDatabaseIfNotExist=true # OLD MULTI-CONTAINER URL
+    #url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a.oregon-postgres.render.com:5432/lacmdb # RENDER EXTERNAL
+    #url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a:5432/lacmdb # RENDER INTERNAL
+    url: jdbc:postgresql://localhost:5432/lacmdb?createDatabaseIfNotExist=true # LOCAL DEV
     username: spring
     password: R4f4MR3HqoqhperVwOUvMDqP0vzsmdd4
     #driver-class-name: com.mysql.cj.jdbc.Driver

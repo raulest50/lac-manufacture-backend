@@ -1,0 +1,19 @@
+
+#In the lab where I'm currently working at, the internet is configured to block me from accessing a
+#remote postgres 16 db on render which is used by my spring app to operate.
+
+#just because of that i'm using docker locally to run a dev database
+
+# in the command line:
+# docker-compose -f docker-compose-only-dev.yml up -d
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: spring
+      POSTGRES_PASSWORD: R4f4MR3HqoqhperVwOUvMDqP0vzsmdd4
+      POSTGRES_DB: lacmdb
+    ports:
+      - "5432:5432"
