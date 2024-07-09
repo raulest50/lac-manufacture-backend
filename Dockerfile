@@ -22,7 +22,9 @@ RUN sed -i 's/\r$//' gradlew
 COPY src src
 
 # Install dependencies and build the project
-RUN ./gradlew clean build -x test
+# added -Pprod for production.
+# also is possible that skip thest is nont longer necessary since db is now a render separate instance
+RUN ./gradlew clean build -x test -Pprod
 
 # lac-manufacture-v1.jar
 
