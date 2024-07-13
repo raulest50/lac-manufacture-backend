@@ -12,7 +12,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="materias_primas")
+@DiscriminatorValue("M")
+//@Table(name="materias_primas")
 @Getter
 @Setter
 @NoArgsConstructor

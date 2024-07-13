@@ -2,6 +2,8 @@ package lacosmetics.planta.lacmanufacture.model;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -10,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 
@@ -21,13 +22,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "producto_type", discriminatorType = DiscriminatorType.STRING)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "producto_type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = MateriaPrima.class, name = "M"),
+        @JsonSubTypes.Type(value = SemiTerminado.class, name = "S")
+})
 public abstract class Producto {
 
     @Id
-    @GeneratedValue(generator = "prefixed-id")
-    @GenericGenerator(name = "prefixed-id", strategy = "lacosmetics.planta.lacmanufacture.config.PrefixedIdGenerator")
-    @Column(name = "id", unique = true, updatable = false, nullable = false)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "producto_id", unique = true, updatable = false, nullable = false)
+    private int producto_id;
 
     @Column(length = 200)
     private String nombre;
