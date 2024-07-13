@@ -30,8 +30,8 @@ public class ProductoService {
         return productoRepo.findAll(PageRequest.of(page, size));
     }
 
-    public Page<Producto> getAllProductos_byType(int page, int size, String tipo) {
-        return productoRepo.findAll(PageRequest.of(page, size));
+    public Page<Producto> getAllProductos_byType(int page, int size, String[] tipo_producto) {
+        return productoRepo.findAllByTipoProductoIn(PageRequest.of(page, size), tipo_producto);
     }
 
     public Producto getProductoById(int id){

@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 @DiscriminatorValue("M")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+//@NoArgsConstructor
+//@AllArgsConstructor
 public class MateriaPrima extends Producto {
 
 

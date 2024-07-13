@@ -30,13 +30,13 @@ public class ProductoResource {
         return ResponseEntity.ok().body(productoService.getAllProductos(page, size));
     }
 
-    @PutMapping("/getall/{tipo}")
+    @GetMapping("/get_tipos_in")
     public ResponseEntity<Page<Producto>> getAllProductos_byType(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @PathVariable String tipo)
+            @RequestParam String[] tipo_producto)
     {
-        return ResponseEntity.ok().body(productoService.getAllProductos_byType(page, size, tipo));
+        return ResponseEntity.ok().body(productoService.getAllProductos_byType(page, size, tipo_producto));
     }
 
 }
