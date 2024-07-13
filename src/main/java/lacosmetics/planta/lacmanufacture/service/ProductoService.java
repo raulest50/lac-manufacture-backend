@@ -14,9 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @Slf4j
 @Transactional(rollbackOn = Exception.class)
@@ -30,6 +27,10 @@ public class ProductoService {
     private final InsumoRepo insumoRepository;
 
     public Page<Producto> getAllProductos(int page, int size){
+        return productoRepo.findAll(PageRequest.of(page, size));
+    }
+
+    public Page<Producto> getAllProductos_byType(int page, int size, String tipo) {
         return productoRepo.findAll(PageRequest.of(page, size));
     }
 
@@ -50,4 +51,5 @@ public class ProductoService {
     public void deleteProducto(int id) {
         productoRepo.deleteById(id);
     }
+
 }

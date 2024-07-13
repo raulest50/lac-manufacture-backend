@@ -1,10 +1,7 @@
 package lacosmetics.planta.lacmanufacture.model;
 
-
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -22,15 +19,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "producto_type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "tipo_producto", discriminatorType = DiscriminatorType.STRING)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "producto_type"
+        property = "tipo_producto"
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = MateriaPrima.class, name = "M"),
-        @JsonSubTypes.Type(value = SemiTerminado.class, name = "S")
+        @JsonSubTypes.Type(value = SemiTerminado.class, name = "S"),
+        @JsonSubTypes.Type(value = Terminado.class, name = "T")
 })
 public abstract class Producto {
 
@@ -42,7 +40,8 @@ public abstract class Producto {
     @Column(length = 200)
     private String nombre;
 
-    private String notas;
+    @Lob
+    private String observaciones;
 
     @Min(value=0, message = "El costo no puede ser negativo") // validacion en db engine
     private int costo;
@@ -50,7 +49,14 @@ public abstract class Producto {
     @CreationTimestamp
     private LocalDateTime fechaCreacion;
 
+    // 0:L, 1:KG, 2:U
+    private int tipo_unidades;
 
+    @Min(value=0, message = "La Cantidad por unidad no puede ser negativa") // Cantidad por unidad
+    private double cantidad_unidad;
+
+    @Transient
+    private String tipo_producto;
 
 }
 

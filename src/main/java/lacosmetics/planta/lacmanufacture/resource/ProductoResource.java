@@ -23,10 +23,20 @@ public class ProductoResource {
     }
 
     @GetMapping("/getall")
-    public ResponseEntity<Page<Producto>>
-    getAllProductos(@RequestParam(value="page", defaultValue = "0") int page,
-                    @RequestParam(defaultValue = "10") int size){
+    public ResponseEntity<Page<Producto>> getAllProductos(
+            @RequestParam(value="page", defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
+    {
         return ResponseEntity.ok().body(productoService.getAllProductos(page, size));
+    }
+
+    @PutMapping("/getall/{tipo}")
+    public ResponseEntity<Page<Producto>> getAllProductos_byType(
+            @RequestParam(value="page", defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @PathVariable String tipo)
+    {
+        return ResponseEntity.ok().body(productoService.getAllProductos_byType(page, size, tipo));
     }
 
 }

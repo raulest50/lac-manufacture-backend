@@ -11,7 +11,6 @@ import java.util.List;
 
 @Entity
 @DiscriminatorValue("S")
-//@Table(name="semi_terminados")
 @Getter
 @Setter
 @NoArgsConstructor
