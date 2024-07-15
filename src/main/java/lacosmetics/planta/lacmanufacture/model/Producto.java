@@ -48,8 +48,8 @@ public abstract class Producto {
     @CreationTimestamp
     private LocalDateTime fechaCreacion;
 
-    // 0:L, 1:KG, 2:U
-    private int tipo_unidades;
+    @Column(name = "tipo_unidades", length = 4)  // L: litros, KG: kilogramos, U: unidades (por ejemplo, paquetes)
+    private String tipo_unidades;
 
     @Min(value=0, message = "La Cantidad por unidad no puede ser negativa") // Cantidad por unidad
     private double cantidad_unidad;
