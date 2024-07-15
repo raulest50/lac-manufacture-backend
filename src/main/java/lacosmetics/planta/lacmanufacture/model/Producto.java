@@ -40,7 +40,6 @@ public abstract class Producto {
     @Column(length = 200)
     private String nombre;
 
-    @Lob
     private String observaciones;
 
     @Min(value=0, message = "El costo no puede ser negativo") // validacion en db engine
@@ -54,9 +53,6 @@ public abstract class Producto {
 
     @Min(value=0, message = "La Cantidad por unidad no puede ser negativa") // Cantidad por unidad
     private double cantidad_unidad;
-
-    @Transient
-    private String tipo_producto;
 
 }
 

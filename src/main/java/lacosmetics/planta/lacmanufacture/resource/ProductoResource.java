@@ -1,7 +1,10 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
 
+import lacosmetics.planta.lacmanufacture.model.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.Producto;
+import lacosmetics.planta.lacmanufacture.model.SemiTerminado;
+import lacosmetics.planta.lacmanufacture.model.Terminado;
 import lacosmetics.planta.lacmanufacture.service.ProductoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,13 +33,28 @@ public class ProductoResource {
         return ResponseEntity.ok().body(productoService.getAllProductos(page, size));
     }
 
-    @GetMapping("/get_tipos_in")
-    public ResponseEntity<Page<Producto>> getAllProductos_byType(
+    @GetMapping("/getall_mprima")
+    public ResponseEntity<Page<MateriaPrima>> getAllMprima(
             @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam String[] tipo_producto)
+            @RequestParam(defaultValue = "10") int size)
     {
-        return ResponseEntity.ok().body(productoService.getAllProductos_byType(page, size, tipo_producto));
+        return ResponseEntity.ok().body(productoService.getAllMP(page, size));
+    }
+
+    @GetMapping("/getall_semi")
+    public ResponseEntity<Page<SemiTerminado>> getAllSemi(
+            @RequestParam(value="page", defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
+    {
+        return ResponseEntity.ok().body(productoService.getAllS(page, size));
+    }
+
+    @GetMapping("/getall_termi")
+    public ResponseEntity<Page<Terminado>> getAllTermi(
+            @RequestParam(value="page", defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size)
+    {
+        return ResponseEntity.ok().body(productoService.getAllT(page, size));
     }
 
 }

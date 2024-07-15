@@ -23,6 +23,6 @@ public class Insumo {
     @JoinColumn(name = "input_producto_id")
     private Producto producto;
 
-    private int cantidad_requerida;
+    private double cantidad_requerida;
 
 }

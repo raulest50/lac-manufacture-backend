@@ -2,11 +2,11 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.Insumo;
+import lacosmetics.planta.lacmanufacture.model.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.Producto;
 import lacosmetics.planta.lacmanufacture.model.SemiTerminado;
-import lacosmetics.planta.lacmanufacture.repo.InsumoRepo;
-import lacosmetics.planta.lacmanufacture.repo.ProductoRepo;
+import lacosmetics.planta.lacmanufacture.model.Terminado;
+import lacosmetics.planta.lacmanufacture.repo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +24,23 @@ public class ProductoService {
     private final ProductoRepo productoRepo;
 
     @Autowired
+    private final MateriaPrimaRepo materiaPrimaRepo;
+
+    @Autowired
+    private final SemiTerminadoRepo semiTerminadoRepo;
+
+    @Autowired
+    private final TerminadoRepo terminadoRepo;
+
+    @Autowired
     private final InsumoRepo insumoRepository;
+
 
     public Page<Producto> getAllProductos(int page, int size){
         return productoRepo.findAll(PageRequest.of(page, size));
     }
 
-    public Page<Producto> getAllProductos_byType(int page, int size, String[] tipo_producto) {
-        return productoRepo.findAllByTipoProductoIn(PageRequest.of(page, size), tipo_producto);
-    }
+
 
     public Producto getProductoById(int id){
         return productoRepo.findById(id)
@@ -52,4 +60,15 @@ public class ProductoService {
         productoRepo.deleteById(id);
     }
 
+    public Page<MateriaPrima> getAllMP(int page, int size) {
+        return materiaPrimaRepo.findAll(PageRequest.of(page, size));
+    }
+
+    public Page<SemiTerminado> getAllS(int page, int size) {
+        return semiTerminadoRepo.findAll(PageRequest.of(page, size));
+    }
+
+    public Page<Terminado> getAllT(int page, int size) {
+        return terminadoRepo.findAll(PageRequest.of(page, size));
+    }
 }
