@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model;
+package lacosmetics.planta.lacmanufacture.model.producto;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.model;
 
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,10 @@ public class Movimiento {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    @Lob
+    // causa del movimiento
+    // VENTA, COMPRA, AVERIA, USO_INTERNO, PROD_INTERNO, OTROS
+    private String causa;
+
     private String observaciones;
 
     @CreationTimestamp

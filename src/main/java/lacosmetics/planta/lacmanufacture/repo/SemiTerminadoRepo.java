@@ -1,7 +1,6 @@
 package lacosmetics.planta.lacmanufacture.repo;
 
-import lacosmetics.planta.lacmanufacture.model.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.SemiTerminado;
+import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

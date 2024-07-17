@@ -1,6 +1,7 @@
 package lacosmetics.planta.lacmanufacture.model;
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

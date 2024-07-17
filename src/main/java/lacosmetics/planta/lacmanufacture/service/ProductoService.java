@@ -3,10 +3,10 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.Producto;
-import lacosmetics.planta.lacmanufacture.model.SemiTerminado;
-import lacosmetics.planta.lacmanufacture.model.Terminado;
+import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
+import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

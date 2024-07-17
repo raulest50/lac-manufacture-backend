@@ -1,10 +1,10 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
 
-import lacosmetics.planta.lacmanufacture.model.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.Producto;
-import lacosmetics.planta.lacmanufacture.model.SemiTerminado;
-import lacosmetics.planta.lacmanufacture.model.Terminado;
+import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
+import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.service.ProductoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

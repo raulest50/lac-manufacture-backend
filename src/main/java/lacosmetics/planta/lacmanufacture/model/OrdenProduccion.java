@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.model;
 
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -28,10 +30,13 @@ public class OrdenProduccion {
     @JoinColumn(name = "producto_id")
     private Terminado terminado;
 
+    @OneToMany
+    @JoinColumn(name = "orden_prod_id")
+    private List<OrdenSeguimiento> ordenesSeguimiento;
+
     // 0: en produccion, 1:terminada
     private int estado_orden;
 
-    @Lob
     private String observaciones;
 
     @CreationTimestamp
