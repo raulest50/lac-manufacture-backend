@@ -30,6 +30,8 @@ public class OrdenProduccion {
     @JoinColumn(name = "producto_id")
     private Terminado terminado;
 
+    private int seccion_responsable;
+
     @OneToMany
     @JoinColumn(name = "orden_prod_id")
     private List<OrdenSeguimiento> ordenesSeguimiento;

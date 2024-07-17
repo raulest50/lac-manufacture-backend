@@ -20,8 +20,8 @@ public class OrdenSeguimiento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "orden_seguimiento_id", unique = true, updatable = false, nullable = false)
-    private int orden_seguimiento_id;
+    @Column(name = "seguimiento_id", unique = true, updatable = false, nullable = false)
+    private int seguimiento_id;
 
     @ManyToOne
     @JoinColumn(name = "insumo_id")
