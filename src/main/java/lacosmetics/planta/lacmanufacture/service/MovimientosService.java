@@ -11,6 +11,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,8 +32,19 @@ public class MovimientosService {
         Optional<Producto> optionalProducto = productoRepo.findById(producto_id);
         if(optionalProducto.isPresent()){
             Double totalCantidad = movimientoRepo.findTotalCantidadByProductoId(producto_id);
+            totalCantidad = (totalCantidad != null) ? totalCantidad : 0.0;
             Stock stock = new Stock(totalCantidad, optionalProducto.get());
             return Optional.of(stock);
+        } else{
+            return Optional.of(new Stock());
+        }
+    }
+
+    public Optional<Stock> getStockOf2(int producto_id){
+        List<Movimiento> movs = movimientoRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
+        if(!movs.isEmpty()){
+            double stock = movs.stream().mapToDouble(Movimiento::getCantidad).sum();
+            return Optional.of(new Stock(stock, movs.getFirst().getProducto()));
         } else{
             return Optional.empty();
         }

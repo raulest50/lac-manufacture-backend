@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class Movimiento {
     private double cantidad;
 
     // aplica para los 3 tipos de productos
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Producto producto;

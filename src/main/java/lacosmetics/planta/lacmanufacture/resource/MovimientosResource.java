@@ -5,6 +5,8 @@ import lacosmetics.planta.lacmanufacture.model.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.notPersisted.Stock;
 import lacosmetics.planta.lacmanufacture.service.MovimientosService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +31,7 @@ public class MovimientosResource {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam int producto_id)
     {
+        //Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok().body(movimientoService.getStockOf(producto_id));
     }
 
