@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface MovimientoRepo extends JpaRepository<Movimiento, Integer> {
 
-    @Query("SELECT SUM(m.cantidad) FROM Movimiento m WHERE m.producto_id = :producto_id")
-    Double findTotalCantidadByProductoId(@Param("productoId") int producto_id);
+    @Query("SELECT SUM(m.cantidad) FROM Movimiento m WHERE m.producto.producto_id = :producto_id")
+    Double findTotalCantidadByProductoId(@Param("producto_id") int producto_id);
 
 }
