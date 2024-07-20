@@ -44,6 +44,7 @@ public class OrdenProduccion {
     @CreationTimestamp
     private LocalDateTime fechaInicio;
 
+
     private LocalDateTime fechaFinal;
 
 }
