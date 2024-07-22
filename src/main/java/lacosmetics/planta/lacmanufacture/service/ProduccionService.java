@@ -22,4 +22,12 @@ public class ProduccionService {
     public Page<OrdenProduccion> getWorkloadByZona(int zonaId, int page, int size) {
 
     }
+
+    @Transactional
+    public OrdenProduccion saveOrdenProduccion(OrdenProduccion ordenProduccion) {
+        return ordenProduccionRepo.save(ordenProduccion);
+    }
+
+    public Page<OrdenProduccion> getAllActiveOrders(int page, int size) {
+    }
 }
