@@ -18,12 +18,12 @@ public class Insumo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "insumo_id", unique = true, updatable = false, nullable = false)
-    private int insumo_id;
+    private int insumoId;
 
     @ManyToOne
     @JoinColumn(name = "input_producto_id")
     private Producto producto;
 
-    private double cantidad_requerida;
+    private double cantidadRequerida;
 
 }

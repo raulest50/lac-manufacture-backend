@@ -29,7 +29,7 @@ public class MovimientosService {
     }
 
     public Optional<Stock> getStockOf(int producto_id){
-        Optional<Producto> optionalProducto = productoRepo.findById(producto_id);
+        Optional<Producto> optionalProducto = productoRepo.findByProductoId(producto_id);
         if(optionalProducto.isPresent()){
             Double totalCantidad = movimientoRepo.findTotalCantidadByProductoId(producto_id);
             totalCantidad = (totalCantidad != null) ? totalCantidad : 0.0;

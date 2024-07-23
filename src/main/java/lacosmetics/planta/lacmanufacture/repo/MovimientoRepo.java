@@ -9,8 +9,9 @@ import java.util.List;
 
 public interface MovimientoRepo extends JpaRepository<Movimiento, Integer> {
 
-    @Query("SELECT SUM(m.cantidad) FROM Movimiento m WHERE m.producto.producto_id = :producto_id")
-    Double findTotalCantidadByProductoId(@Param("producto_id") int producto_id);
+    @Query("SELECT SUM(m.cantidad) FROM Movimiento m WHERE m.producto.productoId = :productoId")
+    Double findTotalCantidadByProductoId(@Param("productoId") int productoId);
 
-    List<Movimiento> findMovimientosByCantidad(Double producto_id);
+    List<Movimiento> findMovimientosByCantidad(Double cantidad);
+
 }

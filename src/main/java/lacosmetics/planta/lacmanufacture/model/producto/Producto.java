@@ -35,7 +35,7 @@ public abstract class Producto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "producto_id", unique = true, updatable = false, nullable = false)
-    private int producto_id;
+    private int productoId;
 
     @Column(length = 200)
     private String nombre;
@@ -49,10 +49,10 @@ public abstract class Producto {
     private LocalDateTime fechaCreacion;
 
     @Column(name = "tipo_unidades", length = 4)  // L: litros, KG: kilogramos, U: unidades (por ejemplo, paquetes)
-    private String tipo_unidades;
+    private String tipoUnidades;
 
     @Min(value=0, message = "La Cantidad por unidad no puede ser negativa") // Cantidad por unidad
-    private double cantidad_unidad;
+    private double cantidadUnidad;
 
 }
 

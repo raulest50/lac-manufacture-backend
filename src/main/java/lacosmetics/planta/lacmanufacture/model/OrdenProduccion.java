@@ -24,20 +24,20 @@ public class OrdenProduccion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "orden_id", unique = true, updatable = false, nullable = false)
-    private int orden_id;
+    private int ordenId;
 
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Terminado terminado;
 
-    private int seccion_responsable;
+    private int seccionResponsable;
 
     @OneToMany
     @JoinColumn(name = "orden_prod_id")
     private List<OrdenSeguimiento> ordenesSeguimiento;
 
     // 0: en produccion, 1:terminada
-    private int estado_orden;
+    private int estadoOrden;
 
     private String observaciones;
 

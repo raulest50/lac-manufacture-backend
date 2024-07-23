@@ -21,13 +21,13 @@ public class OrdenSeguimiento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seguimiento_id", unique = true, updatable = false, nullable = false)
-    private int seguimiento_id;
+    private int seguimientoId;
 
     @ManyToOne
     @JoinColumn(name = "insumo_id")
     private Insumo insumo;
 
-    private int seccion_responsable;
+    private int seccionResponsable;
 
     // 0: pendiente, 1: finalizada
     private int estado;

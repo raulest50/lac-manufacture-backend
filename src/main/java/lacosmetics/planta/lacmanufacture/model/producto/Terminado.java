@@ -20,7 +20,7 @@ public class Terminado extends Producto{
     // 0: standard, active ,   1: obsoleto, deprecated
     private int status;
 
-    private int seccion_responsable;
+    private int seccionResponsable;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "output_producto_id")

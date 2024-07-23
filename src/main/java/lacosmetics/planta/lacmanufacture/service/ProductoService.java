@@ -48,7 +48,7 @@ public class ProductoService {
 
 
     public Producto getProductoById(int id){
-        return productoRepo.findById(id)
+        return productoRepo.findByProductoId(id)
                 .orElseThrow( () -> new RuntimeException("Producto no encontrado"));
     }
 
@@ -73,6 +73,8 @@ public class ProductoService {
         return semiTerminadoRepo.findAll(PageRequest.of(page, size));
     }
 
+
+    // para obtener todos los productos clase Termindo
     public Page<Terminado> getAllT(int page, int size) {
         return terminadoRepo.findAll(PageRequest.of(page, size));
     }

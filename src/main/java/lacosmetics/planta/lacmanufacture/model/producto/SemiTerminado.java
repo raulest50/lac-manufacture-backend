@@ -19,7 +19,7 @@ import java.util.List;
 public class SemiTerminado extends Producto{
 
     // 0: 1er piso bodega llenado, 1: 2do piso llenado, 3r piso
-    private int seccion_responsable;
+    private int seccionResponsable;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "output_producto_id")

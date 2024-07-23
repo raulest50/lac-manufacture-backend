@@ -4,7 +4,7 @@ package lacosmetics.planta.lacmanufacture.service;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.repo.OrdenProduccionRepo;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,7 +25,7 @@ public class ProduccionService {
 
     public Page<OrdenProduccion> getWorkloadByZona(int zonaId, int page, int size) {
         List<OrdenProduccion> listaWorkload = ordenProduccionRepo.
-                findBySeccionResponsableAndEstadoOrderByFechaInicioAsc(zonaId, 0);
+                findBySeccionResponsableAndEstadoOrden(zonaId, 0);
 
         Sort sort = Sort.by("fechaInicio").ascending();
         PageRequest pageRequest = PageRequest.of(page, size, sort);
@@ -40,9 +40,17 @@ public class ProduccionService {
     }
 
     public Page<OrdenProduccion> getAllByEstado(int page, int size, int estado) {
-        List<OrdenProduccion> lista = ordenProduccionRepo.findByEstado(estado);
+        List<OrdenProduccion> lista = ordenProduccionRepo.findByEstadoOrden(estado);
         Sort sort = Sort.by("fechaInicio").ascending();
         PageRequest pageRequest = PageRequest.of(page, size, sort);
         return new PageImpl<>(lista, pageRequest, lista.size());
+    }
+
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    private class OrdenProduccionDTA{
+
     }
 }

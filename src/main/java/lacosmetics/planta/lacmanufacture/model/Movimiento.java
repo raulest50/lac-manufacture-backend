@@ -23,7 +23,7 @@ public class Movimiento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "movimiento_id", unique = true, updatable = false, nullable = false)
-    private int movimiento_id;
+    private int movimientoId;
 
     // puede ser positivo o negativo
     private double cantidad;
