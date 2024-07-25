@@ -38,9 +38,9 @@ public class ProduccionResource {
         return ResponseEntity.ok().body(produccionService.getAllByEstado(page, size, estado));
     }
 
-    @PostMapping
-    public ResponseEntity<OrdenProduccion> saveOrdenProduccion(@RequestBody OrdenProduccion ordenProduccion){
-        return ResponseEntity.created(URI.create("/ordenes/ordenID")).body(produccionService.saveOrdenProduccion(ordenProduccion));
+    @PostMapping("/save")
+    public ResponseEntity<OrdenProduccion> saveOrdenProduccion(@RequestBody ProduccionService.OrdenProduccionDTA ordenProduccionDTA){
+        return ResponseEntity.created(URI.create("/ordenes/ordenID")).body(produccionService.saveOrdenProduccion(ordenProduccionDTA));
     }
 
 

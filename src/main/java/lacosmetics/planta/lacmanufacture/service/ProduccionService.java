@@ -3,7 +3,9 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.OrdenProduccionRepo;
+import lacosmetics.planta.lacmanufacture.repo.TerminadoRepo;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -22,6 +25,7 @@ public class ProduccionService {
 
 
     private final OrdenProduccionRepo ordenProduccionRepo;
+    private final TerminadoRepo terminadoRepo;
 
     public Page<OrdenProduccion> getWorkloadByZona(int zonaId, int page, int size) {
         List<OrdenProduccion> listaWorkload = ordenProduccionRepo.
@@ -34,8 +38,10 @@ public class ProduccionService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public OrdenProduccion saveOrdenProduccion(OrdenProduccion ordenProduccion)
+    public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTA ordenProduccionDTA)
     {
+        Terminado terminado = terminadoRepo.findById(ordenProduccionDTA.terminadoId).get();
+        OrdenProduccion ordenProduccion = new OrdenProduccion(terminado, ordenProduccionDTA.seccionResponsable, ordenProduccionDTA.observaciones);
         return ordenProduccionRepo.save(ordenProduccion);
     }
 
@@ -50,7 +56,9 @@ public class ProduccionService {
     @Getter
     @Setter
     @NoArgsConstructor
-    private class OrdenProduccionDTA{
-
+    public static class OrdenProduccionDTA{
+        private int terminadoId;
+        int seccionResponsable;
+        String observaciones;
     }
 }

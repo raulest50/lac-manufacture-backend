@@ -1,11 +1,13 @@
 package lacosmetics.planta.lacmanufacture.model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
+import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -39,4 +41,32 @@ public class OrdenSeguimiento {
 
     private LocalDateTime fechaFinalizacion;
 
+    @ManyToOne
+    @JoinColumn(name = "orden_prod_id")
+    @JsonBackReference
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private OrdenProduccion ordenProduccion;
+
+
+    /**
+     * Constructor para usar cuando se crea orden de seguimiento a partir de DTA
+     */
+    public OrdenSeguimiento(Insumo insumo, OrdenProduccion ordenProduccion) {
+        this.insumo = insumo;
+        this.estado=0;
+        this.observaciones = "";
+        Producto p = insumo.getProducto();
+
+        if(p instanceof MateriaPrima){
+            this.seccionResponsable=-1;
+        }
+        if(p instanceof SemiTerminado){
+            this.seccionResponsable = ((SemiTerminado) p).getSeccionResponsable();
+        }
+        if(p instanceof Terminado){
+            this.seccionResponsable = ((Terminado) p).getSeccionResponsable();
+        }
+        //this.ordenProduccion = ordenProduccion;
+    }
 }
