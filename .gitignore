@@ -38,4 +38,5 @@ out/
 
 ### secret files ###
 # avoid tracking of sensible data, passwords, etc.
-/application-secrets.properties
+*.properties
+src/main/resources/application.properties

@@ -10,9 +10,9 @@ spring:
     #url: jdbc:mysql://mysql-container:3306/lacm-planta?createDatabaseIfNotExist=true # OLD MULTI-CONTAINER URL
     #url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a.oregon-postgres.render.com:5432/lacmdb # RENDER EXTERNAL
     #url: jdbc:postgresql://dpg-cpuutq1u0jms73ahqplg-a:5432/lacmdb # RENDER INTERNAL
-    url: jdbc:postgresql://localhost:5432/lacmdb?createDatabaseIfNotExist=true # LOCAL DEV
-    username: spring
-    password: R4f4MR3HqoqhperVwOUvMDqP0vzsmdd4
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?createDatabaseIfNotExist=true # LOCAL DEV
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     #driver-class-name: com.mysql.cj.jdbc.Driver
     driver-class-name: org.postgresql.Driver
 
