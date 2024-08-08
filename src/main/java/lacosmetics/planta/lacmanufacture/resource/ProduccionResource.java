@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.OrdenSeguimiento;
 import lacosmetics.planta.lacmanufacture.service.ProduccionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,13 +19,13 @@ public class ProduccionResource {
     private final ProduccionService produccionService;
 
     @GetMapping("/get_workload")
-    public ResponseEntity<Page<OrdenProduccion>> getWorkload(
+    public ResponseEntity<Page<OrdenSeguimiento>> getWorkload(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam int zona_id
+            @RequestParam int zonaId
     )
     {
-        return ResponseEntity.ok().body(produccionService.getWorkloadByZona(zona_id, page, size));
+        return ResponseEntity.ok().body(produccionService.getWorkloadByZona(zonaId, page, size));
     }
 
 
@@ -43,7 +44,14 @@ public class ProduccionResource {
         return ResponseEntity.created(URI.create("/ordenes/ordenID")).body(produccionService.saveOrdenProduccion(ordenProduccionDTA));
     }
 
-
+    @GetMapping("/update_oseg_estado")
+    public ResponseEntity<OrdenSeguimiento> updateEstadoOrdenSeguimiento(
+            @RequestParam int seguimientoId,
+            @RequestParam int estado
+    )
+    {
+        return ResponseEntity.created(URI.create("/ordenes/ordenID")).body(produccionService.updateEstadoOrdenSeguimiento(seguimientoId, estado));
+    }
 
 
 
