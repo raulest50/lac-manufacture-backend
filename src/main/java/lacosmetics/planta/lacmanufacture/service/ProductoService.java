@@ -41,11 +41,10 @@ public class ProductoService {
     private final InsumoRepo insumoRepository;
 
 
+    // fetch all products para el producto picker component en frontend
     public Page<Producto> getAllProductos(int page, int size){
         return productoRepo.findAll(PageRequest.of(page, size));
     }
-
-
 
     public Producto getProductoById(int id){
         return productoRepo.findByProductoId(id)
