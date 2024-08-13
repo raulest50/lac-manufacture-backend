@@ -43,4 +43,21 @@ public class Movimiento {
     @CreationTimestamp
     private LocalDateTime fechaMovimiento;
 
+
+    public Movimiento(Insumo insumo){
+        cantidad = insumo.getCantidadRequerida();
+        producto = insumo.getProducto();
+        causa = CausaMovimiento.USO_INTERNO;
+    }
+
+
+    public static class CausaMovimiento{
+        static String VENTA = "VENTA";
+        static String COMPRA = "COMPRA";
+        static String AVERIA = "AVERIA";
+        static String USO_INTERNO = "USO_INTERNO";
+        static String PROD_INTERNO = "PROD_INTERNO";
+        static String OTROS = "OTROS";
+    }
+
 }
