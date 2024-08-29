@@ -46,6 +46,17 @@ public class ProduccionService {
         return new PageImpl<>(listaWorkload, pageRequest, listaWorkload.size());
     }
 
+
+    public Page<OrdenProduccion> getOrdenesProdByZona(int zonaId, int page, int size) {
+        List<OrdenProduccion> listaWorkload = ordenProduccionRepo.findBySeccionResponsableAndEstadoOrden(zonaId, 0);
+        Sort sort = Sort.by("fechaInicio").ascending();
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+
+        return new PageImpl<>(listaWorkload, pageRequest, listaWorkload.size());
+    }
+
+
+
     @Transactional(rollbackOn = Exception.class)
     public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTA ordenProduccionDTA)
     {
@@ -83,7 +94,6 @@ public class ProduccionService {
 
         return ordenSeguimientoRepo.findById(seguimientoId).orElse(null);
     }
-
 
 
     @Getter

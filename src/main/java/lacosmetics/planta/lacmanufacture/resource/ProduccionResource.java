@@ -29,6 +29,17 @@ public class ProduccionResource {
     }
 
 
+    @GetMapping("/get_orden_prod_by_zona")
+    public ResponseEntity<Page<OrdenProduccion>> getOrdenesProdByZona(
+            @RequestParam(value="page", defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam int zonaId
+    )
+    {
+        return ResponseEntity.ok().body(produccionService.getOrdenesProdByZona(zonaId, page, size));
+    }
+
+
     @GetMapping("/get_by_estado")
     public ResponseEntity<Page<OrdenProduccion>> getAllActive(
             @RequestParam(value="page", defaultValue = "0") int page,

@@ -59,7 +59,7 @@ public class OrdenSeguimiento {
         Producto p = insumo.getProducto();
 
         if(p instanceof MateriaPrima){
-            this.seccionResponsable=-1;
+            this.seccionResponsable=1; // picking, materias primas
         }
         if(p instanceof SemiTerminado){
             this.seccionResponsable = ((SemiTerminado) p).getSeccionResponsable();
