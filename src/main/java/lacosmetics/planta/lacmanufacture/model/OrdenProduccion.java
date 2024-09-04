@@ -54,11 +54,10 @@ public class OrdenProduccion {
     /**
      * constructor para crear las ordenes de produccion a partir de DTA.
      * @param terminado
-     * @param seccionResponsable
      * @param observaciones
      */
-    public OrdenProduccion(Terminado terminado, int seccionResponsable, String observaciones) {
-        this.seccionResponsable = seccionResponsable;
+    public OrdenProduccion(Terminado terminado, String observaciones) {
+        this.seccionResponsable = terminado.getSeccionResponsable();
         this.observaciones = observaciones;
         this.estadoOrden = 0;
         this.terminado = terminado;

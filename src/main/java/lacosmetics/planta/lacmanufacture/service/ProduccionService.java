@@ -61,7 +61,7 @@ public class ProduccionService {
     public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTA ordenProduccionDTA)
     {
         Terminado terminado = terminadoRepo.findById(ordenProduccionDTA.terminadoId).get();
-        OrdenProduccion ordenProduccion = new OrdenProduccion(terminado, ordenProduccionDTA.seccionResponsable, ordenProduccionDTA.observaciones);
+        OrdenProduccion ordenProduccion = new OrdenProduccion(terminado, ordenProduccionDTA.observaciones);
         return ordenProduccionRepo.save(ordenProduccion);
     }
 
@@ -101,7 +101,7 @@ public class ProduccionService {
     @NoArgsConstructor
     public static class OrdenProduccionDTA{
         private int terminadoId;
-        int seccionResponsable;
+        //int seccionResponsable; // se especifica a la hora de codificar terminado y semiterminado
         String observaciones;
     }
 }
