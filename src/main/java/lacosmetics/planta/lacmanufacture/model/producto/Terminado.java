@@ -16,7 +16,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Terminado extends Producto{
+public class Terminado extends ProductoExotic {
 
     // 0: standard, active ,   1: obsoleto, deprecated
     private int status;

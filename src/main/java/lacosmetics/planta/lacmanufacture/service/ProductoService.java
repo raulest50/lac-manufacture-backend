@@ -4,7 +4,7 @@ package lacosmetics.planta.lacmanufacture.service;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.*;
@@ -42,17 +42,17 @@ public class ProductoService {
 
 
     // fetch all products para el producto picker component en frontend
-    public Page<Producto> getAllProductos(int page, int size){
+    public Page<ProductoExotic> getAllProductos(int page, int size){
         return productoRepo.findAll(PageRequest.of(page, size));
     }
 
-    public Producto getProductoById(int id){
+    public ProductoExotic getProductoById(int id){
         return productoRepo.findByProductoId(id)
                 .orElseThrow( () -> new RuntimeException("Producto no encontrado"));
     }
 
     @Transactional
-    public Producto saveProducto(Producto producto){
+    public ProductoExotic saveProducto(ProductoExotic producto){
         if (producto instanceof SemiTerminado semiTerminado) {
             return productoRepo.save(semiTerminado);
         } else{

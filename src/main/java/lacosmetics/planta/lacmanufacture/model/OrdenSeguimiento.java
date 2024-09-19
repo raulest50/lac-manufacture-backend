@@ -3,8 +3,7 @@ package lacosmetics.planta.lacmanufacture.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lombok.*;
@@ -56,11 +55,11 @@ public class OrdenSeguimiento {
         this.insumo = insumo;
         this.estado=0;
         this.observaciones = "";
-        Producto p = insumo.getProducto();
-
+        ProductoExotic p = insumo.getProducto();
+        /*
         if(p instanceof MateriaPrima){
             this.seccionResponsable=1; // picking, materias primas
-        }
+        }*/
         if(p instanceof SemiTerminado){
             this.seccionResponsable = ((SemiTerminado) p).getSeccionResponsable();
         }

@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model.notPersisted;
 
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,5 +12,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Stock{
     public double stock;
-    public Producto producto;
+    public ProductoExotic producto;
 }

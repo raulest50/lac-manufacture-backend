@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SemiTerminado extends Producto{
+public class SemiTerminado extends ProductoExotic {
 
     // 0: 1er piso bodega llenado, 1: 2do piso llenado, 3r piso
     private int seccionResponsable;

@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.service.ProductoService;
@@ -26,12 +26,12 @@ public class ProductoResource {
     private final ProductoService productoService;
 
     @PostMapping("/save")
-    public ResponseEntity<Producto> saveProducto(@RequestBody Producto producto){
+    public ResponseEntity<ProductoExotic> saveProducto(@RequestBody ProductoExotic producto){
         return ResponseEntity.created(URI.create("/productos/productoID")).body(productoService.saveProducto(producto));
     }
 
     @GetMapping("/getall")
-    public ResponseEntity<Page<Producto>> getAllProductos(
+    public ResponseEntity<Page<ProductoExotic>> getAllProductos(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size)
     {

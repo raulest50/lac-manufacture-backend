@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
         @JsonSubTypes.Type(value = SemiTerminado.class, name = "S"),
         @JsonSubTypes.Type(value = Terminado.class, name = "T")
 })
-public abstract class Producto {
+public abstract class ProductoExotic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

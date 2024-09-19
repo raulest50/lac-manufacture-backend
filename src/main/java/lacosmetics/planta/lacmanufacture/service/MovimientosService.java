@@ -4,7 +4,7 @@ package lacosmetics.planta.lacmanufacture.service;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.notPersisted.Stock;
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.ProductoRepo;
 import lombok.*;
@@ -29,7 +29,7 @@ public class MovimientosService {
     }
 
     public Optional<Stock> getStockOf(int producto_id){
-        Optional<Producto> optionalProducto = productoRepo.findByProductoId(producto_id);
+        Optional<ProductoExotic> optionalProducto = productoRepo.findByProductoId(producto_id);
         if(optionalProducto.isPresent()){
             Double totalCantidad = movimientoRepo.findTotalCantidadByProductoId(producto_id);
             totalCantidad = (totalCantidad != null) ? totalCantidad : 0.0;

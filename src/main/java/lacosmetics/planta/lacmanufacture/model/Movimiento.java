@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +32,7 @@ public class Movimiento {
     @NotNull
     @ManyToOne
     @JoinColumn(name = "producto_id")
-    private Producto producto;
+    private ProductoExotic producto;
 
     // causa del movimiento
     // VENTA, COMPRA, AVERIA, USO_INTERNO, PROD_INTERNO, OTROS
