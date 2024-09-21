@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.notPersisted.ReporteCompraDTA;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.resource.HyLIntegracionesResource;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
