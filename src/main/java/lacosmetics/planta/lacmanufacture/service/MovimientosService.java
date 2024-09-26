@@ -2,17 +2,9 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.Movimiento;
-import lacosmetics.planta.lacmanufacture.model.notPersisted.Stock;
-import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
-import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
-import lacosmetics.planta.lacmanufacture.repo.ProductoRepo;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -20,15 +12,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MovimientosService {
 
-    private final MovimientoRepo movimientoRepo;
-    private final ProductoRepo productoRepo;
+//    private final MovimientoRepo movimientoRepo;
 
-    @Transactional
-    public Movimiento saveMovimiento(Movimiento movimiento){
-        return movimientoRepo.save(movimiento);
-    }
+//    @Transactional
+//    public Movimiento saveMovimiento(Movimiento movimiento){
+//        return movimientoRepo.save(movimiento);
+//    }
 
-    public Optional<Stock> getStockOf(int producto_id){
+/*    public Optional<Stock> getStockOf(int producto_id){
         Optional<ProductoExotic> optionalProducto = productoRepo.findByProductoId(producto_id);
         if(optionalProducto.isPresent()){
             Double totalCantidad = movimientoRepo.findTotalCantidadByProductoId(producto_id);
@@ -38,9 +29,9 @@ public class MovimientosService {
         } else{
             return Optional.of(new Stock());
         }
-    }
+    }*/
 
-    public Optional<Stock> getStockOf2(int producto_id){
+/*    public Optional<Stock> getStockOf2(int producto_id){
         List<Movimiento> movs = movimientoRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
         if(!movs.isEmpty()){
             double stock = movs.stream().mapToDouble(Movimiento::getCantidad).sum();
@@ -48,6 +39,6 @@ public class MovimientosService {
         } else{
             return Optional.empty();
         }
-    }
+    }*/
 
 }

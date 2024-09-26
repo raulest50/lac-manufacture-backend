@@ -2,32 +2,43 @@ package lacosmetics.planta.lacmanufacture.model.producto;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import lacosmetics.planta.lacmanufacture.model.Insumo;
+import lacosmetics.planta.lacmanufacture.model.insumo.Insumo_MP_dST;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@DiscriminatorValue("S")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SemiTerminado extends ProductoExotic {
+public class SemiTerminado {
 
-    // 0: 1er piso bodega llenado, 1: 2do piso llenado, 3r piso
-    private int seccionResponsable;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "referencia", unique = true, updatable = false, nullable = false)
+    private int referencia;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "output_producto_id")
-    private List<Insumo> insumos;
+    private String descripcion;
 
+    private int costo;
 
-    @Min(value = 0, message = "El costo final no puede ser negativo")
-    private int costoFinal;
+    private double cantidad;
+
+    private String tipoUnidades;
+    private double contenidoPorUnidad;
+
+    @CreationTimestamp
+    private LocalDateTime fechaCreacion;
+
+    private String observaciones;
+
+    @OneToMany(mappedBy = "semiTerminado", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Insumo_MP_dST> insumosMP;
 
 }

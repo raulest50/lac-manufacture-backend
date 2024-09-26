@@ -4,7 +4,6 @@ package lacosmetics.planta.lacmanufacture.service;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.*;
@@ -26,9 +25,6 @@ import java.util.Optional;
 public class ProductoService {
 
     @Autowired
-    private final ProductoRepo productoRepo;
-
-    @Autowired
     private final MateriaPrimaRepo materiaPrimaRepo;
 
     @Autowired
@@ -41,28 +37,12 @@ public class ProductoService {
     private final InsumoRepo insumoRepository;
 
 
-    // fetch all products para el producto picker component en frontend
-    public Page<ProductoExotic> getAllProductos(int page, int size){
-        return productoRepo.findAll(PageRequest.of(page, size));
+    // se hace un metodo por aparte para hacer modificaciones pero que HyL no tenga acceso a el
+    // para evitar que sobre escriba datos al realizar codificacion 2 veces
+    public MateriaPrima updateMateriaPrima(MateriaPrima materiaPrima) {
+        return materiaPrimaRepo.save(materiaPrima);
     }
 
-    public ProductoExotic getProductoById(int id){
-        return productoRepo.findByProductoId(id)
-                .orElseThrow( () -> new RuntimeException("Producto no encontrado"));
-    }
-
-    @Transactional
-    public ProductoExotic saveProducto(ProductoExotic producto){
-        if (producto instanceof SemiTerminado semiTerminado) {
-            return productoRepo.save(semiTerminado);
-        } else{
-            return productoRepo.save(producto);
-        }
-    }
-
-    public void deleteProducto(int id) {
-        productoRepo.deleteById(id);
-    }
 
     public Page<MateriaPrima> getAllMP(int page, int size) {
         return materiaPrimaRepo.findAll(PageRequest.of(page, size));
@@ -134,5 +114,9 @@ public class ProductoService {
     public Optional<Terminado> findTerminadoByProductoId(int productoId) {
         return terminadoRepo.findById(productoId);
     }
-    
+
+    public Page<MateriaPrima> getPendientesFromHyL(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return materiaPrimaRepo.findByContenidoPorUnidadIsOrTipoUnidadesIsNull(0.0, pageRequest);
+    }
 }

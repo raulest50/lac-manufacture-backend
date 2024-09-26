@@ -3,7 +3,6 @@ package lacosmetics.planta.lacmanufacture.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lombok.*;
@@ -24,9 +23,9 @@ public class OrdenSeguimiento {
     @Column(name = "seguimiento_id", unique = true, updatable = false, nullable = false)
     private int seguimientoId;
 
-    @ManyToOne
+/*    @ManyToOne
     @JoinColumn(name = "insumo_id")
-    private Insumo insumo;
+    private Insumo insumo;*/
 
     private int seccionResponsable;
 
@@ -48,24 +47,4 @@ public class OrdenSeguimiento {
     private OrdenProduccion ordenProduccion;
 
 
-    /**
-     * Constructor para usar cuando se crea orden de seguimiento a partir de DTA
-     */
-    public OrdenSeguimiento(Insumo insumo, OrdenProduccion ordenProduccion) {
-        this.insumo = insumo;
-        this.estado=0;
-        this.observaciones = "";
-        ProductoExotic p = insumo.getProducto();
-        /*
-        if(p instanceof MateriaPrima){
-            this.seccionResponsable=1; // picking, materias primas
-        }*/
-        if(p instanceof SemiTerminado){
-            this.seccionResponsable = ((SemiTerminado) p).getSeccionResponsable();
-        }
-        if(p instanceof Terminado){
-            this.seccionResponsable = ((Terminado) p).getSeccionResponsable();
-        }
-        //this.ordenProduccion = ordenProduccion;
-    }
 }

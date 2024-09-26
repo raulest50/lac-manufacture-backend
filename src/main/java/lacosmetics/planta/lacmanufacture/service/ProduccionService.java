@@ -2,11 +2,8 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.OrdenSeguimiento;
-import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
-import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.OrdenSeguimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.TerminadoRepo;
@@ -20,7 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -31,12 +27,12 @@ public class ProduccionService {
 
     private final OrdenProduccionRepo ordenProduccionRepo;
     private final TerminadoRepo terminadoRepo;
-    private final MovimientoRepo movmientoRepo;
+//    private final MovimientoRepo movmientoRepo;
 
     @Autowired
     private final OrdenSeguimientoRepo ordenSeguimientoRepo;
-    @Autowired
-    private MovimientoRepo movimientoRepo;
+//    @Autowired
+//    private MovimientoRepo movimientoRepo;
 
     public Page<OrdenSeguimiento> getWorkloadByZona(int zonaId, int page, int size) {
         List<OrdenSeguimiento> listaWorkload = ordenSeguimientoRepo.findBySeccionResponsable(zonaId);
@@ -57,13 +53,13 @@ public class ProduccionService {
 
 
 
-    @Transactional(rollbackOn = Exception.class)
+    /*@Transactional(rollbackOn = Exception.class)
     public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTA ordenProduccionDTA)
     {
         Terminado terminado = terminadoRepo.findById(ordenProduccionDTA.terminadoId).get();
         OrdenProduccion ordenProduccion = new OrdenProduccion(terminado, ordenProduccionDTA.observaciones);
         return ordenProduccionRepo.save(ordenProduccion);
-    }
+    }*/
 
     public Page<OrdenProduccion> getAllByEstado(int page, int size, int estado) {
         List<OrdenProduccion> lista = ordenProduccionRepo.findByEstadoOrden(estado);
@@ -81,7 +77,7 @@ public class ProduccionService {
      * @param estado
      * @return
      */
-    @Transactional
+    /*@Transactional
     public OrdenSeguimiento updateEstadoOrdenSeguimiento(int seguimientoId, int estado) {
 
         if(estado == 1){
@@ -93,7 +89,7 @@ public class ProduccionService {
         }
 
         return ordenSeguimientoRepo.findById(seguimientoId).orElse(null);
-    }
+    }*/
 
 
     @Getter

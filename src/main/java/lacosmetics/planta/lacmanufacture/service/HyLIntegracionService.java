@@ -40,13 +40,6 @@ public class HyLIntegracionService {
     }
 
 
-    // se hace un metodo por aparte para hacer modificaciones pero que HyL no tenga acceso a el
-    // para evitar que sobre escriba datos al realizar codificacion 2 veces
-    public MateriaPrima updateMateriaPrima(MateriaPrima materiaPrima) {
-        return materiaPrimaRepo.save(materiaPrima);
-    }
-
-
     @Transactional(rollbackOn = Exception.class)
     public GrupoMovimeintoMP reportarCompraHyL(ReporteCompraDTA reporteCompra) {
 

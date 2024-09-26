@@ -2,7 +2,6 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.producto.ProductoExotic;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.service.ProductoService;
@@ -25,17 +24,17 @@ public class ProductoResource {
 
     private final ProductoService productoService;
 
-    @PostMapping("/save")
-    public ResponseEntity<ProductoExotic> saveProducto(@RequestBody ProductoExotic producto){
-        return ResponseEntity.created(URI.create("/productos/productoID")).body(productoService.saveProducto(producto));
+
+    // obtener lista materias primas, recibidas desde intergacion HyL, pendientes por completar atributos
+    @GetMapping("get_mp_pendientes")
+    public ResponseEntity<Page<MateriaPrima>> getPendientesMP(@RequestParam(value="page", defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size){
+        return ResponseEntity.ok().body(productoService.getPendientesFromHyL(page, size));
     }
 
-    @GetMapping("/getall")
-    public ResponseEntity<Page<ProductoExotic>> getAllProductos(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
-    {
-        return ResponseEntity.ok().body(productoService.getAllProductos(page, size));
+    @PostMapping("/save_mp")
+    public ResponseEntity<MateriaPrima> saveMateriaPrima(@RequestBody MateriaPrima materiaPrima){
+        return ResponseEntity.created(URI.create("/productos/productoID")).body(productoService.updateMateriaPrima(materiaPrima));
     }
 
     @GetMapping("/getall_mprima")

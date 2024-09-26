@@ -55,7 +55,7 @@ public class OrdenProduccion {
      * @param terminado
      * @param observaciones
      */
-    public OrdenProduccion(Terminado terminado, String observaciones) {
+    /*public OrdenProduccion(Terminado terminado, String observaciones) {
         this.seccionResponsable = terminado.getSeccionResponsable();
         this.observaciones = observaciones;
         this.estadoOrden = 0;
@@ -66,5 +66,5 @@ public class OrdenProduccion {
             ordenesSeguimiento.add(new OrdenSeguimiento(insumo, this));
         }
         this.ordenesSeguimiento = ordenesSeguimiento;
-    }
+    }*/
 }

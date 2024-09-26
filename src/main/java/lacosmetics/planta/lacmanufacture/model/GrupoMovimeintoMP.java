@@ -14,6 +14,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Esta clase seria el equivalente a una factura de HyL pero solo con la informacion relevante para
+ * esta app de produccion
+ */
+
 @Entity
 @Getter
 @Setter

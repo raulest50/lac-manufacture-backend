@@ -2,32 +2,47 @@ package lacosmetics.planta.lacmanufacture.model.producto;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import lacosmetics.planta.lacmanufacture.model.Insumo;
+import lacosmetics.planta.lacmanufacture.model.insumo.Insumo_MP_dT;
+import lacosmetics.planta.lacmanufacture.model.insumo.Insumo_ST_dT;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@DiscriminatorValue("T")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Terminado extends ProductoExotic {
+public class Terminado {
 
-    // 0: standard, active ,   1: obsoleto, deprecated
-    private int status;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "referencia", unique = true, updatable = false, nullable = false)
+    private int referencia;
 
-    private int seccionResponsable;
+    private String descripcion;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "output_producto_id")
-    private List<Insumo> insumos;
+    private int costo;
 
-    @Min(value = 0, message = "El costo final no puede ser negativo")
-    private int costoFinal;
+    private double cantidad;
+
+    private String tipoUnidades;
+    private double contenidoPorUnidad;
+
+    @CreationTimestamp
+    private LocalDateTime fechaCreacion;
+
+    private String observaciones;
+
+    @OneToMany(mappedBy = "terminado", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Insumo_MP_dT> insumosMP;
+
+    @OneToMany(mappedBy = "terminado", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Insumo_ST_dT> insumoST;
 
 }

@@ -19,8 +19,11 @@ public class MateriaPrima {
 
     @Id
     private int referencia;
+
     private String descripcion;
+
     private int costo;
+
     private double cantidad;
 
     private String tipoUnidades;

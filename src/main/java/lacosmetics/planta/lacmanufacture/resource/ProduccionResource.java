@@ -50,19 +50,19 @@ public class ProduccionResource {
         return ResponseEntity.ok().body(produccionService.getAllByEstado(page, size, estado));
     }
 
-    @PostMapping("/save")
+/*    @PostMapping("/save")
     public ResponseEntity<OrdenProduccion> saveOrdenProduccion(@RequestBody ProduccionService.OrdenProduccionDTA ordenProduccionDTA){
         return ResponseEntity.created(URI.create("/ordenes/ordenID")).body(produccionService.saveOrdenProduccion(ordenProduccionDTA));
-    }
+    }*/
 
-    @GetMapping("/update_oseg_estado")
+/*    @GetMapping("/update_oseg_estado")
     public ResponseEntity<OrdenSeguimiento> updateEstadoOrdenSeguimiento(
             @RequestParam int seguimientoId,
             @RequestParam int estado
     )
     {
         return ResponseEntity.created(URI.create("/ordenes/ordenID")).body(produccionService.updateEstadoOrdenSeguimiento(seguimientoId, estado));
-    }
+    }*/
 
 
 
