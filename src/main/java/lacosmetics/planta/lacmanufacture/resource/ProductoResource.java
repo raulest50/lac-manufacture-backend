@@ -37,7 +37,7 @@ public class ProductoResource {
         return ResponseEntity.created(URI.create("/productos/productoID")).body(productoService.updateMateriaPrima(materiaPrima));
     }
 
-    @GetMapping("/getall_mprima")
+    @GetMapping("/getall_mp")
     public ResponseEntity<Page<MateriaPrima>> getAllMprima(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size)
@@ -45,7 +45,7 @@ public class ProductoResource {
         return ResponseEntity.ok().body(productoService.getAllMP(page, size));
     }
 
-    @GetMapping("/getall_semi")
+    @GetMapping("/getall_st")
     public ResponseEntity<Page<SemiTerminado>> getAllSemi(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size)
@@ -53,7 +53,7 @@ public class ProductoResource {
         return ResponseEntity.ok().body(productoService.getAllS(page, size));
     }
 
-    @GetMapping("/getall_termi")
+    @GetMapping("/getall_t")
     public ResponseEntity<Page<Terminado>> getAllTermi(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size)
