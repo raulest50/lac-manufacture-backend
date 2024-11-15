@@ -20,9 +20,24 @@ public class Proveedor {
     @Id
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private int Id;
-    private String tipoId;
 
-    private String razonSocial;
+    private String nombre;
+
+    private String direccion;
+
+    private String ciudad;
+
+    private String departamento;
+
+    private String contacto;
+
+    private String telefono;
+
+    private String email;
+
+    private String url;
+
+    private String observacion;
 
     @CreationTimestamp
     private LocalDateTime fechaRegistro;
