@@ -6,7 +6,7 @@ import lacosmetics.planta.lacmanufacture.model.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.notPersisted.Stock;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
-import lacosmetics.planta.lacmanufacture.repo.ProductoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

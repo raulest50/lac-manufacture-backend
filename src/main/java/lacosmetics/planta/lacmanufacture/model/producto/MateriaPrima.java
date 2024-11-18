@@ -10,14 +10,6 @@ import lombok.Setter;
 
 @Entity
 @DiscriminatorValue("M")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class MateriaPrima extends Producto {
-
-    @ManyToOne
-    @JoinColumn(name = "proveedor_id", referencedColumnName = "id")
-    private Proveedor proveedor;
 
 }

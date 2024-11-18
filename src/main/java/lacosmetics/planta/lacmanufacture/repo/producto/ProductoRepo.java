@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.repo;
+package lacosmetics.planta.lacmanufacture.repo.producto;
 
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import org.springframework.data.jpa.repository.JpaRepository;

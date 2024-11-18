@@ -9,7 +9,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.OrdenSeguimientoRepo;
-import lacosmetics.planta.lacmanufacture.repo.TerminadoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

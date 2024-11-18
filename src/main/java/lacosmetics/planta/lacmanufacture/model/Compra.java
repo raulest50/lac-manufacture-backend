@@ -1,15 +1,18 @@
 package lacosmetics.planta.lacmanufacture.model;
 
-
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name="insumos")
+@Table(name = "compras")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,11 +25,16 @@ public class Compra {
     private int compraId;
 
     @ManyToOne
-    @JoinColumn(name = "proveedor_id")
+    @JoinColumn(name = "proveedor_id", referencedColumnName = "id")
     private Proveedor proveedor;
 
-    //  0:abierta, 1:cerrada
-    private int estado_orden;
+    @CreationTimestamp
+    private LocalDateTime fechaCompra;
 
+    // 0: abierta (open), 1: cerrada (closed)
+    private int estado;
+
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemCompra> itemsCompra = new ArrayList<>();
 
 }
