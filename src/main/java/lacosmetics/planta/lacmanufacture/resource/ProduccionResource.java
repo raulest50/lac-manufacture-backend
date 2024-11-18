@@ -18,25 +18,15 @@ public class ProduccionResource {
 
     private final ProduccionService produccionService;
 
-    @GetMapping("/get_workload")
-    public ResponseEntity<Page<OrdenSeguimiento>> getWorkload(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam int zonaId
-    )
-    {
-        return ResponseEntity.ok().body(produccionService.getWorkloadByZona(zonaId, page, size));
-    }
 
-
-    @GetMapping("/get_orden_prod_by_zona")
+    @GetMapping("/get_workload_by_responsable")
     public ResponseEntity<Page<OrdenProduccion>> getOrdenesProdByZona(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam int zonaId
     )
     {
-        return ResponseEntity.ok().body(produccionService.getOrdenesProdByZona(zonaId, page, size));
+        return ResponseEntity.ok().body(produccionService.getOrdenesProdByResponsable(zonaId, page, size));
     }
 
 

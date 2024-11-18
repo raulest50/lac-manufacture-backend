@@ -20,7 +20,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -38,17 +37,9 @@ public class ProduccionService {
     @Autowired
     private MovimientoRepo movimientoRepo;
 
-    public Page<OrdenSeguimiento> getWorkloadByZona(int zonaId, int page, int size) {
-        List<OrdenSeguimiento> listaWorkload = ordenSeguimientoRepo.findBySeccionResponsable(zonaId);
-        Sort sort = Sort.by("fechaInicio").ascending();
-        PageRequest pageRequest = PageRequest.of(page, size, sort);
 
-        return new PageImpl<>(listaWorkload, pageRequest, listaWorkload.size());
-    }
-
-
-    public Page<OrdenProduccion> getOrdenesProdByZona(int zonaId, int page, int size) {
-        List<OrdenProduccion> listaWorkload = ordenProduccionRepo.findBySeccionResponsableAndEstadoOrden(zonaId, 0);
+    public Page<OrdenProduccion> getOrdenesProdByResponsable(int responsableId, int page, int size) {
+        List<OrdenProduccion> listaWorkload = ordenProduccionRepo.findByResponsableIdAndEstadoOrden(responsableId, 0);
         Sort sort = Sort.by("fechaInicio").ascending();
         PageRequest pageRequest = PageRequest.of(page, size, sort);
 

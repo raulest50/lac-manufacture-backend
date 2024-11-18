@@ -19,15 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 public class SemiTerminado extends Producto{
 
-    // 0: 1er piso bodega llenado, 1: 2do piso llenado, 3r piso
-    private int seccionResponsable;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "output_producto_id")
     private List<Insumo> insumos;
-
-
-    @Min(value = 0, message = "El costo final no puede ser negativo")
-    private int costoFinal;
 
 }

@@ -4,6 +4,7 @@ package lacosmetics.planta.lacmanufacture.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,14 +32,15 @@ public class OrdenProduccion {
 
     @ManyToOne
     @JoinColumn(name = "producto_id")
-    private Terminado terminado;
+    private Producto producto;
 
-    private int seccionResponsable;
+    private int responsableId;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "orden_prod_id")
+    //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    //@JoinColumn(name = "orden_prod_id")
+    @OneToMany(mappedBy = "ordenProduccion", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<OrdenSeguimiento> ordenesSeguimiento;
+    private List<OrdenSeguimiento> ordenesSeguimiento = new ArrayList<>();
 
     // 0: en produccion, 1:terminada
     private int estadoOrden;
@@ -53,19 +55,33 @@ public class OrdenProduccion {
 
     /**
      * constructor para crear las ordenes de produccion a partir de DTA.
-     * @param terminado
+     * @param producto
      * @param observaciones
      */
-    public OrdenProduccion(Terminado terminado, String observaciones) {
-        this.seccionResponsable = terminado.getSeccionResponsable();
+    public OrdenProduccion(Producto producto, String observaciones) {
         this.observaciones = observaciones;
         this.estadoOrden = 0;
-        this.terminado = terminado;
+        this.producto = producto; // Producto puede ser Terminado o SemiTerminado
 
-        List<OrdenSeguimiento> ordenesSeguimiento =  new ArrayList<>();
-        for(Insumo insumo : terminado.getInsumos()){
+        List<OrdenSeguimiento> ordenesSeguimiento = new ArrayList<>();
+
+
+        List<Insumo> insumos = new ArrayList<>();
+
+        if (producto instanceof Terminado) {
+            Terminado terminado = (Terminado) producto;
+            insumos = terminado.getInsumos();
+        } else if (producto instanceof SemiTerminado) {
+            SemiTerminado semiterminado = (SemiTerminado) producto;
+            insumos = semiterminado.getInsumos();
+        } else {
+            throw new IllegalArgumentException("El producto debe ser Terminado o SemiTerminado");
+        }
+
+        for (Insumo insumo : insumos) {
             ordenesSeguimiento.add(new OrdenSeguimiento(insumo, this));
         }
         this.ordenesSeguimiento = ordenesSeguimiento;
     }
+
 }

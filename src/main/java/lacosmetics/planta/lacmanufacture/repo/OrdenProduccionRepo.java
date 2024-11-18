@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Integer> {
 
-    List<OrdenProduccion> findBySeccionResponsableAndEstadoOrden(int seccionResponsable, int estadoOrden);
+    List<OrdenProduccion> findByResponsableIdAndEstadoOrden(int seccionResponsable, int estadoOrden);
 
     List<OrdenProduccion> findByEstadoOrden(int estadoOrden);
 

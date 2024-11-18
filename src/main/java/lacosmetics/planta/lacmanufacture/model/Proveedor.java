@@ -19,7 +19,7 @@ public class Proveedor {
 
     @Id
     @Column(name = "id", unique = true, updatable = false, nullable = false)
-    private int Id;
+    private int id; //  Nit
 
     private String nombre;
 

@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface OrdenSeguimientoRepo extends JpaRepository<OrdenSeguimiento, Integer> {
 
-    List<OrdenSeguimiento> findBySeccionResponsable(int zonaId);
-
     @Transactional
     @Modifying
     @Query("UPDATE OrdenSeguimiento o SET o.estado = :estado WHERE o.seguimientoId = :id")

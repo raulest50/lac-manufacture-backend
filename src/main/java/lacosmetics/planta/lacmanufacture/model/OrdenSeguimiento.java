@@ -29,23 +29,22 @@ public class OrdenSeguimiento {
     @JoinColumn(name = "insumo_id")
     private Insumo insumo;
 
-    private int seccionResponsable;
-
     // 0: pendiente, 1: finalizada
     private int estado;
-
-    private String observaciones;
 
     @CreationTimestamp
     private LocalDateTime fechaInicio;
 
     private LocalDateTime fechaFinalizacion;
 
+    //@ManyToOne
+    //@JoinColumn(name = "orden_prod_id")
+    //@JsonBackReference
+    //@Getter(AccessLevel.NONE)
+    //@Setter(AccessLevel.NONE)
     @ManyToOne
     @JoinColumn(name = "orden_prod_id")
     @JsonBackReference
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private OrdenProduccion ordenProduccion;
 
 
@@ -55,18 +54,7 @@ public class OrdenSeguimiento {
     public OrdenSeguimiento(Insumo insumo, OrdenProduccion ordenProduccion) {
         this.insumo = insumo;
         this.estado=0;
-        this.observaciones = "";
         Producto p = insumo.getProducto();
-
-        if(p instanceof MateriaPrima){
-            this.seccionResponsable=1; // picking, materias primas
-        }
-        if(p instanceof SemiTerminado){
-            this.seccionResponsable = ((SemiTerminado) p).getSeccionResponsable();
-        }
-        if(p instanceof Terminado){
-            this.seccionResponsable = ((Terminado) p).getSeccionResponsable();
-        }
         //this.ordenProduccion = ordenProduccion;
     }
 }
