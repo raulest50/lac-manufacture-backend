@@ -2,11 +2,10 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 
 import lacosmetics.planta.lacmanufacture.model.Movimiento;
-import lacosmetics.planta.lacmanufacture.model.notPersisted.Stock;
+import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.MovimientosService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +25,37 @@ public class MovimientosResource {
     }
 
     @GetMapping("/get_stock_by_id")
-    public ResponseEntity<Optional<Stock>> getStockOf(
+    public ResponseEntity<Optional<ProductoStockDTO>> getStockOf(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam int producto_id)
     {
         //Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok().body(movimientoService.getStockOf(producto_id));
+    }
+
+
+    // New endpoint to search products with stock
+    @GetMapping("/search_products_with_stock")
+    public ResponseEntity<Page<ProductoStockDTO>> searchProductsWithStock(
+            @RequestParam String searchTerm,
+            @RequestParam String tipoBusqueda,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        Page<ProductoStockDTO> result = movimientoService.searchProductsWithStock(searchTerm, tipoBusqueda, page, size);
+        return ResponseEntity.ok().body(result);
+    }
+
+    // New endpoint to get movimientos for a product
+    @GetMapping("/get_movimientos_by_producto")
+    public ResponseEntity<Page<Movimiento>> getMovimientosByProducto(
+            @RequestParam int productoId,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        Page<Movimiento> movimientos = movimientoService.getMovimientosByProductoId(productoId, page, size);
+        return ResponseEntity.ok().body(movimientos);
     }
 
 }
