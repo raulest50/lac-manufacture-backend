@@ -51,13 +51,12 @@ public class Movimiento {
     }
 
 
-    public static class CausaMovimiento{
-        static String VENTA = "VENTA";
-        static String COMPRA = "COMPRA";
-        static String AVERIA = "AVERIA";
-        static String USO_INTERNO = "USO_INTERNO";
-        static String PROD_INTERNO = "PROD_INTERNO";
-        static String OTROS = "OTROS";
+    public static class CausaMovimiento {
+        public static final String COMPRA = "COMPRA";
+        public static final String AVERIA = "AVERIA";
+        public static final String USO_INTERNO = "USO_INTERNO";
+        public static final String PROD_INTERNO = "PROD_INTERNO";
+        public static final String OTROS = "OTROS";
     }
 
 }

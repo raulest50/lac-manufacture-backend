@@ -1,5 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class ItemCompra {
 
     @ManyToOne
     @JoinColumn(name = "compra_id")
+    @JsonBackReference
     private Compra compra;
 
     @ManyToOne

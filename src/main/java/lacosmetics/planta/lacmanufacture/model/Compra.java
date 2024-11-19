@@ -1,5 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,6 +36,7 @@ public class Compra {
     private int estado;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<ItemCompra> itemsCompra = new ArrayList<>();
 
 }
