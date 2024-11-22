@@ -1,4 +1,3 @@
-// src/main/java/lacosmetics/planta/lacmanufacture/model/dto/ProductStockDTO.java
 
 package lacosmetics.planta.lacmanufacture.model.dto;
 

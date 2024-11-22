@@ -56,7 +56,7 @@ public class Movimiento {
         public static final String AVERIA = "AVERIA";
         public static final String USO_INTERNO = "USO_INTERNO";
         public static final String PROD_INTERNO = "PROD_INTERNO";
-        public static final String OTROS = "OTROS";
+        public static final String SALIDA_APP_VENTAS = "SALIDA_APP_VENTAS";
     }
 
 }

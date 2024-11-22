@@ -5,6 +5,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.Insumo;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
+import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -146,7 +149,7 @@ public class ProductoService {
     }
 
 
-    public Page<Producto> searchTerminadoAndSemiTerminado(String searchTerm, String tipoBusqueda, int page, int size) {
+    public Page<ProductoStockDTO> searchTerminadoAndSemiTerminadoWithStock(String searchTerm, String tipoBusqueda, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         Specification<Producto> spec = (root, query, criteriaBuilder) -> {
@@ -168,7 +171,15 @@ public class ProductoService {
             }
         };
 
-        return productoRepo.findAll(spec, pageable);
+        Page<Producto> productosPage = productoRepo.findAll(spec, pageable);
+
+        List<ProductoStockDTO> productStockDTOList = productosPage.getContent().stream().map(producto -> {
+            Double stockQuantity = movimientoRepo.findTotalCantidadByProductoId(producto.getProductoId());
+            stockQuantity = (stockQuantity != null) ? stockQuantity : 0.0;
+            return new ProductoStockDTO(producto, stockQuantity);
+        }).collect(Collectors.toList());
+
+        return new PageImpl<>(productStockDTOList, pageable, productosPage.getTotalElements());
     }
 
 

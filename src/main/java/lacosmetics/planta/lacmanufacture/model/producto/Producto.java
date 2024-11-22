@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @DiscriminatorColumn(name = "tipo_producto", discriminatorType = DiscriminatorType.STRING)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "tipo_producto"
 )
 @JsonSubTypes({
@@ -53,6 +53,18 @@ public abstract class Producto {
 
     @Min(value=0, message = "La Cantidad por unidad no puede ser negativa") // Cantidad por unidad
     private double cantidadUnidad;
+
+    public String getTipo_producto() {
+        if (this instanceof MateriaPrima) {
+            return "M";
+        } else if (this instanceof SemiTerminado) {
+            return "S";
+        } else if (this instanceof Terminado) {
+            return "T";
+        } else {
+            return "Unknown";
+        }
+    }
 
 }
 

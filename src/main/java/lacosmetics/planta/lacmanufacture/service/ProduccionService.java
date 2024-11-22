@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.transaction.Transactional;
+import lacosmetics.planta.lacmanufacture.model.Insumo;
 import lacosmetics.planta.lacmanufacture.model.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.OrdenSeguimiento;
@@ -56,16 +57,31 @@ public class ProduccionService {
 
 
     @Transactional(rollbackOn = Exception.class)
-    public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTO ordenProduccionDTA) {
-        Optional<Producto> optionalProducto = productoRepo.findById(ordenProduccionDTA.getProductoId());
+    public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTO ordenProduccionDTO) {
+        Optional<Producto> optionalProducto = productoRepo.findById(ordenProduccionDTO.getProductoId());
         if (optionalProducto.isPresent()) {
             Producto producto = optionalProducto.get();
-            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTA.getObservaciones(), ordenProduccionDTA.getResponsableId());
-            return ordenProduccionRepo.save(ordenProduccion);
+            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getResponsableId());
+            OrdenProduccion savedOrden = ordenProduccionRepo.save(ordenProduccion);
+
+            // Create Movimiento entries for each Insumo
+            for (OrdenSeguimiento ordenSeguimiento : savedOrden.getOrdenesSeguimiento()) {
+                Insumo insumo = ordenSeguimiento.getInsumo();
+                Movimiento movimiento = new Movimiento();
+                movimiento.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
+                movimiento.setProducto(insumo.getProducto());
+                movimiento.setCausa(Movimiento.CausaMovimiento.USO_INTERNO);
+                movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
+                movimientoRepo.save(movimiento);
+            }
+
+            return savedOrden;
         } else {
             throw new RuntimeException("Producto not found");
         }
     }
+
+
 
     public Page<OrdenProduccion> getAllByEstado(int page, int size, int estado) {
         List<OrdenProduccion> lista = ordenProduccionRepo.findByEstadoOrden(estado);
