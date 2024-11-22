@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface MovimientoRepo extends JpaRepository<Movimiento, Integer> {
 
-    @Query("SELECT SUM(m.cantidad) FROM Movimiento m WHERE m.producto.productoId = :productoId")
+    @Query("SELECT COALESCE(SUM(m.cantidad), 0) FROM Movimiento m WHERE m.producto.productoId = :productoId")
     Double findTotalCantidadByProductoId(@Param("productoId") int productoId);
 
     List<Movimiento> findMovimientosByCantidad(Double cantidad);

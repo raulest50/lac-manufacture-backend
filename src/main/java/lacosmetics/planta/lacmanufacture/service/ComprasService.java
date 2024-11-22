@@ -31,6 +31,9 @@ public class ComprasService {
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
 
+
+
+    @Transactional
     public Compra saveCompra(Compra compra) {
         // Verify that the Proveedor exists
         Optional<Proveedor> optionalProveedor = proveedorRepo.findById(compra.getProveedor().getId());
@@ -39,7 +42,7 @@ public class ComprasService {
         }
         compra.setProveedor(optionalProveedor.get());
 
-        // For each ItemCompra, set the Compra reference, verify MateriaPrima, update costo, and cascade updates
+        // For each ItemCompra, set the Compra reference, verify MateriaPrima, update costo ponderado, and cascade updates
         for (ItemCompra itemCompra : compra.getItemsCompra()) {
             itemCompra.setCompra(compra);
 
@@ -51,13 +54,17 @@ public class ComprasService {
             MateriaPrima materiaPrima = optionalMateriaPrima.get();
             itemCompra.setMateriaPrima(materiaPrima);
 
-            // Update the costo of the MateriaPrima with the precioCompra from the ItemCompra
-            materiaPrima.setCosto(itemCompra.getPrecioCompra());
+            // Retrieve current stock
+            Double currentStockOpt = movimientoRepo.findTotalCantidadByProductoId(materiaPrima.getProductoId());
+            int nuevoCosto = getNuevoCosto(itemCompra, currentStockOpt, materiaPrima);
+
+            // Update MateriaPrima's costo
+            materiaPrima.setCosto(nuevoCosto);
 
             // Save the updated MateriaPrima
             materiaPrimaRepo.save(materiaPrima);
 
-            // Update costs of dependent products
+            // Update costs of dependent products if necessary
             Set<Integer> updatedProductIds = new HashSet<>();
             updateCostoCascade(materiaPrima, updatedProductIds);
         }
@@ -77,6 +84,26 @@ public class ComprasService {
 
         return savedCompra;
     }
+
+    private static int getNuevoCosto(ItemCompra itemCompra, Double currentStockOpt, MateriaPrima materiaPrima) {
+        double currentStock = (currentStockOpt != null) ? currentStockOpt : 0;
+
+        // Retrieve current costo
+        double currentCosto = materiaPrima.getCosto();
+
+        // Incoming units and precioCompra from ItemCompra
+        double incomingUnits = itemCompra.getCantidad();
+        double incomingPrecio = itemCompra.getPrecioCompra();
+
+        // Calculate nuevo_costo
+        if (currentStock + incomingUnits == 0) {
+            throw new RuntimeException("Total stock cannot be zero after the compra for MateriaPrima ID: " + materiaPrima.getProductoId());
+        }
+
+        double nuevoCosto = ((currentCosto * currentStock) + (incomingPrecio * incomingUnits)) / (currentStock + incomingUnits);
+        return  (int) Math.ceil(nuevoCosto);
+    }
+
 
     /**
      * Recursively updates the 'costo' of dependent products when a product's cost changes.
