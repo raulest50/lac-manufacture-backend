@@ -5,10 +5,13 @@ import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.OrdenSeguimiento;
+import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
-import lacosmetics.planta.lacmanufacture.repo.OrdenProduccionRepo;
-import lacosmetics.planta.lacmanufacture.repo.OrdenSeguimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
+import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -32,8 +36,11 @@ public class ProduccionService {
     private final TerminadoRepo terminadoRepo;
     private final MovimientoRepo movmientoRepo;
 
+    private final ProductoRepo productoRepo;
+
     @Autowired
     private final OrdenSeguimientoRepo ordenSeguimientoRepo;
+
     @Autowired
     private MovimientoRepo movimientoRepo;
 
@@ -49,11 +56,15 @@ public class ProduccionService {
 
 
     @Transactional(rollbackOn = Exception.class)
-    public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTA ordenProduccionDTA)
-    {
-        Terminado terminado = terminadoRepo.findById(ordenProduccionDTA.terminadoId).get();
-        OrdenProduccion ordenProduccion = new OrdenProduccion(terminado, ordenProduccionDTA.observaciones);
-        return ordenProduccionRepo.save(ordenProduccion);
+    public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTO ordenProduccionDTA) {
+        Optional<Producto> optionalProducto = productoRepo.findById(ordenProduccionDTA.getProductoId());
+        if (optionalProducto.isPresent()) {
+            Producto producto = optionalProducto.get();
+            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTA.getObservaciones(), ordenProduccionDTA.getResponsableId());
+            return ordenProduccionRepo.save(ordenProduccion);
+        } else {
+            throw new RuntimeException("Producto not found");
+        }
     }
 
     public Page<OrdenProduccion> getAllByEstado(int page, int size, int estado) {
@@ -87,12 +98,4 @@ public class ProduccionService {
     }
 
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class OrdenProduccionDTA{
-        private int terminadoId;
-        //int seccionResponsable; // se especifica a la hora de codificar terminado y semiterminado
-        String observaciones;
-    }
 }

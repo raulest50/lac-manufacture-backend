@@ -1,6 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
 
+import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
@@ -123,6 +124,25 @@ public class ProductoResource {
         } else{
             return ResponseEntity.ok().body(productoService.searchByName_T(search, page, size));
         }
+    }
+
+
+    @GetMapping("/search_semiytermi")
+    public ResponseEntity<Page<Producto>> searchProductos(
+            @RequestParam String searchTerm,
+            @RequestParam String tipoBusqueda, // 'NOMBRE' or 'ID'
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        Page<Producto> productos = productoService.searchTerminadoAndSemiTerminado(searchTerm, tipoBusqueda, page, size);
+        return ResponseEntity.ok().body(productos);
+    }
+
+
+    @GetMapping("/{productoId}/insumos_with_stock")
+    public ResponseEntity<List<InsumoWithStockDTO>> getInsumosWithStock(@PathVariable int productoId) {
+        List<InsumoWithStockDTO> insumosWithStock = productoService.getInsumosWithStock(productoId);
+        return ResponseEntity.ok().body(insumosWithStock);
     }
 
 }

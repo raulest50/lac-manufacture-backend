@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.OrdenSeguimiento;
+import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.service.ProduccionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,8 +42,8 @@ public class ProduccionResource {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<OrdenProduccion> saveOrdenProduccion(@RequestBody ProduccionService.OrdenProduccionDTA ordenProduccionDTA){
-        return ResponseEntity.created(URI.create("/ordenes/ordenID")).body(produccionService.saveOrdenProduccion(ordenProduccionDTA));
+    public ResponseEntity<OrdenProduccion> saveOrdenProduccion(@RequestBody OrdenProduccionDTO ordenProduccionDTO){
+        return ResponseEntity.created(URI.create("/ordenes/ordenID")).body(produccionService.saveOrdenProduccion(ordenProduccionDTO));
     }
 
     @GetMapping("/update_oseg_estado")

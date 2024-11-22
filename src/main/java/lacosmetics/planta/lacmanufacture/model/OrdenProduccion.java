@@ -53,27 +53,21 @@ public class OrdenProduccion {
 
     private LocalDateTime fechaFinal;
 
-    /**
-     * constructor para crear las ordenes de produccion a partir de DTA.
-     * @param producto
-     * @param observaciones
-     */
-    public OrdenProduccion(Producto producto, String observaciones) {
+    public OrdenProduccion(Producto producto, String observaciones, int responsableId) {
+        this.producto = producto;
         this.observaciones = observaciones;
+        this.responsableId = responsableId;
         this.estadoOrden = 0;
-        this.producto = producto; // Producto puede ser Terminado o SemiTerminado
 
         List<OrdenSeguimiento> ordenesSeguimiento = new ArrayList<>();
-
-
         List<Insumo> insumos = new ArrayList<>();
 
         if (producto instanceof Terminado) {
             Terminado terminado = (Terminado) producto;
             insumos = terminado.getInsumos();
         } else if (producto instanceof SemiTerminado) {
-            SemiTerminado semiterminado = (SemiTerminado) producto;
-            insumos = semiterminado.getInsumos();
+            SemiTerminado semiTerminado = (SemiTerminado) producto;
+            insumos = semiTerminado.getInsumos();
         } else {
             throw new IllegalArgumentException("El producto debe ser Terminado o SemiTerminado");
         }
@@ -83,5 +77,6 @@ public class OrdenProduccion {
         }
         this.ordenesSeguimiento = ordenesSeguimiento;
     }
+
 
 }

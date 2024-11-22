@@ -3,6 +3,8 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
+import lacosmetics.planta.lacmanufacture.model.Insumo;
+import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
@@ -17,9 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -44,6 +49,7 @@ public class ProductoService {
     @Autowired
     private final InsumoRepo insumoRepository;
 
+    private final MovimientoRepo movimientoRepo;
 
     // fetch all products para el producto picker component en frontend
     public Page<Producto> getAllProductos(int page, int size){
@@ -138,5 +144,70 @@ public class ProductoService {
     public Optional<Terminado> findTerminadoByProductoId(int productoId) {
         return terminadoRepo.findById(productoId);
     }
-    
+
+
+    public Page<Producto> searchTerminadoAndSemiTerminado(String searchTerm, String tipoBusqueda, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Specification<Producto> spec = (root, query, criteriaBuilder) -> {
+            Predicate tipoPredicate = root.type().in(Terminado.class, SemiTerminado.class);
+
+            if ("NOMBRE".equalsIgnoreCase(tipoBusqueda)) {
+                Predicate nombrePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("nombre")), "%" + searchTerm.toLowerCase() + "%");
+                return criteriaBuilder.and(tipoPredicate, nombrePredicate);
+            } else if ("ID".equalsIgnoreCase(tipoBusqueda)) {
+                try {
+                    Integer id = Integer.parseInt(searchTerm);
+                    Predicate idPredicate = criteriaBuilder.equal(root.get("productoId"), id);
+                    return criteriaBuilder.and(tipoPredicate, idPredicate);
+                } catch (NumberFormatException e) {
+                    return criteriaBuilder.disjunction(); // Return no results if ID is invalid
+                }
+            } else {
+                return null;
+            }
+        };
+
+        return productoRepo.findAll(spec, pageable);
+    }
+
+
+
+    public List<InsumoWithStockDTO> getInsumosWithStock(int productoId) {
+        Optional<Producto> optionalProducto = productoRepo.findById(productoId);
+        if (optionalProducto.isPresent()) {
+            Producto producto = optionalProducto.get();
+            List<Insumo> insumos = new ArrayList<>();
+
+            if (producto instanceof Terminado) {
+                Terminado terminado = (Terminado) producto;
+                insumos = terminado.getInsumos();
+            } else if (producto instanceof SemiTerminado) {
+                SemiTerminado semiTerminado = (SemiTerminado) producto;
+                insumos = semiTerminado.getInsumos();
+            } else {
+                throw new RuntimeException("Producto must be Terminado or SemiTerminado");
+            }
+
+            List<InsumoWithStockDTO> insumosWithStock = new ArrayList<>();
+            for (Insumo insumo : insumos) {
+                Producto insumoProducto = insumo.getProducto();
+                Double stockActual = movimientoRepo.findTotalCantidadByProductoId(insumoProducto.getProductoId());
+                stockActual = (stockActual != null) ? stockActual : 0.0;
+
+                InsumoWithStockDTO dto = new InsumoWithStockDTO();
+                dto.setInsumoId(insumo.getInsumoId());
+                dto.setProductoId(insumoProducto.getProductoId());
+                dto.setProductoNombre(insumoProducto.getNombre());
+                dto.setCantidadRequerida(insumo.getCantidadRequerida());
+                dto.setStockActual(stockActual);
+
+                insumosWithStock.add(dto);
+            }
+            return insumosWithStock;
+        } else {
+            throw new RuntimeException("Producto not found");
+        }
+    }
+
 }
