@@ -21,5 +21,4 @@ public class ComprasResource {
         return ResponseEntity.created(URI.create("/compras/" + savedCompra.getCompraId())).body(savedCompra);
     }
 
-    // Additional endpoints (e.g., getCompraById, getAllCompras) can be added here
 }

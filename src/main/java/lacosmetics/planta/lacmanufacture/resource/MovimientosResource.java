@@ -19,22 +19,6 @@ public class MovimientosResource {
 
     private final MovimientosService movimientoService;
 
-    @PostMapping("/save")
-    public ResponseEntity<Movimiento> saveMovimiento(@RequestBody Movimiento movimiento){
-        return ResponseEntity.created(URI.create("/movimiento/movmientoID")).body(movimientoService.saveMovimiento(movimiento));
-    }
-
-    @GetMapping("/get_stock_by_id")
-    public ResponseEntity<Optional<ProductoStockDTO>> getStockOf(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam int producto_id)
-    {
-        //Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok().body(movimientoService.getStockOf(producto_id));
-    }
-
-
     // New endpoint to search products with stock
     @GetMapping("/search_products_with_stock")
     public ResponseEntity<Page<ProductoStockDTO>> searchProductsWithStock(

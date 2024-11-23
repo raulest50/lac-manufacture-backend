@@ -31,8 +31,6 @@ public class ComprasService {
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
 
-
-
     @Transactional
     public Compra saveCompra(Compra compra) {
         // Verify that the Proveedor exists

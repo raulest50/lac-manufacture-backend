@@ -2,7 +2,6 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 
 import lacosmetics.planta.lacmanufacture.model.Proveedor;
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.service.ProveedorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

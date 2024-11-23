@@ -6,7 +6,6 @@ import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
-import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.service.ProductoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,38 +29,6 @@ public class ProductoResource {
     @PostMapping("/save")
     public ResponseEntity<Producto> saveProducto(@RequestBody Producto producto){
         return ResponseEntity.created(URI.create("/productos/productoID")).body(productoService.saveProducto(producto));
-    }
-
-    @GetMapping("/getall")
-    public ResponseEntity<Page<Producto>> getAllProductos(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
-    {
-        return ResponseEntity.ok().body(productoService.getAllProductos(page, size));
-    }
-
-    @GetMapping("/getall_mprima")
-    public ResponseEntity<Page<MateriaPrima>> getAllMprima(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
-    {
-        return ResponseEntity.ok().body(productoService.getAllMP(page, size));
-    }
-
-    @GetMapping("/getall_semi")
-    public ResponseEntity<Page<SemiTerminado>> getAllSemi(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
-    {
-        return ResponseEntity.ok().body(productoService.getAllS(page, size));
-    }
-
-    @GetMapping("/getall_termi")
-    public ResponseEntity<Page<Terminado>> getAllTermi(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
-    {
-        return ResponseEntity.ok().body(productoService.getAllT(page, size));
     }
 
     @GetMapping("/search_mprima")
@@ -103,27 +70,6 @@ public class ProductoResource {
             }
         } else{
             return ResponseEntity.ok().body(productoService.searchByName_S(search, page, size));
-        }
-    }
-
-    @GetMapping("/search_terminado")
-    public ResponseEntity<Page<Terminado>> search_terminado(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam String search,
-            @RequestParam String tipoBusqueda)
-    {
-        if(tipoBusqueda.equals("ID")){
-            Optional<Terminado> terminadoOptional = productoService.findTerminadoByProductoId(Integer.parseInt(search));
-            if (terminadoOptional.isPresent()) {
-                List<Terminado> terminadoList = List.of(terminadoOptional.get());
-                Pageable pageable = PageRequest.of(page, size);
-                return ResponseEntity.ok().body(new PageImpl<>(terminadoList, pageable, 1));
-            } else {
-                return ResponseEntity.ok().body(new PageImpl<>(List.of(), PageRequest.of(page, size), 0));
-            }
-        } else{
-            return ResponseEntity.ok().body(productoService.searchByName_T(search, page, size));
         }
     }
 
