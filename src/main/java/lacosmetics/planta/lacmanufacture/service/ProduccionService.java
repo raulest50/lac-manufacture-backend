@@ -6,6 +6,7 @@ import lacosmetics.planta.lacmanufacture.model.Insumo;
 import lacosmetics.planta.lacmanufacture.model.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.OrdenSeguimiento;
+import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
@@ -25,8 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -123,6 +123,73 @@ public class ProduccionService {
         dto.setCantidadRequerida(seguimiento.getInsumo().getCantidadRequerida());
         dto.setEstado(seguimiento.getEstado());
         return dto;
+    }
+
+
+
+
+    public Page<InventarioEnTransitoDTO> getInventarioEnTransito(Pageable pageable) {
+        // Fetch all Ordenes de Producción with estadoOrden = 0
+        List<OrdenProduccion> ordenesProduccion = ordenProduccionRepo.findByEstadoOrden(0);
+
+        // Initialize necessary associations
+        for (OrdenProduccion orden : ordenesProduccion) {
+            Hibernate.initialize(orden.getOrdenesSeguimiento());
+            for (OrdenSeguimiento seguimiento : orden.getOrdenesSeguimiento()) {
+                Hibernate.initialize(seguimiento.getInsumo());
+                Hibernate.initialize(seguimiento.getInsumo().getProducto());
+            }
+        }
+
+        // Map to hold Producto ID and corresponding InventarioEnTransitoDTO
+        Map<Integer, InventarioEnTransitoDTO> inventarioMap = new HashMap<>();
+
+        // Process each Orden de Producción
+        for (OrdenProduccion orden : ordenesProduccion) {
+            int ordenProduccionId = orden.getOrdenId();
+            for (OrdenSeguimiento seguimiento : orden.getOrdenesSeguimiento()) {
+                Insumo insumo = seguimiento.getInsumo();
+                Producto producto = insumo.getProducto();
+                int productoId = producto.getProductoId();
+                String productoNombre = producto.getNombre();
+                double cantidadRequerida = insumo.getCantidadRequerida();
+
+                InventarioEnTransitoDTO inventarioDTO = inventarioMap.get(productoId);
+                if (inventarioDTO == null) {
+                    inventarioDTO = new InventarioEnTransitoDTO();
+                    inventarioDTO.setProductoId(productoId);
+                    inventarioDTO.setProductoNombre(productoNombre);
+                    inventarioDTO.setCantidadTotal(cantidadRequerida);
+                    inventarioDTO.setOrdenesProduccionIds(new ArrayList<>());
+                    inventarioDTO.getOrdenesProduccionIds().add(ordenProduccionId);
+                    inventarioMap.put(productoId, inventarioDTO);
+                } else {
+                    inventarioDTO.setCantidadTotal(inventarioDTO.getCantidadTotal() + cantidadRequerida);
+                    if (!inventarioDTO.getOrdenesProduccionIds().contains(ordenProduccionId)) {
+                        inventarioDTO.getOrdenesProduccionIds().add(ordenProduccionId);
+                    }
+                }
+            }
+        }
+
+        // Convert map values to a list
+        List<InventarioEnTransitoDTO> inventarioList = new ArrayList<>(inventarioMap.values());
+
+        // Apply sorting if needed (e.g., by productoNombre)
+        inventarioList.sort(Comparator.comparing(InventarioEnTransitoDTO::getProductoNombre));
+
+        // Implement pagination manually
+        int total = inventarioList.size();
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), total);
+        List<InventarioEnTransitoDTO> output;
+        if (start <= end) {
+            output = inventarioList.subList(start, end);
+        } else {
+            output = new ArrayList<>();
+        }
+
+        return new PageImpl<>(output, pageable, total);
     }
 
 

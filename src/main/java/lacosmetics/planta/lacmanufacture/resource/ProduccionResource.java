@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.service.ProduccionService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/produccion")
@@ -43,5 +45,15 @@ public class ProduccionResource {
         return ResponseEntity.ok(resultados);
     }
 
+
+    @GetMapping("/inventario_en_transito")
+    public ResponseEntity<Page<InventarioEnTransitoDTO>> getInventarioEnTransito(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<InventarioEnTransitoDTO> inventarioEnTransito = produccionService.getInventarioEnTransito(pageable);
+        return ResponseEntity.ok(inventarioEnTransito);
+    }
 
 }
