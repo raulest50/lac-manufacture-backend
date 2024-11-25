@@ -7,8 +7,9 @@ import lacosmetics.planta.lacmanufacture.model.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.OrdenSeguimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
+import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
+import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
@@ -16,15 +17,17 @@ import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -46,18 +49,8 @@ public class ProduccionService {
     private MovimientoRepo movimientoRepo;
 
 
-    public Page<OrdenProduccion> getOrdenesProdByResponsable(int responsableId, int page, int size) {
-        List<OrdenProduccion> listaWorkload = ordenProduccionRepo.findByResponsableIdAndEstadoOrden(responsableId, 0);
-        Sort sort = Sort.by("fechaInicio").ascending();
-        PageRequest pageRequest = PageRequest.of(page, size, sort);
-
-        return new PageImpl<>(listaWorkload, pageRequest, listaWorkload.size());
-    }
-
-
-
     @Transactional(rollbackOn = Exception.class)
-    public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTO ordenProduccionDTO) {
+    public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTO_save ordenProduccionDTO) {
         Optional<Producto> optionalProducto = productoRepo.findById(ordenProduccionDTO.getProductoId());
         if (optionalProducto.isPresent()) {
             Producto producto = optionalProducto.get();
@@ -83,34 +76,53 @@ public class ProduccionService {
 
 
 
-    public Page<OrdenProduccion> getAllByEstado(int page, int size, int estado) {
-        List<OrdenProduccion> lista = ordenProduccionRepo.findByEstadoOrden(estado);
-        Sort sort = Sort.by("fechaInicio").ascending();
-        PageRequest pageRequest = PageRequest.of(page, size, sort);
-        return new PageImpl<>(lista, pageRequest, lista.size());
+    public Page<OrdenProduccionDTO> searchOrdenesProduccionByDateRangeAndEstadoOrden(
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            int estadoOrden,
+            Pageable pageable
+    ) {
+        Page<OrdenProduccion> page = ordenProduccionRepo.findByFechaInicioBetweenAndEstadoOrden(startDate, endDate, estadoOrden, pageable);
+        // Initialize necessary associations
+        page.getContent().forEach(orden -> {
+            Hibernate.initialize(orden.getOrdenesSeguimiento());
+            Hibernate.initialize(orden.getProducto());
+        });
+
+        // Map entities to DTOs
+        List<OrdenProduccionDTO> dtoList = page.getContent().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 
+    // Helper method to map OrdenProduccion to OrdenProduccionDTO
+    private OrdenProduccionDTO convertToDto(OrdenProduccion orden) {
+        OrdenProduccionDTO dto = new OrdenProduccionDTO();
+        dto.setOrdenId(orden.getOrdenId());
+        dto.setProductoNombre(orden.getProducto().getNombre());
+        dto.setFechaInicio(orden.getFechaInicio());
+        dto.setEstadoOrden(orden.getEstadoOrden());
+        dto.setResponsableId(orden.getResponsableId());
+        dto.setObservaciones(orden.getObservaciones());
 
-    /**
-     * Una orden de seguimiento completada implica actualizar los movimientos correspondientes de los insumos que
-     * entran y del producto que sale, semiterminado o terminado segun sea el caso.
-     *
-     * @param seguimientoId
-     * @param estado
-     * @return
-     */
-    @Transactional
-    public OrdenSeguimiento updateEstadoOrdenSeguimiento(int seguimientoId, int estado) {
+        List<OrdenSeguimientoDTO> seguimientoDTOs = orden.getOrdenesSeguimiento().stream()
+                .map(this::convertSeguimientoToDto)
+                .collect(Collectors.toList());
+        dto.setOrdenesSeguimiento(seguimientoDTOs);
 
-        if(estado == 1){
-            ordenSeguimientoRepo.updateEstadoById(seguimientoId, estado);
-            OrdenSeguimiento ordenSeguimiento = ordenSeguimientoRepo.findById(seguimientoId).orElse(null);
-            Movimiento movimientoIn = new Movimiento(ordenSeguimiento.getInsumo());
-            movimientoRepo.save(movimientoIn);
+        return dto;
+    }
 
-        }
-
-        return ordenSeguimientoRepo.findById(seguimientoId).orElse(null);
+    // Helper method to map OrdenSeguimiento to OrdenSeguimientoDTO
+    private OrdenSeguimientoDTO convertSeguimientoToDto(OrdenSeguimiento seguimiento) {
+        OrdenSeguimientoDTO dto = new OrdenSeguimientoDTO();
+        dto.setSeguimientoId(seguimiento.getSeguimientoId());
+        dto.setInsumoNombre(seguimiento.getInsumo().getProducto().getNombre());
+        dto.setCantidadRequerida(seguimiento.getInsumo().getCantidadRequerida());
+        dto.setEstado(seguimiento.getEstado());
+        return dto;
     }
 
 

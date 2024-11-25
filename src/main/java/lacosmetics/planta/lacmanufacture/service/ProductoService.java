@@ -59,11 +59,6 @@ public class ProductoService {
         return productoRepo.findAll(PageRequest.of(page, size));
     }
 
-    public Producto getProductoById(int id){
-        return productoRepo.findByProductoId(id)
-                .orElseThrow( () -> new RuntimeException("Producto no encontrado"));
-    }
-
     @Transactional
     public Producto saveProducto(Producto producto){
         if (producto instanceof SemiTerminado semiTerminado) {
@@ -72,19 +67,6 @@ public class ProductoService {
             return productoRepo.save(producto);
         }
     }
-
-    public void deleteProducto(int id) {
-        productoRepo.deleteById(id);
-    }
-
-    public Page<MateriaPrima> getAllMP(int page, int size) {
-        return materiaPrimaRepo.findAll(PageRequest.of(page, size));
-    }
-
-    public Page<SemiTerminado> getAllS(int page, int size) {
-        return semiTerminadoRepo.findAll(PageRequest.of(page, size));
-    }
-
 
     // para obtener todos los productos clase Termindo
     public Page<Terminado> getAllT(int page, int size) {
@@ -121,21 +103,6 @@ public class ProductoService {
         return semiTerminadoRepo.findAll(spec, PageRequest.of(page, size));
     }
 
-    public Page<Terminado> searchByName_T(String searchTerm, int page, int size){
-        String[] searchTerms = searchTerm.toLowerCase().split(" ");
-
-        Specification<Terminado> spec = (root, query, criteriaBuilder) -> {
-            Predicate[] predicates = new Predicate[searchTerms.length];
-
-            for (int i = 0; i < searchTerms.length; i++) {
-                predicates[i] = criteriaBuilder.like(criteriaBuilder.lower(root.get("nombre")), "%" + searchTerms[i] + "%");
-            }
-
-            return criteriaBuilder.and(predicates);
-        };
-        return terminadoRepo.findAll(spec, PageRequest.of(page, size));
-    }
-
     public Optional<MateriaPrima> findMateriaPrimaByProductoId(int productoId) {
         return materiaPrimaRepo.findById(productoId);
     }
@@ -143,11 +110,6 @@ public class ProductoService {
     public Optional<SemiTerminado> findSemiTerminadoByProductoId(int productoId) {
         return semiTerminadoRepo.findById(productoId);
     }
-
-    public Optional<Terminado> findTerminadoByProductoId(int productoId) {
-        return terminadoRepo.findById(productoId);
-    }
-
 
     public Page<ProductoStockDTO> searchTerminadoAndSemiTerminadoWithStock(String searchTerm, String tipoBusqueda, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

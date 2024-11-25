@@ -55,6 +55,6 @@ public class OrdenSeguimiento {
         this.insumo = insumo;
         this.estado=0;
         Producto p = insumo.getProducto();
-        //this.ordenProduccion = ordenProduccion;
+        this.ordenProduccion = ordenProduccion;
     }
 }
