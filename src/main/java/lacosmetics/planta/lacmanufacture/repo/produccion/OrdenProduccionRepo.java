@@ -1,10 +1,12 @@
 package lacosmetics.planta.lacmanufacture.repo.produccion;
 
+import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -37,5 +39,15 @@ public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Inte
             @Param("estadoOrden") int estadoOrden,
             Pageable pageable
     );
+
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE OrdenProduccion o SET o.estadoOrden = :estadoOrden, o.fechaFinal = CURRENT_TIMESTAMP WHERE o.ordenId = :id")
+    void updateEstadoOrdenById(@Param("id") int id, @Param("estadoOrden") int estadoOrden);
+
+    @EntityGraph(attributePaths = {"ordenesSeguimiento", "producto"})
+    Page<OrdenProduccion> findByResponsableIdAndEstadoOrden(int responsableId, int estadoOrden, Pageable pageable);
+
 
 }

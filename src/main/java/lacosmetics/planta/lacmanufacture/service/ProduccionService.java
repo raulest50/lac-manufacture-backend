@@ -193,4 +193,53 @@ public class ProduccionService {
     }
 
 
+
+    /**
+     * Update the estado of an OrdenSeguimiento.
+     */
+    @Transactional
+    public OrdenSeguimientoDTO updateEstadoOrdenSeguimiento(int seguimientoId, int estado) {
+        ordenSeguimientoRepo.updateEstadoById(seguimientoId, estado);
+
+        // Fetch updated OrdenSeguimiento
+        OrdenSeguimiento ordenSeguimiento = ordenSeguimientoRepo.findById(seguimientoId).orElseThrow(() -> new RuntimeException("OrdenSeguimiento not found"));
+
+        // Return updated DTO
+        return convertSeguimientoToDto(ordenSeguimiento);
+    }
+
+    /**
+     * Update the estadoOrden of an OrdenProduccion and register Movimiento.
+     */
+    @Transactional
+    public OrdenProduccionDTO updateEstadoOrdenProduccion(int ordenId, int estadoOrden) {
+        ordenProduccionRepo.updateEstadoOrdenById(ordenId, estadoOrden);
+
+        // Fetch updated OrdenProduccion
+        OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenId).orElseThrow(() -> new RuntimeException("OrdenProduccion not found"));
+
+        // Register Movimiento for the produced Producto
+        Movimiento movimiento = new Movimiento();
+        movimiento.setCantidad(ordenProduccion.getProducto().getCantidadUnidad()); // Adjust as per your business logic
+        movimiento.setProducto(ordenProduccion.getProducto());
+        movimiento.setCausa(Movimiento.CausaMovimiento.PROD_INTERNO);
+        movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
+        movimientoRepo.save(movimiento);
+
+        return convertToDto(ordenProduccion);
+    }
+
+
+
+    public Page<OrdenProduccionDTO> getOrdenesProduccionByResponsable(int responsableId, Pageable pageable) {
+        Page<OrdenProduccion> page = ordenProduccionRepo.findByResponsableIdAndEstadoOrden(responsableId, 0, pageable);
+        // Initialize and map to DTOs
+        List<OrdenProduccionDTO> dtoList = page.getContent().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
+    }
+
+
+
 }

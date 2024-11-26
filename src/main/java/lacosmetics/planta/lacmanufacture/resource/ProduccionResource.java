@@ -5,6 +5,7 @@ import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
+import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
 import lacosmetics.planta.lacmanufacture.service.ProduccionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -55,5 +56,44 @@ public class ProduccionResource {
         Page<InventarioEnTransitoDTO> inventarioEnTransito = produccionService.getInventarioEnTransito(pageable);
         return ResponseEntity.ok(inventarioEnTransito);
     }
+
+
+    /**
+     * Update estado of OrdenSeguimiento.
+     */
+    @PutMapping("/orden_seguimiento/{id}/update_estado")
+    public ResponseEntity<OrdenSeguimientoDTO> updateEstadoOrdenSeguimiento(
+            @PathVariable int id,
+            @RequestParam int estado
+    ) {
+        OrdenSeguimientoDTO updatedSeguimiento = produccionService.updateEstadoOrdenSeguimiento(id, estado);
+        return ResponseEntity.ok(updatedSeguimiento);
+    }
+
+    /**
+     * Update estadoOrden of OrdenProduccion.
+     */
+    @PutMapping("/orden_produccion/{id}/update_estado")
+    public ResponseEntity<OrdenProduccionDTO> updateEstadoOrdenProduccion(
+            @PathVariable int id,
+            @RequestParam int estadoOrden
+    ) {
+        OrdenProduccionDTO updatedOrden = produccionService.updateEstadoOrdenProduccion(id, estadoOrden);
+        return ResponseEntity.ok(updatedOrden);
+    }
+
+
+
+    @GetMapping("/ordenes_produccion/responsable/{responsableId}")
+    public ResponseEntity<Page<OrdenProduccionDTO>> getOrdenesProduccionByResponsable(
+            @PathVariable int responsableId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<OrdenProduccionDTO> ordenes = produccionService.getOrdenesProduccionByResponsable(responsableId, pageable);
+        return ResponseEntity.ok(ordenes);
+    }
+
 
 }
