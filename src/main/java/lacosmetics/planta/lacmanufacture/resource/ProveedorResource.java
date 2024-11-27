@@ -4,6 +4,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 import lacosmetics.planta.lacmanufacture.model.Proveedor;
 import lacosmetics.planta.lacmanufacture.service.ProveedorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,5 +29,18 @@ public class ProveedorResource {
         List<Proveedor> proveedores = proveedorService.searchProveedores(searchText);
         return ResponseEntity.ok(proveedores);
     }
+
+    // In ProveedorResource.java
+    @GetMapping("/search_pag")
+    public ResponseEntity<Page<Proveedor>> searchProveedores(
+            @RequestParam("q") String searchText,
+            @RequestParam("searchType") String searchType,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        Page<Proveedor> proveedores = proveedorService.searchProveedores(searchText, searchType, page, size);
+        return ResponseEntity.ok(proveedores);
+    }
+
 
 }

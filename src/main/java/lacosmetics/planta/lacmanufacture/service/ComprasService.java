@@ -11,8 +11,14 @@ import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -102,13 +108,6 @@ public class ComprasService {
         return  (int) Math.ceil(nuevoCosto);
     }
 
-
-    /**
-     * Recursively updates the 'costo' of dependent products when a product's cost changes.
-     *
-     * @param producto          The product whose dependents need to be updated.
-     * @param updatedProductIds A set to track updated products and prevent infinite recursion.
-     */
     private void updateCostoCascade(Producto producto, Set<Integer> updatedProductIds) {
         // If we've already updated this product, return to prevent infinite recursion
         if (updatedProductIds.contains(producto.getProductoId())) {
@@ -162,5 +161,20 @@ public class ComprasService {
             updateCostoCascade(t, updatedProductIds);
         }
     }
+
+    public Page<Compra> getComprasByProveedorAndDate(int proveedorId, String date1, String date2, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        LocalDateTime startDate = LocalDate.parse(date1).atStartOfDay();
+        LocalDateTime endDate = LocalDate.parse(date2).atTime(LocalTime.MAX);
+        return compraRepo.findByProveedorIdAndFechaCompraBetween(proveedorId, startDate, endDate, pageable);
+    }
+
+
+    public List<ItemCompra> getItemsByCompraId(int compraId) {
+        Compra compra = compraRepo.findById(compraId)
+                .orElseThrow(() -> new RuntimeException("Compra not found with id: " + compraId));
+        return compra.getItemsCompra();
+    }
+
 }
 

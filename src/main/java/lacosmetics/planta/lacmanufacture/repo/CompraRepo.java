@@ -1,8 +1,19 @@
 package lacosmetics.planta.lacmanufacture.repo;
 
 import lacosmetics.planta.lacmanufacture.model.Compra;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
+
 public interface CompraRepo extends JpaRepository<Compra, Integer> {
-    // Additional query methods can be added here if needed
+
+    Page<Compra> findByProveedorIdAndFechaCompraBetween(
+            int proveedorId,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable
+    );
+
 }
