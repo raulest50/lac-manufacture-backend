@@ -63,7 +63,7 @@ public class ProduccionService {
                 Movimiento movimiento = new Movimiento();
                 movimiento.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
                 movimiento.setProducto(insumo.getProducto());
-                movimiento.setCausa(Movimiento.CausaMovimiento.USO_INTERNO);
+                movimiento.setTipo(Movimiento.CausaMovimiento.USO_INTERNO);
                 movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
                 movimientoRepo.save(movimiento);
             }
@@ -222,7 +222,7 @@ public class ProduccionService {
         Movimiento movimiento = new Movimiento();
         movimiento.setCantidad(ordenProduccion.getProducto().getCantidadUnidad()); // Adjust as per your business logic
         movimiento.setProducto(ordenProduccion.getProducto());
-        movimiento.setCausa(Movimiento.CausaMovimiento.PROD_INTERNO);
+        movimiento.setTipo(Movimiento.CausaMovimiento.PROD_INTERNO);
         movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
         movimientoRepo.save(movimiento);
 

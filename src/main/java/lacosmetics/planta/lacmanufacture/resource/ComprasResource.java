@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
-import lacosmetics.planta.lacmanufacture.model.Compra;
-import lacosmetics.planta.lacmanufacture.model.ItemCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.Compra;
+import lacosmetics.planta.lacmanufacture.model.compras.ItemCompra;
 import lacosmetics.planta.lacmanufacture.service.ComprasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

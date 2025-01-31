@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.config;
 
-import lacosmetics.planta.lacmanufacture.model.Role;
-import lacosmetics.planta.lacmanufacture.model.User;
+import lacosmetics.planta.lacmanufacture.model.users.Role;
+import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.RoleRepository;
 import lacosmetics.planta.lacmanufacture.repo.UserRepository;
 import lombok.RequiredArgsConstructor;

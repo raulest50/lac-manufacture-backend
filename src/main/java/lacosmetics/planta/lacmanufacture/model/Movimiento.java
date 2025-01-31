@@ -36,7 +36,7 @@ public class Movimiento {
 
     // causa del movimiento
     // VENTA, COMPRA, AVERIA, USO_INTERNO, PROD_INTERNO, OTROS
-    private String causa;
+    private String tipo;
 
     private String observaciones;
 
@@ -47,7 +47,7 @@ public class Movimiento {
     public Movimiento(Insumo insumo){
         cantidad = insumo.getCantidadRequerida();
         producto = insumo.getProducto();
-        causa = CausaMovimiento.USO_INTERNO;
+        tipo = CausaMovimiento.USO_INTERNO;
     }
 
 
@@ -58,5 +58,10 @@ public class Movimiento {
         public static final String PROD_INTERNO = "PROD_INTERNO";
         public static final String SALIDA_APP_VENTAS = "SALIDA_APP_VENTAS";
     }
+
+
+
+
+
 
 }

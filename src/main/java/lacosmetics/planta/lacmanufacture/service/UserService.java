@@ -1,13 +1,10 @@
 package lacosmetics.planta.lacmanufacture.service;
 
-import lacosmetics.planta.lacmanufacture.model.Role;
-import lacosmetics.planta.lacmanufacture.model.User;
+import lacosmetics.planta.lacmanufacture.model.users.Role;
+import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.*;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.transaction.annotation.Transactional;

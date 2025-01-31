@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.repo;
 
-import lacosmetics.planta.lacmanufacture.model.ItemCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.ItemCompra;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ItemCompraRepo extends JpaRepository<ItemCompra, Integer> {

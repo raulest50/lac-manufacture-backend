@@ -1,5 +1,5 @@
 package lacosmetics.planta.lacmanufacture.repo;
-import lacosmetics.planta.lacmanufacture.model.Role;
+import lacosmetics.planta.lacmanufacture.model.users.Role;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

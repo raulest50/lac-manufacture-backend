@@ -29,7 +29,7 @@ public class Proveedor {
 
     private String departamento;
 
-    private String contacto;
+    private String nombreContacto;
 
     private String telefono;
 

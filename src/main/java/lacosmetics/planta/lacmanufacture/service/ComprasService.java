@@ -2,6 +2,8 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.*;
+import lacosmetics.planta.lacmanufacture.model.compras.Compra;
+import lacosmetics.planta.lacmanufacture.model.compras.ItemCompra;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
@@ -81,7 +83,7 @@ public class ComprasService {
             Movimiento movimiento = new Movimiento();
             movimiento.setCantidad(itemCompra.getCantidad()); // Positive quantity for stock increase
             movimiento.setProducto(itemCompra.getMateriaPrima());
-            movimiento.setCausa(Movimiento.CausaMovimiento.COMPRA);
+            movimiento.setTipo(Movimiento.CausaMovimiento.COMPRA);
             movimiento.setObservaciones("Compra ID: " + savedCompra.getCompraId());
             movimientoRepo.save(movimiento);
         }
