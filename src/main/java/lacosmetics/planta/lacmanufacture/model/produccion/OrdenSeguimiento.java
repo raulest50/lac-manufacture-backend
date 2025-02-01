@@ -1,12 +1,10 @@
-package lacosmetics.planta.lacmanufacture.model;
+package lacosmetics.planta.lacmanufacture.model.produccion;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
+import lacosmetics.planta.lacmanufacture.model.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
-import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 

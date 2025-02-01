@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.repo.produccion;
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;

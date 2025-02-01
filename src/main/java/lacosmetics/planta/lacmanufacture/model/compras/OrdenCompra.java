@@ -14,16 +14,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
-/*
+
 @Entity
 @Table(name = "orden_compra")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
- */
 public class OrdenCompra {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,17 +33,14 @@ public class OrdenCompra {
 
     private LocalDateTime fechaVencimiento;
 
-    /*
     @ManyToOne
     @JoinColumn(name = "proveedor_id", referencedColumnName = "id")
     private Proveedor proveedor;
-     */
 
-    /*
+
     @OneToMany(mappedBy = "orden_compra", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ItemOrdenCompra> itemOrdenCompra;
-     */
 
     private int subTotal;
 

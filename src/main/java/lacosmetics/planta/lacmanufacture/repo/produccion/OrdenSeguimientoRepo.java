@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.repo.produccion;
 
-import lacosmetics.planta.lacmanufacture.model.OrdenSeguimiento;
+import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
