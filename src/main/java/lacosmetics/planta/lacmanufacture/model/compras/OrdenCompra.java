@@ -13,8 +13,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-
 @Entity
 @Table(name = "orden_compra")
 @Getter
@@ -38,7 +36,7 @@ public class OrdenCompra {
     private Proveedor proveedor;
 
 
-    @OneToMany(mappedBy = "orden_compra", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "ordenCompra", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ItemOrdenCompra> itemOrdenCompra;
 
@@ -53,5 +51,14 @@ public class OrdenCompra {
     private String tiempoEntrega;
 
     private int plazo_pago;
+
+    /**
+     * -1: cancelada
+     *  0: pendiente aprovacion proveedor
+     *  1: pendiente revision precio
+     *  2: pendiente conteo
+     *  3: cerrada con exito
+     */
+    private int estado;
 
 }
