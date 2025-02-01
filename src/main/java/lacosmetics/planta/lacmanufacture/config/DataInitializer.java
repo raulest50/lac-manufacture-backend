@@ -37,7 +37,7 @@ public class DataInitializer {
             userRepository.findByUsername("master").orElseGet(() -> {
                 User master = User.builder()
                         .username("master")
-                        .password("{noop}masterpass") // <-- No password encoding (development only!)
+                        .password("m1243") // <-- No password encoding (development only!)
                         .roles(Set.of(finalRoleMaster))
                         .build();
                 return userRepository.save(master);
@@ -45,10 +45,10 @@ public class DataInitializer {
 
             // Check or create the "worker" user
             Role finalRoleWorker = roleWorker;
-            userRepository.findByUsername("worker").orElseGet(() -> {
+            userRepository.findByUsername("user").orElseGet(() -> {
                 User worker = User.builder()
-                        .username("worker")
-                        .password("{noop}workerpass")
+                        .username("user")
+                        .password("u1234")
                         .roles(Set.of(finalRoleWorker))
                         .build();
                 return userRepository.save(worker);
