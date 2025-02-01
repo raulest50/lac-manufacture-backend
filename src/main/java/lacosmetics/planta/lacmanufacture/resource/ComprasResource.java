@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 import lacosmetics.planta.lacmanufacture.model.compras.Compra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lacosmetics.planta.lacmanufacture.service.ComprasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,10 @@ import java.util.List;
 @RequestMapping("/compras")
 @RequiredArgsConstructor
 public class ComprasResource {
+
+    /**
+     * Compras
+     */
 
     private final ComprasService compraService;
 
@@ -40,6 +45,17 @@ public class ComprasResource {
     public ResponseEntity<List<ItemCompra>> getItemsCompra(@PathVariable int compraId) {
         List<ItemCompra> items = compraService.getItemsByCompraId(compraId);
         return ResponseEntity.ok(items);
+    }
+
+
+    /**
+     * Ordenes de Compra
+     */
+    @PostMapping("/save_orden_compra")
+    public ResponseEntity<OrdenCompra> saveOrdenCompra(@RequestBody OrdenCompra ordenCompra) {
+        OrdenCompra savedOrdenCompra = compraService.saveOrdenCompra(ordenCompra);
+        return ResponseEntity.created(URI.create("/compras/orden_compra/" + savedOrdenCompra.getOrdenCompraId()))
+                .body(savedOrdenCompra);
     }
 
 }

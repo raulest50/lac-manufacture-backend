@@ -4,11 +4,15 @@ import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.*;
 import lacosmetics.planta.lacmanufacture.model.compras.Compra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.*;
+import lacosmetics.planta.lacmanufacture.repo.compras.CompraRepo;
+import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
@@ -38,6 +42,14 @@ public class ComprasService {
     private final MateriaPrimaRepo materiaPrimaRepo;
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
+
+    private final OrdenCompraRepo ordenCompraRepo;
+
+    /**
+     *
+     * Compras
+     *
+     */
 
     @Transactional
     public Compra saveCompra(Compra compra) {
@@ -171,11 +183,38 @@ public class ComprasService {
         return compraRepo.findByProveedorIdAndFechaCompraBetween(proveedorId, startDate, endDate, pageable);
     }
 
-
     public List<ItemCompra> getItemsByCompraId(int compraId) {
         Compra compra = compraRepo.findById(compraId)
                 .orElseThrow(() -> new RuntimeException("Compra not found with id: " + compraId));
         return compra.getItemsCompra();
+    }
+
+
+    /**
+     *
+     * Ordenes de Compra
+     *
+     */
+
+
+
+    public OrdenCompra saveOrdenCompra(OrdenCompra ordenCompra) {
+        // Verify the Proveedor exists
+        Optional<Proveedor> optProveedor = proveedorRepo.findById(ordenCompra.getProveedor().getId());
+        if (!optProveedor.isPresent()) {
+            throw new RuntimeException("Proveedor not found with ID: " + ordenCompra.getProveedor().getId());
+        }
+        ordenCompra.setProveedor(optProveedor.get());
+
+        // For each ItemOrdenCompra, set the back‑reference and initialize check fields to 0
+        for (ItemOrdenCompra item : ordenCompra.getItemOrdenCompra()) {
+            item.setOrdenCompra(ordenCompra);
+            if(item.getCantidadCorrecta() == 0) item.setCantidadCorrecta(0);
+            if(item.getPrecioCorrecto() == 0) item.setPrecioCorrecto(0);
+        }
+
+        // Save and return the OrdenCompra
+        return ordenCompraRepo.save(ordenCompra);
     }
 
 }
