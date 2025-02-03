@@ -38,7 +38,7 @@ public class OrdenCompra {
 
     @OneToMany(mappedBy = "ordenCompra", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<ItemOrdenCompra> itemOrdenCompra;
+    private List<ItemOrdenCompra> itemsOrdenCompra;
 
     private int subTotal;
 

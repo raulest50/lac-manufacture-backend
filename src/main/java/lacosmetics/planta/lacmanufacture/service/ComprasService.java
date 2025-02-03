@@ -207,7 +207,7 @@ public class ComprasService {
         ordenCompra.setProveedor(optProveedor.get());
 
         // For each ItemOrdenCompra, set the back‑reference and initialize check fields to 0
-        for (ItemOrdenCompra item : ordenCompra.getItemOrdenCompra()) {
+        for (ItemOrdenCompra item : ordenCompra.getItemsOrdenCompra()) {
             item.setOrdenCompra(ordenCompra);
             if(item.getCantidadCorrecta() == 0) item.setCantidadCorrecta(0);
             if(item.getPrecioCorrecto() == 0) item.setPrecioCorrecto(0);

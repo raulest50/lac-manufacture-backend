@@ -1,6 +1,7 @@
 package lacosmetics.planta.lacmanufacture.model.compras;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,7 @@ public class ItemOrdenCompra {
     // Bidirectional relationship with OrdenCompra
     @ManyToOne
     @JoinColumn(name = "orden_compra_id")  // This column will hold the foreign key
+    @JsonBackReference
     private OrdenCompra ordenCompra;
 
     // Bidirectional relationship with OrdenCompra

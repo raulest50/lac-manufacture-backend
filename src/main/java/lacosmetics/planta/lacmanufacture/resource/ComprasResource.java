@@ -54,7 +54,7 @@ public class ComprasResource {
     @PostMapping("/save_orden_compra")
     public ResponseEntity<OrdenCompra> saveOrdenCompra(@RequestBody OrdenCompra ordenCompra) {
         OrdenCompra savedOrdenCompra = compraService.saveOrdenCompra(ordenCompra);
-        return ResponseEntity.created(URI.create("/compras/orden_compra/" + savedOrdenCompra.getOrdenCompraId()))
+        return ResponseEntity.created(URI.create("/compras/save_orden_compra/" + savedOrdenCompra.getOrdenCompraId()))
                 .body(savedOrdenCompra);
     }
 
