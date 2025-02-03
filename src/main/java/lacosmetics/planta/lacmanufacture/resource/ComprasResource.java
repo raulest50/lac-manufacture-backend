@@ -58,4 +58,21 @@ public class ComprasResource {
                 .body(savedOrdenCompra);
     }
 
+
+    /**
+     * GET endpoint to search OrdenCompra by date range and estados.
+     * Example: /compras/ordenes?date1=2025-02-01&date2=2025-02-10&estados=0,1,2&page=0&size=10
+     */
+    @GetMapping("/search_ordenes_by_date_estado")
+    public ResponseEntity<Page<OrdenCompra>> getOrdenesCompra(
+            @RequestParam String date1,
+            @RequestParam String date2,
+            @RequestParam String estados,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        Page<OrdenCompra> ordenes = compraService.getOrdenesCompraByDateAndEstado(date1, date2, estados, page, size);
+        return ResponseEntity.ok(ordenes);
+    }
+
 }

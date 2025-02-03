@@ -25,10 +25,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -215,6 +213,21 @@ public class ComprasService {
 
         // Save and return the OrdenCompra
         return ordenCompraRepo.save(ordenCompra);
+    }
+
+    public Page<OrdenCompra> getOrdenesCompraByDateAndEstado(String date1, String date2, String estados, int page, int size) {
+        // Parse the date strings
+        LocalDateTime startDate = LocalDate.parse(date1).atStartOfDay();
+        LocalDateTime endDate = LocalDate.parse(date2).atTime(LocalTime.MAX);
+
+        // Parse the estados string into a list of integers
+        List<Integer> estadoList = Arrays.stream(estados.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoIn(startDate, endDate, estadoList, pageable);
     }
 
 }
