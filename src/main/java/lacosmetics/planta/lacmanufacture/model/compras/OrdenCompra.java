@@ -46,11 +46,15 @@ public class OrdenCompra {
 
     private int totalPagar;
 
+    /**
+     * 0:credito
+     * 1:contado
+     */
     private String condicionPago;
 
     private String tiempoEntrega;
 
-    private int plazo_pago;
+    private int plazoPago;
 
     /**
      * -1: cancelada
