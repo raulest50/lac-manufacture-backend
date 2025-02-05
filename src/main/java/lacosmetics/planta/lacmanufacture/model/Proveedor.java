@@ -25,6 +25,13 @@ public class Proveedor {
 
     private String direccion;
 
+    /**
+     * 0: Regimen comun
+     * 1: Regimen simplificado
+     * 2: Regimen especial
+     */
+    private int regimenTributario;
+
     private String ciudad;
 
     private String departamento;

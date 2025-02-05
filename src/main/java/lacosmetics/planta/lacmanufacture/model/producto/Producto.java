@@ -33,7 +33,7 @@ import java.time.LocalDateTime;
 public abstract class Producto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "producto_id", unique = true, updatable = false, nullable = false)
     private int productoId;
 
