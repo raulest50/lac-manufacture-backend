@@ -75,4 +75,10 @@ public class ComprasResource {
         return ResponseEntity.ok(ordenes);
     }
 
+    @PutMapping("/orden_compra/{ordenCompraId}/cancel")
+    public ResponseEntity<OrdenCompra> cancelOrdenCompra(@PathVariable int ordenCompraId) {
+        OrdenCompra updated = compraService.cancelOrdenCompra(ordenCompraId);
+        return ResponseEntity.ok(updated);
+    }
+
 }

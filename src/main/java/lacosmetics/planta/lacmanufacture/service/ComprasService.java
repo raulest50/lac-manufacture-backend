@@ -230,5 +230,12 @@ public class ComprasService {
         return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoIn(startDate, endDate, estadoList, pageable);
     }
 
+    public OrdenCompra cancelOrdenCompra(int ordenCompraId) {
+        OrdenCompra orden = ordenCompraRepo.findById(ordenCompraId)
+                .orElseThrow(() -> new RuntimeException("OrdenCompra not found with id: " + ordenCompraId));
+        orden.setEstado(-1);
+        return ordenCompraRepo.save(orden);
+    }
+
 }
 
