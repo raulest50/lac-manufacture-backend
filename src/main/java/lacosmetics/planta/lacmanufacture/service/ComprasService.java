@@ -237,5 +237,12 @@ public class ComprasService {
         return ordenCompraRepo.save(orden);
     }
 
+    public OrdenCompra updateEstadoOrdenCompra(int ordenCompraId, int newEstado) {
+        OrdenCompra orden = ordenCompraRepo.findById(ordenCompraId)
+                .orElseThrow(() -> new RuntimeException("OrdenCompra not found with id: " + ordenCompraId));
+        orden.setEstado(newEstado);
+        return ordenCompraRepo.save(orden);
+    }
+
 }
 

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/compras")
@@ -78,6 +79,16 @@ public class ComprasResource {
     @PutMapping("/orden_compra/{ordenCompraId}/cancel")
     public ResponseEntity<OrdenCompra> cancelOrdenCompra(@PathVariable int ordenCompraId) {
         OrdenCompra updated = compraService.cancelOrdenCompra(ordenCompraId);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/orden_compra/{ordenCompraId}/updateEstado")
+    public ResponseEntity<OrdenCompra> updateEstadoOrdenCompra(
+            @PathVariable int ordenCompraId,
+            @RequestBody Map<String, Integer> body
+    ) {
+        int newEstado = body.get("newEstado");
+        OrdenCompra updated = compraService.updateEstadoOrdenCompra(ordenCompraId, newEstado);
         return ResponseEntity.ok(updated);
     }
 
