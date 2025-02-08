@@ -1,14 +1,12 @@
 package lacosmetics.planta.lacmanufacture.config;
 
-import lacosmetics.planta.lacmanufacture.repo.UserRepository;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lacosmetics.planta.lacmanufacture.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.*;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.*;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 
@@ -25,17 +23,8 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Worker-only routes
-                        .requestMatchers("/api/responsable_1/**", "/api/responsable_2/**")
-                        .hasRole("WORKER")
-
-                        // Master-only routes
-                        .requestMatchers("/api/producto/**", "/api/produccion/**",
-                                "/api/stock/**", "/api/proveedores/**", "/api/compras/**")
-                        .hasRole("MASTER")
-
-                        // Everything else is free
-                        .anyRequest().permitAll()
+                        // For development, allow all authenticated users to access any endpoint
+                        .anyRequest().authenticated()
                 )
                 .httpBasic(withDefaults());
 

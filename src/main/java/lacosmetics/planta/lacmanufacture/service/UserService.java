@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import lacosmetics.planta.lacmanufacture.model.users.Role;
 import lacosmetics.planta.lacmanufacture.model.users.User;
-import lacosmetics.planta.lacmanufacture.repo.UserRepository;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.core.GrantedAuthority;

@@ -2,8 +2,8 @@ package lacosmetics.planta.lacmanufacture.config;
 
 import lacosmetics.planta.lacmanufacture.model.users.Role;
 import lacosmetics.planta.lacmanufacture.model.users.User;
-import lacosmetics.planta.lacmanufacture.repo.RoleRepository;
-import lacosmetics.planta.lacmanufacture.repo.UserRepository;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.RoleRepository;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -18,22 +18,22 @@ public class DataInitializer {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
 
+    private final String ROLE_MASTER = "ROLE_MASTER";
+    private final String ROLE_COMPRAS = "ROLE_COMPRAS";
+    private final String ROLE_JEFE_PRODUCCION = "ROLE_JEFE_PRODUCCION";
+    private final String ROLE_ASISTENTE_PRODUCCION = "ROLE_ASISTENTE_PRODUCCION";
+    private final String ROLE_ALMACEN = "ROLE_ALMACEN";
+
     @Bean
     CommandLineRunner initDatabase() {
         return args -> {
-            // Check or create the roles
-            Role roleMaster = roleRepository.findByName("ROLE_MASTER");
-            if (roleMaster == null) {
-                roleMaster = roleRepository.save(new Role(null, "ROLE_MASTER"));
-            }
-
-            Role roleWorker = roleRepository.findByName("ROLE_WORKER");
-            if (roleWorker == null) {
-                roleWorker = roleRepository.save(new Role(null, "ROLE_WORKER"));
-            }
 
             // Check or create the "master" user
-            Role finalRoleMaster = roleMaster;
+            Role finalRoleMaster = initRole(ROLE_MASTER);
+            initRole(ROLE_COMPRAS);
+            initRole(ROLE_JEFE_PRODUCCION);
+            initRole(ROLE_ASISTENTE_PRODUCCION);
+            initRole(ROLE_ALMACEN);
             userRepository.findByUsername("master").orElseGet(() -> {
                 User master = User.builder()
                         .username("master")
@@ -43,16 +43,14 @@ public class DataInitializer {
                 return userRepository.save(master);
             });
 
-            // Check or create the "worker" user
-            Role finalRoleWorker = roleWorker;
-            userRepository.findByUsername("user").orElseGet(() -> {
-                User worker = User.builder()
-                        .username("user")
-                        .password("u1234")
-                        .roles(Set.of(finalRoleWorker))
-                        .build();
-                return userRepository.save(worker);
-            });
         };
+    }
+
+    private Role initRole(String role_name){
+        Role role = roleRepository.findByName(role_name);
+        if (role == null) {
+            role = roleRepository.save(new Role(null, role_name));
+        }
+        return role;
     }
 }
