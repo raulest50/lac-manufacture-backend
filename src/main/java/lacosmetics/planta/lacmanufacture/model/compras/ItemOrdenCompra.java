@@ -35,11 +35,8 @@ public class ItemOrdenCompra {
     private MateriaPrima materiaPrima;
 
     private int cantidad;
-
     private int precioUnitario;
-
     private int iva19;
-
     private int subTotal;
 
     /**

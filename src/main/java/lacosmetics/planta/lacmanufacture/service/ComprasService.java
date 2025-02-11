@@ -2,8 +2,8 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.*;
-import lacosmetics.planta.lacmanufacture.model.compras.Compra;
-import lacosmetics.planta.lacmanufacture.model.compras.ItemCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.FacturaCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
@@ -11,7 +11,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.*;
-import lacosmetics.planta.lacmanufacture.repo.compras.CompraRepo;
+import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ComprasService {
 
-    private final CompraRepo compraRepo;
+    private final FacturaCompraRepo facturaCompraRepo;
     private final MovimientoRepo movimientoRepo;
     private final ProveedorRepo proveedorRepo;
     private final MateriaPrimaRepo materiaPrimaRepo;
@@ -50,29 +50,29 @@ public class ComprasService {
      */
 
     @Transactional
-    public Compra saveCompra(Compra compra) {
+    public FacturaCompra saveCompra(FacturaCompra facturaCompra) {
         // Verify that the Proveedor exists
-        Optional<Proveedor> optionalProveedor = proveedorRepo.findById(compra.getProveedor().getId());
+        Optional<Proveedor> optionalProveedor = proveedorRepo.findById(facturaCompra.getProveedor().getId());
         if (!optionalProveedor.isPresent()) {
-            throw new RuntimeException("Proveedor not found with ID: " + compra.getProveedor().getId());
+            throw new RuntimeException("Proveedor not found with ID: " + facturaCompra.getProveedor().getId());
         }
-        compra.setProveedor(optionalProveedor.get());
+        facturaCompra.setProveedor(optionalProveedor.get());
 
         // For each ItemCompra, set the Compra reference, verify MateriaPrima, update costo ponderado, and cascade updates
-        for (ItemCompra itemCompra : compra.getItemsCompra()) {
-            itemCompra.setCompra(compra);
+        for (ItemFacturaCompra itemFacturaCompra : facturaCompra.getItemsCompra()) {
+            itemFacturaCompra.setFacturaCompra(facturaCompra);
 
             // Verify that the MateriaPrima exists
-            Optional<MateriaPrima> optionalMateriaPrima = materiaPrimaRepo.findById(itemCompra.getMateriaPrima().getProductoId());
+            Optional<MateriaPrima> optionalMateriaPrima = materiaPrimaRepo.findById(itemFacturaCompra.getMateriaPrima().getProductoId());
             if (!optionalMateriaPrima.isPresent()) {
-                throw new RuntimeException("MateriaPrima not found with ID: " + itemCompra.getMateriaPrima().getProductoId());
+                throw new RuntimeException("MateriaPrima not found with ID: " + itemFacturaCompra.getMateriaPrima().getProductoId());
             }
             MateriaPrima materiaPrima = optionalMateriaPrima.get();
-            itemCompra.setMateriaPrima(materiaPrima);
+            itemFacturaCompra.setMateriaPrima(materiaPrima);
 
             // Retrieve current stock
             Double currentStockOpt = movimientoRepo.findTotalCantidadByProductoId(materiaPrima.getProductoId());
-            int nuevoCosto = getNuevoCosto(itemCompra, currentStockOpt, materiaPrima);
+            int nuevoCosto = getNuevoCosto(itemFacturaCompra, currentStockOpt, materiaPrima);
 
             // Update MateriaPrima's costo
             materiaPrima.setCosto(nuevoCosto);
@@ -86,30 +86,30 @@ public class ComprasService {
         }
 
         // Save the Compra (this will also save ItemCompra due to CascadeType.ALL)
-        Compra savedCompra = compraRepo.save(compra);
+        FacturaCompra savedFacturaCompra = facturaCompraRepo.save(facturaCompra);
 
         // Create Movimiento entries for each ItemCompra
-        for (ItemCompra itemCompra : savedCompra.getItemsCompra()) {
+        for (ItemFacturaCompra itemFacturaCompra : savedFacturaCompra.getItemsCompra()) {
             Movimiento movimiento = new Movimiento();
-            movimiento.setCantidad(itemCompra.getCantidad()); // Positive quantity for stock increase
-            movimiento.setProducto(itemCompra.getMateriaPrima());
+            movimiento.setCantidad(itemFacturaCompra.getCantidad()); // Positive quantity for stock increase
+            movimiento.setProducto(itemFacturaCompra.getMateriaPrima());
             movimiento.setTipo(Movimiento.CausaMovimiento.COMPRA);
-            movimiento.setObservaciones("Compra ID: " + savedCompra.getCompraId());
+            movimiento.setObservaciones("Compra ID: " + savedFacturaCompra.getFacturaCompraId());
             movimientoRepo.save(movimiento);
         }
 
-        return savedCompra;
+        return savedFacturaCompra;
     }
 
-    private static int getNuevoCosto(ItemCompra itemCompra, Double currentStockOpt, MateriaPrima materiaPrima) {
+    private static int getNuevoCosto(ItemFacturaCompra itemFacturaCompra, Double currentStockOpt, MateriaPrima materiaPrima) {
         double currentStock = (currentStockOpt != null) ? currentStockOpt : 0;
 
         // Retrieve current costo
         double currentCosto = materiaPrima.getCosto();
 
         // Incoming units and precioCompra from ItemCompra
-        double incomingUnits = itemCompra.getCantidad();
-        double incomingPrecio = itemCompra.getPrecioCompra();
+        double incomingUnits = itemFacturaCompra.getCantidad();
+        double incomingPrecio = itemFacturaCompra.getPrecioCompra();
 
         // Calculate nuevo_costo
         if (currentStock + incomingUnits == 0) {
@@ -174,17 +174,17 @@ public class ComprasService {
         }
     }
 
-    public Page<Compra> getComprasByProveedorAndDate(int proveedorId, String date1, String date2, int page, int size) {
+    public Page<FacturaCompra> getComprasByProveedorAndDate(int proveedorId, String date1, String date2, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         LocalDateTime startDate = LocalDate.parse(date1).atStartOfDay();
         LocalDateTime endDate = LocalDate.parse(date2).atTime(LocalTime.MAX);
-        return compraRepo.findByProveedorIdAndFechaCompraBetween(proveedorId, startDate, endDate, pageable);
+        return facturaCompraRepo.findByProveedorIdAndFechaCompraBetween(proveedorId, startDate, endDate, pageable);
     }
 
-    public List<ItemCompra> getItemsByCompraId(int compraId) {
-        Compra compra = compraRepo.findById(compraId)
+    public List<ItemFacturaCompra> getItemsByCompraId(int compraId) {
+        FacturaCompra facturaCompra = facturaCompraRepo.findById(compraId)
                 .orElseThrow(() -> new RuntimeException("Compra not found with id: " + compraId));
-        return compra.getItemsCompra();
+        return facturaCompra.getItemsCompra();
     }
 
 
@@ -237,10 +237,16 @@ public class ComprasService {
         return ordenCompraRepo.save(orden);
     }
 
-    public OrdenCompra updateEstadoOrdenCompra(int ordenCompraId, int newEstado) {
+    public OrdenCompra updateEstadoOrdenCompra(int ordenCompraId, int newEstado, Integer facturaCompraId) {
         OrdenCompra orden = ordenCompraRepo.findById(ordenCompraId)
                 .orElseThrow(() -> new RuntimeException("OrdenCompra not found with id: " + ordenCompraId));
         orden.setEstado(newEstado);
+        if (newEstado == 1 && facturaCompraId != null) {
+            // OLD: load FacturaCompra and set the association
+            FacturaCompra fc = facturaCompraRepo.findById(facturaCompraId)
+                    .orElseThrow(() -> new RuntimeException("FacturaCompra not found with id: " + facturaCompraId));
+
+        }
         return ordenCompraRepo.save(orden);
     }
 

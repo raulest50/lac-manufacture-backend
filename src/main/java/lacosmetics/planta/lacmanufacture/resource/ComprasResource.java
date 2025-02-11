@@ -1,8 +1,9 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
-import lacosmetics.planta.lacmanufacture.model.compras.Compra;
-import lacosmetics.planta.lacmanufacture.model.compras.ItemCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.FacturaCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.dto.UpdateEstadoOrdenCompraRequest;
 import lacosmetics.planta.lacmanufacture.service.ComprasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,26 +26,26 @@ public class ComprasResource {
     private final ComprasService compraService;
 
     @PostMapping("/save")
-    public ResponseEntity<Compra> saveCompra(@RequestBody Compra compra) {
-        Compra savedCompra = compraService.saveCompra(compra);
-        return ResponseEntity.created(URI.create("/compras/" + savedCompra.getCompraId())).body(savedCompra);
+    public ResponseEntity<FacturaCompra> saveCompra(@RequestBody FacturaCompra facturaCompra) {
+        FacturaCompra savedFacturaCompra = compraService.saveCompra(facturaCompra);
+        return ResponseEntity.created(URI.create("/compras/" + savedFacturaCompra.getFacturaCompraId())).body(savedFacturaCompra);
     }
 
     @GetMapping("/byProveedorAndDate")
-    public ResponseEntity<Page<Compra>> getComprasByProveedorAndDate(
+    public ResponseEntity<Page<FacturaCompra>> getComprasByProveedorAndDate(
             @RequestParam int proveedorId,
             @RequestParam String date1,
             @RequestParam String date2,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        Page<Compra> compras = compraService.getComprasByProveedorAndDate(proveedorId, date1, date2, page, size);
+        Page<FacturaCompra> compras = compraService.getComprasByProveedorAndDate(proveedorId, date1, date2, page, size);
         return ResponseEntity.ok(compras);
     }
 
     @GetMapping("/{compraId}/items")
-    public ResponseEntity<List<ItemCompra>> getItemsCompra(@PathVariable int compraId) {
-        List<ItemCompra> items = compraService.getItemsByCompraId(compraId);
+    public ResponseEntity<List<ItemFacturaCompra>> getItemsCompra(@PathVariable int compraId) {
+        List<ItemFacturaCompra> items = compraService.getItemsByCompraId(compraId);
         return ResponseEntity.ok(items);
     }
 
@@ -85,10 +86,11 @@ public class ComprasResource {
     @PutMapping("/orden_compra/{ordenCompraId}/updateEstado")
     public ResponseEntity<OrdenCompra> updateEstadoOrdenCompra(
             @PathVariable int ordenCompraId,
-            @RequestBody Map<String, Integer> body
+            @RequestBody UpdateEstadoOrdenCompraRequest request
     ) {
-        int newEstado = body.get("newEstado");
-        OrdenCompra updated = compraService.updateEstadoOrdenCompra(ordenCompraId, newEstado);
+        OrdenCompra updated = compraService.updateEstadoOrdenCompra(ordenCompraId,
+                request.getNewEstado(),
+                request.getFacturaCompraId());
         return ResponseEntity.ok(updated);
     }
 

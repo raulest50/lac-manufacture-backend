@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "items_compra")
+@Table(name = "items_factura_compra")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemCompra {
+public class ItemFacturaCompra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,9 +22,9 @@ public class ItemCompra {
     private int itemCompraId;
 
     @ManyToOne
-    @JoinColumn(name = "compra_id")
+    @JoinColumn(name = "factura_compra_id")
     @JsonBackReference
-    private Compra compra;
+    private FacturaCompra facturaCompra;
 
     @ManyToOne
     @JoinColumn(name = "materia_prima_id")

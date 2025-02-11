@@ -14,17 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "compras")
+@Table(name = "facturas_compras")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Compra {
+public class FacturaCompra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "compra_id", unique = true, updatable = false, nullable = false)
-    private int compraId;
+    @Column(name = "factura_compra_id", unique = true, updatable = false, nullable = false)
+    private int facturaCompraId;
 
     @ManyToOne
     @JoinColumn(name = "proveedor_id", referencedColumnName = "id")
@@ -33,11 +33,27 @@ public class Compra {
     @CreationTimestamp
     private LocalDateTime fechaCompra;
 
-    // 0: abierta (open), 1: cerrada (closed)
-    private int estado;
-
-    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Note: mappedBy must match the field name in ItemFacturaCompra
+    @OneToMany(mappedBy = "facturaCompra", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<ItemCompra> itemsCompra = new ArrayList<>();
+    private List<ItemFacturaCompra> itemsCompra = new ArrayList<>();
 
+    private int subTotal;
+    private int iva19;
+    private int totalPagar;
+
+    /**
+     * 0: credito
+     * 1: contado
+     */
+    private String condicionPago;
+
+    // en días
+    private int plazoPago;
+
+    /**
+     * 0: pendiente pago
+     * 1: pagada
+     */
+    private int estadoPago;
 }

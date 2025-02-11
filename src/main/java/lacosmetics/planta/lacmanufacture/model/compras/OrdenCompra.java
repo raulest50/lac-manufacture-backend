@@ -1,6 +1,5 @@
 package lacosmetics.planta.lacmanufacture.model.compras;
 
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.Proveedor;
@@ -9,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +24,7 @@ public class OrdenCompra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(unique = true, updatable = false, nullable = false)
+    @Column(name = "orden_compra_id", unique = true, updatable = false, nullable = false)
     private int ordenCompraId;
 
     @CreationTimestamp
@@ -35,20 +36,17 @@ public class OrdenCompra {
     @JoinColumn(name = "proveedor_id", referencedColumnName = "id")
     private Proveedor proveedor;
 
-
     @OneToMany(mappedBy = "ordenCompra", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ItemOrdenCompra> itemsOrdenCompra;
 
     private int subTotal;
-
     private int iva19;
-
     private int totalPagar;
 
     /**
-     * 0:credito
-     * 1:contado
+     * 0: credito
+     * 1: contado
      */
     private String condicionPago;
 
@@ -58,11 +56,17 @@ public class OrdenCompra {
 
     /**
      * -1: cancelada
-     *  0: pendiente aprovacion proveedor
-     *  1: pendiente revision precio
+     *  0: pendiente aprobación proveedor
+     *  1: pendiente revisión precio
      *  2: pendiente conteo
-     *  3: cerrada con exito
+     *  3: cerrada con éxito
      */
     private int estado;
+
+    /**
+     * Plain column to store the FacturaCompra ID supplied by the provider.
+     */
+    @Column(name = "factura_compra_id")
+    private Integer facturaCompra;
 
 }
