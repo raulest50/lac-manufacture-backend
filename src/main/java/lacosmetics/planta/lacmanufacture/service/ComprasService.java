@@ -6,6 +6,7 @@ import lacosmetics.planta.lacmanufacture.model.compras.FacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.dto.UpdateEstadoOrdenCompraRequest;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
@@ -237,16 +238,12 @@ public class ComprasService {
         return ordenCompraRepo.save(orden);
     }
 
-    public OrdenCompra updateEstadoOrdenCompra(int ordenCompraId, int newEstado, Integer facturaCompraId) {
-        OrdenCompra orden = ordenCompraRepo.findById(ordenCompraId)
-                .orElseThrow(() -> new RuntimeException("OrdenCompra not found with id: " + ordenCompraId));
-        orden.setEstado(newEstado);
-        if (newEstado == 1 && facturaCompraId != null) {
-            // OLD: load FacturaCompra and set the association
-            FacturaCompra fc = facturaCompraRepo.findById(facturaCompraId)
-                    .orElseThrow(() -> new RuntimeException("FacturaCompra not found with id: " + facturaCompraId));
-
+    public OrdenCompra updateEstadoOrdenCompra(int ordenCompraId, UpdateEstadoOrdenCompraRequest ue) {
+        OrdenCompra orden = ordenCompraRepo.findById(ordenCompraId).orElseThrow(() -> new RuntimeException("OrdenCompra not found with id: " + ordenCompraId));
+        if(orden.getEstado() == 0 && ue.getNewEstado() == 1){
+            orden.setFacturaCompraId(ue.getFacturaCompraId());
         }
+        orden.setEstado(ue.getNewEstado());
         return ordenCompraRepo.save(orden);
     }
 

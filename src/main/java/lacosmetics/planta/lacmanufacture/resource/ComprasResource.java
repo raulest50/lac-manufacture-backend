@@ -88,9 +88,7 @@ public class ComprasResource {
             @PathVariable int ordenCompraId,
             @RequestBody UpdateEstadoOrdenCompraRequest request
     ) {
-        OrdenCompra updated = compraService.updateEstadoOrdenCompra(ordenCompraId,
-                request.getNewEstado(),
-                request.getFacturaCompraId());
+        OrdenCompra updated = compraService.updateEstadoOrdenCompra(ordenCompraId, request);
         return ResponseEntity.ok(updated);
     }
 

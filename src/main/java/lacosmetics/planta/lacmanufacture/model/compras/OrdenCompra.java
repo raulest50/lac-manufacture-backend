@@ -8,8 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -66,7 +65,6 @@ public class OrdenCompra {
     /**
      * Plain column to store the FacturaCompra ID supplied by the provider.
      */
-    @Column(name = "factura_compra_id")
-    private Integer facturaCompra;
+    private int facturaCompraId;
 
 }
