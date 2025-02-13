@@ -247,7 +247,7 @@ public class ComprasService {
         return ordenCompraRepo.save(orden);
     }
 
-    public OrdenCompra getOrdenCompraByFacturaId(int facturaCompraId) {
+    public OrdenCompra getOrdenCompraByFacturaId(Integer facturaCompraId) {
         return ordenCompraRepo.findByFacturaCompraId(facturaCompraId)
                 .orElseThrow(() -> new RuntimeException("OrdenCompra not found with FacturaCompraId: " + facturaCompraId));
     }

@@ -94,7 +94,7 @@ public class ComprasResource {
 
 
     @GetMapping("/orden_by_factura")
-    public ResponseEntity<OrdenCompra> getOrdenCompraByFacturaId(@RequestParam int facturaCompraId) {
+    public ResponseEntity<OrdenCompra> getOrdenCompraByFacturaId(@RequestParam Integer facturaCompraId) {
         try {
             OrdenCompra orden = compraService.getOrdenCompraByFacturaId(facturaCompraId);
             return ResponseEntity.ok(orden);

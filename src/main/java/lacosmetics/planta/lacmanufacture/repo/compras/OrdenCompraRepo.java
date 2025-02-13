@@ -18,6 +18,6 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompra, Integer> {
             Pageable pageable
     );
 
-    Optional<OrdenCompra> findByFacturaCompraId(int facturaCompraId);
+    Optional<OrdenCompra> findByFacturaCompraId(Integer facturaCompraId);
 
 }
