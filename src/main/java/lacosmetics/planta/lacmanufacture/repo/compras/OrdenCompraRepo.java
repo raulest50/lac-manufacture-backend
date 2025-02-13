@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrdenCompraRepo extends JpaRepository<OrdenCompra, Integer> {
 
@@ -16,5 +17,7 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompra, Integer> {
             List<Integer> estados,
             Pageable pageable
     );
+
+    Optional<OrdenCompra> findByFacturaCompraId(int facturaCompraId);
 
 }
