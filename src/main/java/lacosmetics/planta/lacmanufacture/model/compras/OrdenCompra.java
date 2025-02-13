@@ -65,6 +65,7 @@ public class OrdenCompra {
     /**
      * Plain column to store the FacturaCompra ID supplied by the provider.
      */
+    @Column(name = "factura_compra_id", unique = true, nullable = true)
     private int facturaCompraId;
 
 }
