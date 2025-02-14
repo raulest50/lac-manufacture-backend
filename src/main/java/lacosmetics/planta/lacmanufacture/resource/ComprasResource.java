@@ -93,12 +93,13 @@ public class ComprasResource {
     }
 
 
-    @GetMapping("/orden_by_factura")
-    public ResponseEntity<OrdenCompra> getOrdenCompraByFacturaId(@RequestParam Integer facturaCompraId) {
+    @GetMapping("/orden_by_id")
+    public ResponseEntity<OrdenCompra> getOrdenCompraByOrdenCompraId
+            (@RequestParam Integer ordenCompraId, @RequestParam(defaultValue = "2") int estado) {
         try {
-            OrdenCompra orden = compraService.getOrdenCompraByFacturaId(facturaCompraId);
+            OrdenCompra orden = compraService.getOrdenCompraByOrdenCompraIdAndEstado(ordenCompraId, estado);
             return ResponseEntity.ok(orden);
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
