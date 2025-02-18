@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;

@@ -7,6 +7,7 @@ import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.dto.UpdateEstadoOrdenCompraRequest;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
@@ -240,9 +241,6 @@ public class ComprasService {
 
     public OrdenCompra updateEstadoOrdenCompra(int ordenCompraId, UpdateEstadoOrdenCompraRequest ue) {
         OrdenCompra orden = ordenCompraRepo.findById(ordenCompraId).orElseThrow(() -> new RuntimeException("OrdenCompra not found with id: " + ordenCompraId));
-        if(orden.getEstado() == 0 && ue.getNewEstado() == 1){
-            orden.setFacturaCompraId(ue.getFacturaCompraId());
-        }
         orden.setEstado(ue.getNewEstado());
         return ordenCompraRepo.save(orden);
     }

@@ -1,8 +1,9 @@
-package lacosmetics.planta.lacmanufacture.model;
+package lacosmetics.planta.lacmanufacture.model.inventarios;
 
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lacosmetics.planta.lacmanufacture.model.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -58,10 +59,6 @@ public class Movimiento {
         public static final String PROD_INTERNO = "PROD_INTERNO";
         public static final String SALIDA_APP_VENTAS = "SALIDA_APP_VENTAS";
     }
-
-
-
-
 
 
 }

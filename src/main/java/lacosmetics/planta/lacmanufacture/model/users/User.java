@@ -22,6 +22,8 @@ public class User {
     @Column(unique = true) // username must be unique
     private String username;
 
+    private String nombreCompleto;
+
     private String password;  // in a real app, store an encoded (hashed) password
 
     @ManyToMany(fetch = FetchType.EAGER)

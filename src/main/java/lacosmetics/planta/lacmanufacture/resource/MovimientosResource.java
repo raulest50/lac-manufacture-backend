@@ -1,16 +1,13 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
 
-import lacosmetics.planta.lacmanufacture.model.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.MovimientosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/movimientos")
