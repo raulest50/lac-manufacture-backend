@@ -5,7 +5,7 @@ import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

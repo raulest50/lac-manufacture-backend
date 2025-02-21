@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.repo;
+package lacosmetics.planta.lacmanufacture.repo.inventarios;
 
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import org.springframework.data.domain.Page;

@@ -1,9 +1,11 @@
 package lacosmetics.planta.lacmanufacture.model.inventarios;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lacosmetics.planta.lacmanufacture.model.Insumo;
+import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,17 +41,15 @@ public class Movimiento {
     // VENTA, COMPRA, AVERIA, USO_INTERNO, PROD_INTERNO, OTROS
     private String tipo;
 
-    private String observaciones;
-
     @CreationTimestamp
     private LocalDateTime fechaMovimiento;
 
 
-    public Movimiento(Insumo insumo){
-        cantidad = insumo.getCantidadRequerida();
-        producto = insumo.getProducto();
-        tipo = CausaMovimiento.USO_INTERNO;
-    }
+    // Bidirectional relationship with OrdenCompra
+    @ManyToOne
+    @JoinColumn(name = "doc_ingreso_id")  // This column will hold the foreign key
+    @JsonBackReference
+    private DocumentoMovimiento documentoMovimiento;
 
 
     public static class CausaMovimiento {
@@ -58,6 +58,28 @@ public class Movimiento {
         public static final String USO_INTERNO = "USO_INTERNO";
         public static final String PROD_INTERNO = "PROD_INTERNO";
         public static final String SALIDA_APP_VENTAS = "SALIDA_APP_VENTAS";
+    }
+
+
+    /**
+     * Constructor para se usado preferiblemente solo por
+     * @param insumo
+     */
+    public Movimiento(Insumo insumo){
+        cantidad = insumo.getCantidadRequerida();
+        producto = insumo.getProducto();
+        tipo = CausaMovimiento.USO_INTERNO;
+    }
+
+    /**
+     * Constructor para ser usado preferiblemente solo por el Constructor DocumentoIngreso(OrdenCompra).
+     * usarlo en otras clases solo en casos donde realmente sea muy necesario o beneficioso.
+     * @param item
+     */
+    Movimiento(ItemOrdenCompra item){
+        this.cantidad = item.getCantidad();
+        this.producto = item.getMateriaPrima();
+        this.tipo = CausaMovimiento.COMPRA;
     }
 
 

@@ -11,7 +11,7 @@ import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.repo.MovimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
@@ -64,7 +64,7 @@ public class ProduccionService {
                 movimiento.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
                 movimiento.setProducto(insumo.getProducto());
                 movimiento.setTipo(Movimiento.CausaMovimiento.USO_INTERNO);
-                movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
+                //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
                 movimientoRepo.save(movimiento);
             }
 
@@ -223,7 +223,7 @@ public class ProduccionService {
         movimiento.setCantidad(ordenProduccion.getProducto().getCantidadUnidad()); // Adjust as per your business logic
         movimiento.setProducto(ordenProduccion.getProducto());
         movimiento.setTipo(Movimiento.CausaMovimiento.PROD_INTERNO);
-        movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
+        //movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
         movimientoRepo.save(movimiento);
 
         return convertToDto(ordenProduccion);

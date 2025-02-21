@@ -11,6 +11,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.*;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;

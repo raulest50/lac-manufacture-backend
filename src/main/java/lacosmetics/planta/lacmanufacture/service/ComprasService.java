@@ -15,6 +15,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.*;
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
@@ -96,7 +97,7 @@ public class ComprasService {
             movimiento.setCantidad(itemFacturaCompra.getCantidad()); // Positive quantity for stock increase
             movimiento.setProducto(itemFacturaCompra.getMateriaPrima());
             movimiento.setTipo(Movimiento.CausaMovimiento.COMPRA);
-            movimiento.setObservaciones("Compra ID: " + savedFacturaCompra.getFacturaCompraId());
+            //movimiento.setObservaciones("Compra ID: " + savedFacturaCompra.getFacturaCompraId());
             movimientoRepo.save(movimiento);
         }
 
