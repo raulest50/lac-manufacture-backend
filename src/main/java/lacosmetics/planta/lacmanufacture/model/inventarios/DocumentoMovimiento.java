@@ -31,8 +31,6 @@ import java.util.List;
         @JsonSubTypes.Type(value = DocIngresoAlmacenOC.class, name = "OC_IN"),
 })
 public abstract class DocumentoMovimiento {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "doc_ingreso_id", unique = true, updatable = false, nullable = false)
@@ -50,13 +48,11 @@ public abstract class DocumentoMovimiento {
      */
     private String urlDocSoporte;
 
-
     /**
      * nombre de la persona o usuario que crea el documento de ingreso
      */
     private String nombreResponsable;
 
-    private String Observaciones;
-
+    private String observaciones;
 
 }

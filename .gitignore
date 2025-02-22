@@ -40,3 +40,7 @@ out/
 # avoid tracking of sensible data, passwords, etc.
 *.properties
 src/main/resources/application.properties
+
+/data
+
+
