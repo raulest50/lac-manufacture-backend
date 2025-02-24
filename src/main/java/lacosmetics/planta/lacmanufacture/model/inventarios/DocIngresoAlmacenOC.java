@@ -4,6 +4,7 @@ package lacosmetics.planta.lacmanufacture.model.inventarios;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
 import lombok.NoArgsConstructor;
 
 import java.util.stream.Collectors;
@@ -30,6 +31,10 @@ public class DocIngresoAlmacenOC extends DocumentoMovimiento{
                         .collect(Collectors.toList())
         );
         this.setObservaciones(observaciones);
+    }
+
+    public DocIngresoAlmacenOC(DocIngresoDTA docIngresoDTA){
+        // i need to finish this constructor
     }
 
 
