@@ -52,6 +52,12 @@ public class ComprasService {
      *
      */
 
+
+    /**
+     * este metodo ya queda obsoleto y dbe cambiarse completamente, pero dejo este trabajo para despues
+     * @param facturaCompra
+     * @return
+     */
     @Transactional
     public FacturaCompra saveCompra(FacturaCompra facturaCompra) {
         // Verify that the Proveedor exists
@@ -62,31 +68,7 @@ public class ComprasService {
         facturaCompra.setProveedor(optionalProveedor.get());
 
         // For each ItemCompra, set the Compra reference, verify MateriaPrima, update costo ponderado, and cascade updates
-        for (ItemFacturaCompra itemFacturaCompra : facturaCompra.getItemsCompra()) {
-            itemFacturaCompra.setFacturaCompra(facturaCompra);
 
-            // Verify that the MateriaPrima exists
-            Optional<MateriaPrima> optionalMateriaPrima = materiaPrimaRepo.findById(itemFacturaCompra.getMateriaPrima().getProductoId());
-            if (!optionalMateriaPrima.isPresent()) {
-                throw new RuntimeException("MateriaPrima not found with ID: " + itemFacturaCompra.getMateriaPrima().getProductoId());
-            }
-            MateriaPrima materiaPrima = optionalMateriaPrima.get();
-            itemFacturaCompra.setMateriaPrima(materiaPrima);
-
-            // Retrieve current stock
-            Double currentStockOpt = movimientoRepo.findTotalCantidadByProductoId(materiaPrima.getProductoId());
-            int nuevoCosto = getNuevoCosto(itemFacturaCompra, currentStockOpt, materiaPrima);
-
-            // Update MateriaPrima's costo
-            materiaPrima.setCosto(nuevoCosto);
-
-            // Save the updated MateriaPrima
-            materiaPrimaRepo.save(materiaPrima);
-
-            // Update costs of dependent products if necessary
-            Set<Integer> updatedProductIds = new HashSet<>();
-            updateCostoCascade(materiaPrima, updatedProductIds);
-        }
 
         // Save the Compra (this will also save ItemCompra due to CascadeType.ALL)
         FacturaCompra savedFacturaCompra = facturaCompraRepo.save(facturaCompra);
@@ -104,78 +86,9 @@ public class ComprasService {
         return savedFacturaCompra;
     }
 
-    private static int getNuevoCosto(ItemFacturaCompra itemFacturaCompra, Double currentStockOpt, MateriaPrima materiaPrima) {
-        double currentStock = (currentStockOpt != null) ? currentStockOpt : 0;
 
-        // Retrieve current costo
-        double currentCosto = materiaPrima.getCosto();
 
-        // Incoming units and precioCompra from ItemCompra
-        double incomingUnits = itemFacturaCompra.getCantidad();
-        double incomingPrecio = itemFacturaCompra.getPrecioCompra();
 
-        // Calculate nuevo_costo
-        if (currentStock + incomingUnits == 0) {
-            throw new RuntimeException("Total stock cannot be zero after the compra for MateriaPrima ID: " + materiaPrima.getProductoId());
-        }
-
-        double nuevoCosto = ((currentCosto * currentStock) + (incomingPrecio * incomingUnits)) / (currentStock + incomingUnits);
-        return  (int) Math.ceil(nuevoCosto);
-    }
-
-    private void updateCostoCascade(Producto producto, Set<Integer> updatedProductIds) {
-        // If we've already updated this product, return to prevent infinite recursion
-        if (updatedProductIds.contains(producto.getProductoId())) {
-            return;
-        }
-        updatedProductIds.add(producto.getProductoId());
-
-        // Recalculate cost of the product if it's a SemiTerminado or Terminado
-        if (producto instanceof SemiTerminado) {
-            SemiTerminado semiTerminado = (SemiTerminado) producto;
-
-            // Recalculate cost
-            double newCosto = 0;
-            for (Insumo insumo : semiTerminado.getInsumos()) {
-                Producto insumoProducto = insumo.getProducto();
-                double insumoCosto = insumoProducto.getCosto();
-                double cantidadRequerida = insumo.getCantidadRequerida();
-                newCosto += insumoCosto * cantidadRequerida;
-            }
-            semiTerminado.setCosto((int) newCosto);
-
-            // Save updated SemiTerminado
-            semiTerminadoRepo.save(semiTerminado);
-
-        } else if (producto instanceof Terminado) {
-            Terminado terminado = (Terminado) producto;
-
-            // Recalculate cost
-            double newCosto = 0;
-            for (Insumo insumo : terminado.getInsumos()) {
-                Producto insumoProducto = insumo.getProducto();
-                double insumoCosto = insumoProducto.getCosto();
-                double cantidadRequerida = insumo.getCantidadRequerida();
-                newCosto += insumoCosto * cantidadRequerida;
-            }
-            terminado.setCosto((int) newCosto);
-
-            // Save updated Terminado
-            terminadoRepo.save(terminado);
-        }
-
-        // Now find any SemiTerminados that use this product as an Insumo
-        List<SemiTerminado> semiTerminados = semiTerminadoRepo.findByInsumos_Producto(producto);
-        for (SemiTerminado st : semiTerminados) {
-            updateCostoCascade(st, updatedProductIds);
-        }
-
-        // And find any Terminados that use this product as an Insumo
-        List<Terminado> terminados = terminadoRepo.findByInsumos_Producto(producto);
-        for (Terminado t : terminados) {
-            updateCostoCascade(t, updatedProductIds);
-        }
-    }
 
     public Page<FacturaCompra> getComprasByProveedorAndDate(int proveedorId, String date1, String date2, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

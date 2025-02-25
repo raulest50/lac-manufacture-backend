@@ -1,13 +1,16 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
 
+import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.MovimientosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/movimientos")
@@ -38,5 +41,14 @@ public class MovimientosResource {
         Page<Movimiento> movimientos = movimientoService.getMovimientosByProductoId(productoId, page, size);
         return ResponseEntity.ok().body(movimientos);
     }
+
+    @PostMapping(value = "/save_doc_ingreso_oc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createDocIngreso(
+            @RequestPart("docIngresoDTA") DocIngresoDTA docIngresoDTO,
+            @RequestPart("file") MultipartFile file) {
+        return movimientoService.createDocIngreso(docIngresoDTO, file);
+    }
+
+
 
 }

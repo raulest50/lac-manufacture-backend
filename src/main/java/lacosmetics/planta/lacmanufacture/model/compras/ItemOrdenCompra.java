@@ -39,6 +39,10 @@ public class ItemOrdenCompra {
     private int iva19;
     private int subTotal;
 
+    public int getPrecioUnitarioFinal(){
+        return precioUnitario + iva19;
+    }
+
     /**
      * 0: aun por revisar
      * 1: si concuerda

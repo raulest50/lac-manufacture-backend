@@ -33,8 +33,22 @@ public class DocIngresoAlmacenOC extends DocumentoMovimiento{
         this.setObservaciones(observaciones);
     }
 
-    public DocIngresoAlmacenOC(DocIngresoDTA docIngresoDTA){
-        // i need to finish this constructor
+    /**
+     * Constructor used when creating an entry based on the provided DTO.
+     * The urlDocSoporte will be set later after the file is saved.
+     * @param docIngresoDTO the incoming DTO containing order, user and observations.
+     */
+    public DocIngresoAlmacenOC(DocIngresoDTA docIngresoDTO) {
+        // If an order exists, create Movimiento items from its itemsOrdenCompra.
+        if (docIngresoDTO.getOrdenCompra() != null) {
+            this.setItemsDocIngreso(
+                    docIngresoDTO.getOrdenCompra().getItemsOrdenCompra()
+                            .stream().map(Movimiento::new)
+                            .collect(Collectors.toList())
+            );
+        }
+        this.setNombreResponsable(docIngresoDTO.getUser());
+        this.setObservaciones(docIngresoDTO.getObservaciones());
     }
 
 
