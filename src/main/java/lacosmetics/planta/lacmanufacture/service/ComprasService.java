@@ -1,20 +1,12 @@
 package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.*;
-import lacosmetics.planta.lacmanufacture.model.compras.FacturaCompra;
-import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
-import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
-import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.*;
 import lacosmetics.planta.lacmanufacture.model.dto.UpdateEstadoOrdenCompraRequest;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
-import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
-import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
-import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
-import lacosmetics.planta.lacmanufacture.repo.*;
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
+import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;

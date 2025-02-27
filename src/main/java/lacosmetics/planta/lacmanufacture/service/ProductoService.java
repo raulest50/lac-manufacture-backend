@@ -3,19 +3,15 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.Insumo;
+import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
-import lacosmetics.planta.lacmanufacture.repo.*;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
-import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
-import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
-import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
-import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,6 +100,20 @@ public class ProductoService {
         return semiTerminadoRepo.findAll(spec, PageRequest.of(page, size));
     }
 
+    public Page<Terminado> searchByName_T(String searchTerm, int page, int size) {
+        String[] searchTerms = searchTerm.toLowerCase().split(" ");
+        Specification<Terminado> spec = (root, query, criteriaBuilder) -> {
+            Predicate[] predicates = new Predicate[searchTerms.length];
+            for (int i = 0; i < searchTerms.length; i++) {
+                predicates[i] = criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("nombre")), "%" + searchTerms[i] + "%"
+                );
+            }
+            return criteriaBuilder.and(predicates);
+        };
+        return terminadoRepo.findAll(spec, PageRequest.of(page, size));
+    }
+
     public Optional<MateriaPrima> findMateriaPrimaByProductoId(int productoId) {
         return materiaPrimaRepo.findById(productoId);
     }
@@ -145,19 +155,15 @@ public class ProductoService {
         return new PageImpl<>(productStockDTOList, pageable, productosPage.getTotalElements());
     }
 
-
-
     public List<InsumoWithStockDTO> getInsumosWithStock(int productoId) {
         Optional<Producto> optionalProducto = productoRepo.findById(productoId);
         if (optionalProducto.isPresent()) {
             Producto producto = optionalProducto.get();
             List<Insumo> insumos = new ArrayList<>();
 
-            if (producto instanceof Terminado) {
-                Terminado terminado = (Terminado) producto;
+            if (producto instanceof Terminado terminado) {
                 insumos = terminado.getInsumos();
-            } else if (producto instanceof SemiTerminado) {
-                SemiTerminado semiTerminado = (SemiTerminado) producto;
+            } else if (producto instanceof SemiTerminado semiTerminado) {
                 insumos = semiTerminado.getInsumos();
             } else {
                 throw new RuntimeException("Producto must be Terminado or SemiTerminado");

@@ -3,9 +3,11 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
+import lacosmetics.planta.lacmanufacture.model.dto.productoservice.procdesigner.TargetDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
+import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.service.ProductoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,11 @@ import java.util.Optional;
 public class ProductoResource {
 
     private final ProductoService productoService;
+
+    /**
+     * Endpoints Para la codificacion de materias primas, semi y terminados
+     */
+
 
     @PostMapping("/save")
     public ResponseEntity<Producto> saveProducto(@RequestBody Producto producto){
@@ -90,6 +97,37 @@ public class ProductoResource {
     public ResponseEntity<List<InsumoWithStockDTO>> getInsumosWithStock(@PathVariable int productoId) {
         List<InsumoWithStockDTO> insumosWithStock = productoService.getInsumosWithStock(productoId);
         return ResponseEntity.ok().body(insumosWithStock);
+    }
+
+
+
+
+    /**
+     * Endpoints para Process Designer feature
+     */
+
+    // Endpoint to search for Terminados (targets)
+    @GetMapping("/search_terminados")
+    public ResponseEntity<Page<TargetDTO>> searchTerminados(
+            @RequestParam String searchTerm,
+            @RequestParam String tipoBusqueda,  // "NOMBRE" or "ID"
+            @RequestParam int page,
+            @RequestParam int size) {
+        Page<Terminado> pageResult = productoService.searchByName_T(searchTerm, page, size);
+        Page<TargetDTO> dtoPage = pageResult.map(TargetDTO::fromProducto);
+        return ResponseEntity.ok(dtoPage);
+    }
+
+    // Endpoint para buscar semiterminados para la feuture de process designer
+    @GetMapping("/search_semi_4pd")
+    public ResponseEntity<Page<TargetDTO>> searchSemiterminados(
+            @RequestParam String search,
+            @RequestParam String tipoBusqueda, // "NOMBRE" or "ID"
+            @RequestParam int page,
+            @RequestParam int size) {
+        Page<SemiTerminado> pageResult = productoService.searchByName_S(search, page, size);
+        Page<TargetDTO> dtoPage = pageResult.map(TargetDTO::fromProducto);
+        return ResponseEntity.ok(dtoPage);
     }
 
 }

@@ -2,8 +2,8 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.Proveedor;
-import lacosmetics.planta.lacmanufacture.repo.ProveedorRepo;
+import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
+import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

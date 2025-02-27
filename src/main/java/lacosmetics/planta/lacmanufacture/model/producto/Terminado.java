@@ -1,8 +1,7 @@
 package lacosmetics.planta.lacmanufacture.model.producto;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import lacosmetics.planta.lacmanufacture.model.Insumo;
+import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

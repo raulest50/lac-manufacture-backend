@@ -4,7 +4,7 @@ package lacosmetics.planta.lacmanufacture.model.inventarios;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lacosmetics.planta.lacmanufacture.model.Insumo;
+import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lombok.AllArgsConstructor;

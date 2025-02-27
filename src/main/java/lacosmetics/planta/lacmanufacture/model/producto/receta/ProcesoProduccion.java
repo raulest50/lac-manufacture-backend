@@ -1,7 +1,8 @@
-package lacosmetics.planta.lacmanufacture.model.producto;
+package lacosmetics.planta.lacmanufacture.model.producto.receta;
 
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name="procesos")
+@Table(name="procesos_produccion")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,9 +28,14 @@ public class ProcesoProduccion {
     private Producto producto;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "subproceso_id")
-    private List<SubProceso> subProcesos;
+    @JoinColumn(name = "proc_node_id")
+    private List<ProcesoNode> procesoNodes;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "mat_pri_id")
+    private List<MateriaPrimaNode> materiaPrimaNodesNodes;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private TargetNode targetNode;
 
 }

@@ -1,6 +1,6 @@
-package lacosmetics.planta.lacmanufacture.repo;
+package lacosmetics.planta.lacmanufacture.repo.compras;
 
-import lacosmetics.planta.lacmanufacture.model.Proveedor;
+import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -2,8 +2,7 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.Insumo;
-import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
+import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
@@ -29,11 +28,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;

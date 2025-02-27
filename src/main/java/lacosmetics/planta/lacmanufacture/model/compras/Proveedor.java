@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model;
+package lacosmetics.planta.lacmanufacture.model.compras;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
