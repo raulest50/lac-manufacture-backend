@@ -1,6 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
 
+import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.productoservice.procdesigner.TargetDTO;
@@ -14,8 +15,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
@@ -33,10 +37,34 @@ public class ProductoResource {
      */
 
 
+    /**
+     * possibly to be deprecated but not clear still. at least, mprima is not going to be
+     * persisted anylonger by this endpoint.
+     * @param producto
+     * @return
+     */
     @PostMapping("/save")
     public ResponseEntity<Producto> saveProducto(@RequestBody Producto producto){
         return ResponseEntity.created(URI.create("/productos/productoID")).body(productoService.saveProducto(producto));
     }
+
+
+    @PostMapping(value = "/save_mprima_v2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> saveMateriaPrimaV2(
+            @RequestPart("materiaPrima") MateriaPrima materiaPrima,
+            @RequestPart("file") MultipartFile file) {
+        try {
+            MateriaPrima savedMP = productoService.saveMateriaPrimaV2(materiaPrima, file);
+            // You can customize the URI as needed.
+            return ResponseEntity.created(URI.create("/productos/" + savedMP.getProductoId()))
+                    .body(savedMP);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error saving Materia Prima: " + e.getMessage());
+        }
+    }
+
+
 
     @GetMapping("/search_mprima")
     public ResponseEntity<Page<MateriaPrima>> search_mprima(

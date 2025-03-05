@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class DocIngresoAlmacenOC extends DocumentoMovimiento{
 
+    
+
     /**
      * Constructor used when registering a warehouse entry due to a purchase.
      *
@@ -42,9 +44,7 @@ public class DocIngresoAlmacenOC extends DocumentoMovimiento{
         // If an order exists, create Movimiento items from its itemsOrdenCompra.
         if (docIngresoDTO.getOrdenCompra() != null) {
             this.setItemsDocIngreso(
-                    docIngresoDTO.getOrdenCompra().getItemsOrdenCompra()
-                            .stream().map(Movimiento::new)
-                            .collect(Collectors.toList())
+                    docIngresoDTO.getOrdenCompra().getItemsOrdenCompra().stream().map(Movimiento::new).collect(Collectors.toList())
             );
         }
         this.setNombreResponsable(docIngresoDTO.getUser());

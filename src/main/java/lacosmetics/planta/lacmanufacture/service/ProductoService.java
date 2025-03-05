@@ -21,10 +21,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -56,6 +62,11 @@ public class ProductoService {
         return productoRepo.findAll(PageRequest.of(page, size));
     }
 
+    /**
+     * no longer to be used to save a materia prima
+     * @param producto
+     * @return
+     */
     @Transactional
     public Producto saveProducto(Producto producto){
         if (producto instanceof SemiTerminado semiTerminado) {
@@ -64,6 +75,41 @@ public class ProductoService {
             return productoRepo.save(producto);
         }
     }
+
+
+    /**
+     * the most up to date method to save materias primas, since saving their ficha tecnica
+     * is now implemented, so previous methods are deprecated for this purpose.
+     * @param materiaPrima
+     * @param file
+     * @return
+     */
+    @Transactional
+    public MateriaPrima saveMateriaPrimaV2(MateriaPrima materiaPrima, MultipartFile file) {
+        try {
+            // Define the folder where the ficha técnica PDFs will be stored.
+            Path folderPath = Paths.get("data", "fichas_tecnicas_mp");
+            Files.createDirectories(folderPath);  // Create the folder if it doesn't exist.
+
+            // Generate a unique filename using a UUID and the original filename.
+            String originalFilename = file.getOriginalFilename();
+            String newFilename = UUID.randomUUID().toString() + "_" + originalFilename;
+            Path filePath = folderPath.resolve(newFilename);
+
+            // Copy the file's content to the target folder.
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Set the file path (or URL) to the MateriaPrima entity.
+            materiaPrima.setFichaTecnicaUrl(filePath.toString());
+
+            // Persist the MateriaPrima entity.
+            return materiaPrimaRepo.save(materiaPrima);
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving MateriaPrima with ficha técnica: " + e.getMessage(), e);
+        }
+    }
+
+
 
     // para obtener todos los productos clase Termindo
     public Page<Terminado> getAllT(int page, int size) {
