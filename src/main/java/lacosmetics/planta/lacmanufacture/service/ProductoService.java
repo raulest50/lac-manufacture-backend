@@ -40,19 +40,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductoService {
 
-    @Autowired
     private final ProductoRepo productoRepo;
-
-    @Autowired
     private final MateriaPrimaRepo materiaPrimaRepo;
-
-    @Autowired
     private final SemiTerminadoRepo semiTerminadoRepo;
-
-    @Autowired
     private final TerminadoRepo terminadoRepo;
 
-    @Autowired
     private final InsumoRepo insumoRepository;
 
     private final MovimientoRepo movimientoRepo;
@@ -109,6 +101,46 @@ public class ProductoService {
         }
     }
 
+    public Page<Producto> searchP4RecetaV2(String searchTerm, String tipoBusqueda, String clasificacion, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        if ("ID".equalsIgnoreCase(tipoBusqueda)) {
+            try {
+                int id = Integer.parseInt(searchTerm);
+                if ("M".equalsIgnoreCase(clasificacion)) { // return MateriaPrima list
+                    Optional<MateriaPrima> mpOpt = materiaPrimaRepo.findById(id);
+                    List<MateriaPrima> result = mpOpt.map(List::of).orElse(List.of());
+                    List<Producto> productos = new ArrayList<>();
+                    productos.addAll(result);
+                    return new PageImpl<>(productos, pageable, productos.size());
+                } else if ("S".equalsIgnoreCase(clasificacion)) {
+                    Optional<SemiTerminado> stOpt = semiTerminadoRepo.findById(id);
+                    List<SemiTerminado> result = stOpt.map(List::of).orElse(List.of());
+                    List<Producto> productos = new ArrayList<>();
+                    productos.addAll(result);
+                    return new PageImpl<>(productos, pageable, productos.size());
+                }
+            } catch (NumberFormatException e) {
+                return Page.empty(pageable);
+            }
+        } else { // Name search with partial matching
+            if ("M".equalsIgnoreCase(clasificacion)) {
+                Specification<MateriaPrima> spec = (root, query, cb) ->
+                        cb.like(cb.lower(root.get("nombre")), "%" + searchTerm.toLowerCase() + "%");
+                Page<MateriaPrima> result = materiaPrimaRepo.findAll(spec, pageable);
+                List<Producto> productos = new ArrayList<>();
+                productos.addAll(result.getContent());
+                return new PageImpl<>(productos, pageable, result.getTotalElements());
+            } else if ("S".equalsIgnoreCase(clasificacion)) {
+                Specification<SemiTerminado> spec = (root, query, cb) ->
+                        cb.like(cb.lower(root.get("nombre")), "%" + searchTerm.toLowerCase() + "%");
+                Page<SemiTerminado> result = semiTerminadoRepo.findAll(spec, pageable);
+                List<Producto> productos = new ArrayList<>();
+                productos.addAll(result.getContent());
+                return new PageImpl<>(productos, pageable, result.getTotalElements());
+            }
+        }
+        return Page.empty(pageable);
+    }
 
 
     // para obtener todos los productos clase Termindo

@@ -65,6 +65,17 @@ public class ProductoResource {
     }
 
 
+    @GetMapping("/search_p4_receta_v2")
+    public ResponseEntity<Page<Producto>> searchP4RecetaV2(
+            @RequestParam String searchTerm,
+            @RequestParam String tipoBusqueda,   // "NOMBRE" or "ID"
+            @RequestParam String clasificacion,  // "Terminado" or "Semiterminado"
+            @RequestParam int page,
+            @RequestParam int size) {
+        Page<Producto> result = productoService.searchP4RecetaV2(searchTerm, tipoBusqueda, clasificacion, page, size);
+        return ResponseEntity.ok(result);
+    }
+
 
     @GetMapping("/search_mprima")
     public ResponseEntity<Page<MateriaPrima>> search_mprima(
