@@ -169,4 +169,22 @@ public class ProductoResource {
         return ResponseEntity.ok(dtoPage);
     }
 
+
+    /**
+     * para hacer carga masiva desde arhcivo de excel
+     * @param file
+     * @return
+     */
+    @PostMapping(value = "/bulk_upload_excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> bulkUploadExcel(@RequestPart("file") MultipartFile file) {
+        try {
+            int count = productoService.bulkUploadMateriasPrimas(file);
+            return ResponseEntity.ok("Successfully uploaded " + count + " records.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error processing file: " + e.getMessage());
+        }
+    }
+
+
 }

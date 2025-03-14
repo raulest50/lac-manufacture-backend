@@ -49,5 +49,14 @@ public class Proveedor {
     @CreationTimestamp
     private LocalDateTime fechaRegistro;
 
+    /**
+     * 1: Servicios Operativos
+     * 2: Materias Primas
+     * 3: Materiales de Empaque
+     * 4: Servicios Administrativos
+     * 5: Equipos y Otros Servicios
+     */
+    private int tipoProveedor;
+
 
 }

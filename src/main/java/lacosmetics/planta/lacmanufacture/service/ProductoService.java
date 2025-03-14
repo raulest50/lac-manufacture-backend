@@ -268,4 +268,72 @@ public class ProductoService {
         }
     }
 
+
+    /**
+     * para hacer carga masiva desde archivo de excel
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    @Transactional
+    public int bulkUploadMateriasPrimas(MultipartFile file) throws Exception {
+        int insertedCount = 0;
+        // List of sheet names of interest
+        List<String> sheetNames = Arrays.asList("MATERIA PRIMA", "FRAGANCIA", "ETIQUETAS");
+
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            for (String sheetName : sheetNames) {
+                Sheet sheet = workbook.getSheet(sheetName);
+                if (sheet == null) {
+                    continue; // If the sheet does not exist, skip it
+                }
+                // Determine tipoMateriaPrima: 1 for "MATERIA PRIMA" and "FRAGANCIA", 2 for "ETIQUETAS"
+                int tipoMateria = (sheetName.equalsIgnoreCase("MATERIA PRIMA") || sheetName.equalsIgnoreCase("FRAGANCIA")) ? 1 : 2;
+
+                // Iterate over rows, starting at row 1 (skipping header)
+                for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                    Row row = sheet.getRow(i);
+                    if (row == null) continue;
+
+                    Cell cellName = row.getCell(0);
+                    Cell cellTipoUnidad = row.getCell(1);
+                    Cell cellProductoId = row.getCell(2);
+
+                    if (cellName == null || cellTipoUnidad == null || cellProductoId == null) continue;
+
+                    // Read cell values (trim spaces)
+                    String nombre = cellName.getStringCellValue().trim();
+                    String tipoUnidades = cellTipoUnidad.getStringCellValue().trim();
+                    int productoId;
+                    // Read the product ID as numeric (you might add more validation if needed)
+                    try {
+                        productoId = (int) cellProductoId.getNumericCellValue();
+                    } catch (Exception ex) {
+                        continue; // Skip rows with invalid product id
+                    }
+
+                    // Check if product already exists (skip if exists)
+                    if (productoRepo.existsById(productoId)) {
+                        continue;
+                    }
+
+                    // Create and populate a new MateriaPrima instance
+                    MateriaPrima mp = new MateriaPrima();
+                    mp.setProductoId(productoId);
+                    mp.setNombre(nombre);
+                    mp.setTipoUnidades(tipoUnidades);
+                    mp.setCosto(0);
+                    mp.setObservaciones("");
+                    mp.setCantidadUnidad(1);
+                    mp.setTipoMateriaPrima(tipoMateria);
+                    // fechaCreacion is automatically set by @CreationTimestamp
+
+                    materiaPrimaRepo.save(mp);
+                    insertedCount++;
+                }
+            }
+        }
+        return insertedCount;
+    }
+
 }

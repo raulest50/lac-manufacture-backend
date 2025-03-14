@@ -17,4 +17,11 @@ public class MateriaPrima extends Producto {
      */
     private String fichaTecnicaUrl;
 
+    /**
+     * 1: Materia Prima
+     * 2: Material de Empaque
+     */
+    private int tipoMateriaPrima;
+
+
 }
