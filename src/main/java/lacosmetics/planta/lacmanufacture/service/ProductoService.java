@@ -14,7 +14,7 @@ import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -27,11 +27,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+
 
 
 @Service
@@ -335,5 +334,58 @@ public class ProductoService {
         }
         return insertedCount;
     }
+
+
+
+
+    public Page<Producto> consultaProductos(String search, List<String> categories, int page, int size) {
+        Specification<Producto> spec = Specification.where(null);
+
+        // Use partial matching on 'nombre'
+        if (search != null && !search.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("nombre")), "%" + search.toLowerCase() + "%")
+            );
+        }
+
+        // Map checkbox selections to product type and subcategory conditions
+        if (categories != null && !categories.isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                Predicate categoryPredicate = cb.disjunction();
+                if (categories.contains("materia prima")) {
+                    // For MateriaPrima with tipoMateriaPrima = 1
+                    categoryPredicate = cb.or(categoryPredicate,
+                            cb.and(
+                                    cb.equal(root.type(), MateriaPrima.class),
+                                    cb.equal(cb.treat(root, MateriaPrima.class).get("tipoMateriaPrima"), 1)
+                            )
+                    );
+                }
+                if (categories.contains("material empaque")) {
+                    // For MateriaPrima with tipoMateriaPrima = 2
+                    categoryPredicate = cb.or(categoryPredicate,
+                            cb.and(
+                                    cb.equal(root.type(), MateriaPrima.class),
+                                    cb.equal(cb.treat(root, MateriaPrima.class).get("tipoMateriaPrima"), 2)
+                            )
+                    );
+                }
+                if (categories.contains("semiterminado")) {
+                    categoryPredicate = cb.or(categoryPredicate,
+                            cb.equal(root.type(), SemiTerminado.class)
+                    );
+                }
+                if (categories.contains("terminado")) {
+                    categoryPredicate = cb.or(categoryPredicate,
+                            cb.equal(root.type(), Terminado.class)
+                    );
+                }
+                return categoryPredicate;
+            });
+        }
+
+        return productoRepo.findAll(spec, PageRequest.of(page, size));
+    }
+
 
 }

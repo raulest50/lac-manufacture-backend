@@ -4,6 +4,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
+import lacosmetics.planta.lacmanufacture.model.dto.productoservice.ProductoSearchCriteria;
 import lacosmetics.planta.lacmanufacture.model.dto.productoservice.procdesigner.TargetDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
@@ -184,6 +185,20 @@ public class ProductoResource {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error processing file: " + e.getMessage());
         }
+    }
+
+
+    /**
+     * para usar en el tab de Consulta de productos. aca se filtra solamente por cateforias:
+     * terminadoo, semiterminado, materia prima o material de empaque
+     * @param criteria
+     * @return
+     */
+    @PostMapping("/consulta1")
+    public Page<Producto> searchProductos(@RequestBody ProductoSearchCriteria criteria) {
+        int page = criteria.getPage() != null ? criteria.getPage() : 0;
+        int size = criteria.getSize() != null ? criteria.getSize() : 10;
+        return productoService.consultaProductos(criteria.getSearch(), criteria.getCategories(), page, size);
     }
 
 
