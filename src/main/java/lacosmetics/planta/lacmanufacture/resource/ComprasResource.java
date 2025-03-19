@@ -25,12 +25,6 @@ public class ComprasResource {
 
     private final ComprasService compraService;
 
-    @PostMapping("/save")
-    public ResponseEntity<FacturaCompra> saveCompra(@RequestBody FacturaCompra facturaCompra) {
-        FacturaCompra savedFacturaCompra = compraService.saveCompra(facturaCompra);
-        return ResponseEntity.created(URI.create("/compras/" + savedFacturaCompra.getFacturaCompraId())).body(savedFacturaCompra);
-    }
-
     @GetMapping("/byProveedorAndDate")
     public ResponseEntity<Page<FacturaCompra>> getComprasByProveedorAndDate(
             @RequestParam int proveedorId,

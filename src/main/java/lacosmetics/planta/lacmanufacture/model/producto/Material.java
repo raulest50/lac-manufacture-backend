@@ -9,7 +9,7 @@ import lombok.Setter;
 @DiscriminatorValue("M")
 @Setter
 @Getter
-public class MateriaPrima extends Producto {
+public class Material extends Producto { // (ROH)
 
     /**
      * para guardar la ruta en data/fichas_tecnicas/
@@ -21,7 +21,7 @@ public class MateriaPrima extends Producto {
      * 1: Materia Prima
      * 2: Material de Empaque
      */
-    private int tipoMateriaPrima;
+    private int tipoMaterial;
 
 
 }

@@ -1,12 +1,11 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
 
-import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.productoservice.ProductoSearchCriteria;
 import lacosmetics.planta.lacmanufacture.model.dto.productoservice.procdesigner.TargetDTO;
-import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
+import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
@@ -52,10 +51,10 @@ public class ProductoResource {
 
     @PostMapping(value = "/save_mprima_v2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> saveMateriaPrimaV2(
-            @RequestPart("materiaPrima") MateriaPrima materiaPrima,
+            @RequestPart("materiaPrima") Material material,
             @RequestPart("file") MultipartFile file) {
         try {
-            MateriaPrima savedMP = productoService.saveMateriaPrimaV2(materiaPrima, file);
+            Material savedMP = productoService.saveMateriaPrimaV2(material, file);
             // You can customize the URI as needed.
             return ResponseEntity.created(URI.create("/productos/" + savedMP.getProductoId()))
                     .body(savedMP);
@@ -79,18 +78,18 @@ public class ProductoResource {
 
 
     @GetMapping("/search_mprima")
-    public ResponseEntity<Page<MateriaPrima>> search_mprima(
+    public ResponseEntity<Page<Material>> search_mprima(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String search,
             @RequestParam String tipoBusqueda)
     {
         if(tipoBusqueda.equals("ID")){
-            Optional<MateriaPrima> materiaPrimaOptional = productoService.findMateriaPrimaByProductoId(Integer.parseInt(search));
+            Optional<Material> materiaPrimaOptional = productoService.findMateriaPrimaByProductoId(Integer.parseInt(search));
             if (materiaPrimaOptional.isPresent()) {
-                List<MateriaPrima> materiaPrimaList = List.of(materiaPrimaOptional.get());
+                List<Material> materialList = List.of(materiaPrimaOptional.get());
                 Pageable pageable = PageRequest.of(page, size);
-                return ResponseEntity.ok().body(new PageImpl<>(materiaPrimaList, pageable, 1));
+                return ResponseEntity.ok().body(new PageImpl<>(materialList, pageable, 1));
             } else {
                 return ResponseEntity.ok().body(new PageImpl<>(List.of(), PageRequest.of(page, size), 0));
             }

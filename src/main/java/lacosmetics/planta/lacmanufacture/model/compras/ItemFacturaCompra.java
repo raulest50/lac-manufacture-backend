@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.compras;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
+import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,7 +28,7 @@ public class ItemFacturaCompra {
 
     @ManyToOne
     @JoinColumn(name = "materia_prima_id")
-    private MateriaPrima materiaPrima;
+    private Material material;
 
     private double cantidad;
 

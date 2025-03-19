@@ -45,42 +45,6 @@ public class ComprasService {
      */
 
 
-    /**
-     * este metodo ya queda obsoleto y dbe cambiarse completamente, pero dejo este trabajo para despues
-     * @param facturaCompra
-     * @return
-     */
-    @Transactional
-    public FacturaCompra saveCompra(FacturaCompra facturaCompra) {
-        // Verify that the Proveedor exists
-        Optional<Proveedor> optionalProveedor = proveedorRepo.findById(facturaCompra.getProveedor().getId());
-        if (!optionalProveedor.isPresent()) {
-            throw new RuntimeException("Proveedor not found with ID: " + facturaCompra.getProveedor().getId());
-        }
-        facturaCompra.setProveedor(optionalProveedor.get());
-
-        // For each ItemCompra, set the Compra reference, verify MateriaPrima, update costo ponderado, and cascade updates
-
-
-        // Save the Compra (this will also save ItemCompra due to CascadeType.ALL)
-        FacturaCompra savedFacturaCompra = facturaCompraRepo.save(facturaCompra);
-
-        // Create Movimiento entries for each ItemCompra
-        for (ItemFacturaCompra itemFacturaCompra : savedFacturaCompra.getItemsCompra()) {
-            Movimiento movimiento = new Movimiento();
-            movimiento.setCantidad(itemFacturaCompra.getCantidad()); // Positive quantity for stock increase
-            movimiento.setProducto(itemFacturaCompra.getMateriaPrima());
-            movimiento.setTipo(Movimiento.CausaMovimiento.COMPRA);
-            //movimiento.setObservaciones("Compra ID: " + savedFacturaCompra.getFacturaCompraId());
-            movimientoRepo.save(movimiento);
-        }
-
-        return savedFacturaCompra;
-    }
-
-
-
-
 
     public Page<FacturaCompra> getComprasByProveedorAndDate(int proveedorId, String date1, String date2, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -101,9 +65,6 @@ public class ComprasService {
      * Ordenes de Compra
      *
      */
-
-
-
     public OrdenCompra saveOrdenCompra(OrdenCompra ordenCompra) {
         // Verify the Proveedor exists
         Optional<Proveedor> optProveedor = proveedorRepo.findById(ordenCompra.getProveedor().getId());

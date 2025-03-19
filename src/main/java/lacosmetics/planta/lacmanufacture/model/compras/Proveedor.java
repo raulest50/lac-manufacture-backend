@@ -6,8 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "proveedores")
@@ -19,10 +23,9 @@ public class Proveedor {
 
     @Id
     @Column(name = "id", unique = true, updatable = false, nullable = false)
-    private int id; //  Nit
+    private String id; // Nit
 
     private String nombre;
-
     private String direccion;
 
     /**
@@ -33,30 +36,44 @@ public class Proveedor {
     private int regimenTributario;
 
     private String ciudad;
-
     private String departamento;
 
-    private String nombreContacto;
-
-    private String telefono;
-
-    private String email;
+    /**
+     * Instead of a single contacto, we store a list of JSON objects.
+     * Each object can represent a contact with its own attributes.
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<Map<String, Object>> contactos;
 
     private String url;
-
     private String observacion;
 
     @CreationTimestamp
     private LocalDateTime fechaRegistro;
 
     /**
-     * 1: Servicios Operativos
-     * 2: Materias Primas
-     * 3: Materiales de Empaque
-     * 4: Servicios Administrativos
-     * 5: Equipos y Otros Servicios
+     * 0: credito
+     * 1: contado
+     * condicion de pago is persisted both in orden compra and proveedor. this
+     * way it is possible to change condicion de pago in time and also keeo a history
+     * of condiciones de pago over time in case it is changed.
      */
-    private int tipoProveedor;
+    private String condicionPago;
 
+    /**
+     * categorias:
+     * 0: Servicios Operativos
+     * 1: Materias Primas
+     * 2: Materiales de Empaque
+     * 3: Servicios Administrativos
+     * 4: Equipos y Otros Servicios
+     */
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "categorias", columnDefinition = "integer[]")
+    private int[] categorias;
+
+    private String rutUrl;
+    private String camaraUrl;
 
 }

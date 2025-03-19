@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
         property = "tipo_producto"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = MateriaPrima.class, name = "M"),
+        @JsonSubTypes.Type(value = Material.class, name = "M"),
         @JsonSubTypes.Type(value = SemiTerminado.class, name = "S"),
         @JsonSubTypes.Type(value = Terminado.class, name = "T")
 })
@@ -61,7 +61,7 @@ public abstract class Producto {
     private double cantidadUnidad;
 
     public String getTipo_producto() {
-        if (this instanceof MateriaPrima) {
+        if (this instanceof Material) {
             return "M";
         } else if (this instanceof SemiTerminado) {
             return "S";

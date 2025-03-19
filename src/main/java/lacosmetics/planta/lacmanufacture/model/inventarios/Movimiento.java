@@ -78,7 +78,7 @@ public class Movimiento {
      */
     Movimiento(ItemOrdenCompra item){
         this.cantidad = item.getCantidad();
-        this.producto = item.getMateriaPrima();
+        this.producto = item.getMaterial();
         this.tipo = CausaMovimiento.COMPRA;
     }
 

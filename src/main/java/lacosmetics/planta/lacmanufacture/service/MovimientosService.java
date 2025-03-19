@@ -9,7 +9,7 @@ import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.DocIngresoAlmacenOC;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
-import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
+import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
@@ -172,26 +172,26 @@ public class MovimientosService {
                 itemOrdenCompra.setOrdenCompra(oc);
 
                 // Verify that the MateriaPrima exists
-                Optional<MateriaPrima> optionalMateriaPrima = materiaPrimaRepo.findById(itemOrdenCompra.getMateriaPrima().getProductoId());
+                Optional<Material> optionalMateriaPrima = materiaPrimaRepo.findById(itemOrdenCompra.getMaterial().getProductoId());
                 if (!optionalMateriaPrima.isPresent()) {
-                    throw new RuntimeException("MateriaPrima not found with ID: " + itemOrdenCompra.getMateriaPrima().getProductoId());
+                    throw new RuntimeException("MateriaPrima not found with ID: " + itemOrdenCompra.getMaterial().getProductoId());
                 }
-                MateriaPrima materiaPrima = optionalMateriaPrima.get();
-                itemOrdenCompra.setMateriaPrima(materiaPrima);
+                Material material = optionalMateriaPrima.get();
+                itemOrdenCompra.setMaterial(material);
 
                 // Retrieve current stock
-                Double currentStockOpt = movimientoRepo.findTotalCantidadByProductoId(materiaPrima.getProductoId());
-                int nuevoCosto = getNuevoCosto(itemOrdenCompra, currentStockOpt, materiaPrima);
+                Double currentStockOpt = movimientoRepo.findTotalCantidadByProductoId(material.getProductoId());
+                int nuevoCosto = getNuevoCosto(itemOrdenCompra, currentStockOpt, material);
 
                 // Update MateriaPrima's costo
-                materiaPrima.setCosto(nuevoCosto);
+                material.setCosto(nuevoCosto);
 
                 // Save the updated MateriaPrima
-                materiaPrimaRepo.save(materiaPrima);
+                materiaPrimaRepo.save(material);
 
                 // Update costs of dependent products if necessary
                 Set<Integer> updatedProductIds = new HashSet<>();
-                updateCostoCascade(materiaPrima, updatedProductIds);
+                updateCostoCascade(material, updatedProductIds);
             }
 
 
@@ -260,11 +260,11 @@ public class MovimientosService {
     }
 
 
-    private static int getNuevoCosto(ItemOrdenCompra itemOrdenCompra, Double currentStockOpt, MateriaPrima materiaPrima) {
+    private static int getNuevoCosto(ItemOrdenCompra itemOrdenCompra, Double currentStockOpt, Material material) {
         double currentStock = (currentStockOpt != null) ? currentStockOpt : 0;
 
         // Retrieve current costo
-        double currentCosto = materiaPrima.getCosto();
+        double currentCosto = material.getCosto();
 
         // Incoming units and precioCompra from ItemCompra
         double incomingUnits = itemOrdenCompra.getCantidad();
@@ -272,7 +272,7 @@ public class MovimientosService {
 
         // Calculate nuevo_costo
         if (currentStock + incomingUnits == 0) {
-            throw new RuntimeException("Total stock cannot be zero after the compra for MateriaPrima ID: " + materiaPrima.getProductoId());
+            throw new RuntimeException("Total stock cannot be zero after the compra for MateriaPrima ID: " + material.getProductoId());
         }
 
         double nuevoCosto = ((currentCosto * currentStock) + (incomingPrecio * incomingUnits)) / (currentStock + incomingUnits);

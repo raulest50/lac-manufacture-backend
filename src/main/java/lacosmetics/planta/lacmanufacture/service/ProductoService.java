@@ -6,7 +6,7 @@ import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
-import lacosmetics.planta.lacmanufacture.model.producto.MateriaPrima;
+import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
@@ -71,12 +71,12 @@ public class ProductoService {
     /**
      * the most up to date method to save materias primas, since saving their ficha tecnica
      * is now implemented, so previous methods are deprecated for this purpose.
-     * @param materiaPrima
+     * @param material
      * @param file
      * @return
      */
     @Transactional
-    public MateriaPrima saveMateriaPrimaV2(MateriaPrima materiaPrima, MultipartFile file) {
+    public Material saveMateriaPrimaV2(Material material, MultipartFile file) {
         try {
             // Define the folder where the ficha técnica PDFs will be stored.
             Path folderPath = Paths.get("data", "fichas_tecnicas_mp");
@@ -91,10 +91,10 @@ public class ProductoService {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // Set the file path (or URL) to the MateriaPrima entity.
-            materiaPrima.setFichaTecnicaUrl(filePath.toString());
+            material.setFichaTecnicaUrl(filePath.toString());
 
             // Persist the MateriaPrima entity.
-            return materiaPrimaRepo.save(materiaPrima);
+            return materiaPrimaRepo.save(material);
         } catch (Exception e) {
             throw new RuntimeException("Error saving MateriaPrima with ficha técnica: " + e.getMessage(), e);
         }
@@ -106,8 +106,8 @@ public class ProductoService {
             try {
                 int id = Integer.parseInt(searchTerm);
                 if ("M".equalsIgnoreCase(clasificacion)) { // return MateriaPrima list
-                    Optional<MateriaPrima> mpOpt = materiaPrimaRepo.findById(id);
-                    List<MateriaPrima> result = mpOpt.map(List::of).orElse(List.of());
+                    Optional<Material> mpOpt = materiaPrimaRepo.findById(id);
+                    List<Material> result = mpOpt.map(List::of).orElse(List.of());
                     List<Producto> productos = new ArrayList<>();
                     productos.addAll(result);
                     return new PageImpl<>(productos, pageable, productos.size());
@@ -123,9 +123,9 @@ public class ProductoService {
             }
         } else { // Name search with partial matching
             if ("M".equalsIgnoreCase(clasificacion)) {
-                Specification<MateriaPrima> spec = (root, query, cb) ->
+                Specification<Material> spec = (root, query, cb) ->
                         cb.like(cb.lower(root.get("nombre")), "%" + searchTerm.toLowerCase() + "%");
-                Page<MateriaPrima> result = materiaPrimaRepo.findAll(spec, pageable);
+                Page<Material> result = materiaPrimaRepo.findAll(spec, pageable);
                 List<Producto> productos = new ArrayList<>();
                 productos.addAll(result.getContent());
                 return new PageImpl<>(productos, pageable, result.getTotalElements());
@@ -147,9 +147,9 @@ public class ProductoService {
         return terminadoRepo.findAll(PageRequest.of(page, size));
     }
 
-    public Page<MateriaPrima> searchByName_MP(String searchTerm, int page, int size){
+    public Page<Material> searchByName_MP(String searchTerm, int page, int size){
         String[] searchTerms = searchTerm.toLowerCase().split(" ");
-        Specification<MateriaPrima> spec = (root, query, criteriaBuilder) -> {
+        Specification<Material> spec = (root, query, criteriaBuilder) -> {
             Predicate[] predicates = new Predicate[searchTerms.length];
 
             for (int i = 0; i < searchTerms.length; i++) {
@@ -191,7 +191,7 @@ public class ProductoService {
         return terminadoRepo.findAll(spec, PageRequest.of(page, size));
     }
 
-    public Optional<MateriaPrima> findMateriaPrimaByProductoId(int productoId) {
+    public Optional<Material> findMateriaPrimaByProductoId(int productoId) {
         return materiaPrimaRepo.findById(productoId);
     }
     
@@ -317,14 +317,14 @@ public class ProductoService {
                     }
 
                     // Create and populate a new MateriaPrima instance
-                    MateriaPrima mp = new MateriaPrima();
+                    Material mp = new Material();
                     mp.setProductoId(productoId);
                     mp.setNombre(nombre);
                     mp.setTipoUnidades(tipoUnidades);
                     mp.setCosto(0);
                     mp.setObservaciones("");
                     mp.setCantidadUnidad(1);
-                    mp.setTipoMateriaPrima(tipoMateria);
+                    mp.setTipoMaterial(tipoMateria);
                     // fechaCreacion is automatically set by @CreationTimestamp
 
                     materiaPrimaRepo.save(mp);
@@ -356,8 +356,8 @@ public class ProductoService {
                     // For MateriaPrima with tipoMateriaPrima = 1
                     categoryPredicate = cb.or(categoryPredicate,
                             cb.and(
-                                    cb.equal(root.type(), MateriaPrima.class),
-                                    cb.equal(cb.treat(root, MateriaPrima.class).get("tipoMateriaPrima"), 1)
+                                    cb.equal(root.type(), Material.class),
+                                    cb.equal(cb.treat(root, Material.class).get("tipoMateriaPrima"), 1)
                             )
                     );
                 }
@@ -365,8 +365,8 @@ public class ProductoService {
                     // For MateriaPrima with tipoMateriaPrima = 2
                     categoryPredicate = cb.or(categoryPredicate,
                             cb.and(
-                                    cb.equal(root.type(), MateriaPrima.class),
-                                    cb.equal(cb.treat(root, MateriaPrima.class).get("tipoMateriaPrima"), 2)
+                                    cb.equal(root.type(), Material.class),
+                                    cb.equal(cb.treat(root, Material.class).get("tipoMateriaPrima"), 2)
                             )
                     );
                 }

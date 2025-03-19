@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ProveedorRepo extends JpaRepository<Proveedor, Integer> {
+public interface ProveedorRepo extends JpaRepository<Proveedor, String> {
 
     List<Proveedor> findByNombreContainingIgnoreCase(String nombre);
 
