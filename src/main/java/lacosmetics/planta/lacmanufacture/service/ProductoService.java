@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class ProductoService {
 
     private final ProductoRepo productoRepo;
-    private final MateriaPrimaRepo materiaPrimaRepo;
+    private final MaterialRepo materialRepo;
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
 
@@ -94,7 +94,7 @@ public class ProductoService {
             material.setFichaTecnicaUrl(filePath.toString());
 
             // Persist the MateriaPrima entity.
-            return materiaPrimaRepo.save(material);
+            return materialRepo.save(material);
         } catch (Exception e) {
             throw new RuntimeException("Error saving MateriaPrima with ficha técnica: " + e.getMessage(), e);
         }
@@ -106,7 +106,7 @@ public class ProductoService {
             try {
                 int id = Integer.parseInt(searchTerm);
                 if ("M".equalsIgnoreCase(clasificacion)) { // return MateriaPrima list
-                    Optional<Material> mpOpt = materiaPrimaRepo.findById(id);
+                    Optional<Material> mpOpt = materialRepo.findById(id);
                     List<Material> result = mpOpt.map(List::of).orElse(List.of());
                     List<Producto> productos = new ArrayList<>();
                     productos.addAll(result);
@@ -125,7 +125,7 @@ public class ProductoService {
             if ("M".equalsIgnoreCase(clasificacion)) {
                 Specification<Material> spec = (root, query, cb) ->
                         cb.like(cb.lower(root.get("nombre")), "%" + searchTerm.toLowerCase() + "%");
-                Page<Material> result = materiaPrimaRepo.findAll(spec, pageable);
+                Page<Material> result = materialRepo.findAll(spec, pageable);
                 List<Producto> productos = new ArrayList<>();
                 productos.addAll(result.getContent());
                 return new PageImpl<>(productos, pageable, result.getTotalElements());
@@ -159,7 +159,7 @@ public class ProductoService {
             return criteriaBuilder.and(predicates);
         };
 
-        return materiaPrimaRepo.findAll(spec, PageRequest.of(page, size));
+        return materialRepo.findAll(spec, PageRequest.of(page, size));
     }
 
     public Page<SemiTerminado> searchByName_S(String searchTerm, int page, int size){
@@ -192,7 +192,7 @@ public class ProductoService {
     }
 
     public Optional<Material> findMateriaPrimaByProductoId(int productoId) {
-        return materiaPrimaRepo.findById(productoId);
+        return materialRepo.findById(productoId);
     }
     
     public Optional<SemiTerminado> findSemiTerminadoByProductoId(int productoId) {
@@ -327,7 +327,7 @@ public class ProductoService {
                     mp.setTipoMaterial(tipoMateria);
                     // fechaCreacion is automatically set by @CreationTimestamp
 
-                    materiaPrimaRepo.save(mp);
+                    materialRepo.save(mp);
                     insertedCount++;
                 }
             }

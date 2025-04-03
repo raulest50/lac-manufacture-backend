@@ -16,7 +16,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.DocIngresoAlmacenOCRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
-import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
@@ -54,7 +54,7 @@ public class MovimientosService {
     private final OrdenCompraRepo ordenCompraRepo;
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
-    private final MateriaPrimaRepo materiaPrimaRepo;
+    private final MaterialRepo materialRepo;
 
     @Transactional
     public Movimiento saveMovimiento(Movimiento movimiento){
@@ -172,7 +172,7 @@ public class MovimientosService {
                 itemOrdenCompra.setOrdenCompra(oc);
 
                 // Verify that the MateriaPrima exists
-                Optional<Material> optionalMateriaPrima = materiaPrimaRepo.findById(itemOrdenCompra.getMaterial().getProductoId());
+                Optional<Material> optionalMateriaPrima = materialRepo.findById(itemOrdenCompra.getMaterial().getProductoId());
                 if (!optionalMateriaPrima.isPresent()) {
                     throw new RuntimeException("MateriaPrima not found with ID: " + itemOrdenCompra.getMaterial().getProductoId());
                 }
@@ -187,7 +187,7 @@ public class MovimientosService {
                 material.setCosto(nuevoCosto);
 
                 // Save the updated MateriaPrima
-                materiaPrimaRepo.save(material);
+                materialRepo.save(material);
 
                 // Update costs of dependent products if necessary
                 Set<Integer> updatedProductIds = new HashSet<>();

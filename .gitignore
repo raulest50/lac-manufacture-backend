@@ -44,3 +44,8 @@ src/main/resources/application.properties
 /data
 
 
+id_rsa
+id_rsa.pub
+
+comandos.md
+

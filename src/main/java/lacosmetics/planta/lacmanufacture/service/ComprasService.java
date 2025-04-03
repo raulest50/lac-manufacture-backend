@@ -3,12 +3,11 @@ package lacosmetics.planta.lacmanufacture.service;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.*;
 import lacosmetics.planta.lacmanufacture.model.dto.UpdateEstadoOrdenCompraRequest;
-import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
-import lacosmetics.planta.lacmanufacture.repo.producto.MateriaPrimaRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class ComprasService {
     private final FacturaCompraRepo facturaCompraRepo;
     private final MovimientoRepo movimientoRepo;
     private final ProveedorRepo proveedorRepo;
-    private final MateriaPrimaRepo materiaPrimaRepo;
+    private final MaterialRepo materialRepo;
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
 
