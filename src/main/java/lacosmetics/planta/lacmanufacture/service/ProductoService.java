@@ -77,6 +77,11 @@ public class ProductoService {
      */
     @Transactional
     public Material saveMateriaPrimaV2(Material material, MultipartFile file) {
+        // Prevent accidental overwrite: if a material with the same productoId already exists, throw an exception.
+        if (materialRepo.existsById(material.getProductoId())) {
+            throw new IllegalArgumentException("El codigo: " + material.getProductoId() +
+                    " ya esta asignadoa otro Material");
+        }
         try {
             // Define the folder where the ficha técnica PDFs will be stored.
             Path folderPath = Paths.get("data", "fichas_tecnicas_mp");
@@ -357,7 +362,7 @@ public class ProductoService {
                     categoryPredicate = cb.or(categoryPredicate,
                             cb.and(
                                     cb.equal(root.type(), Material.class),
-                                    cb.equal(cb.treat(root, Material.class).get("tipoMateriaPrima"), 1)
+                                    cb.equal(cb.treat(root, Material.class).get("tipoMaterial"), 1)
                             )
                     );
                 }
@@ -366,7 +371,7 @@ public class ProductoService {
                     categoryPredicate = cb.or(categoryPredicate,
                             cb.and(
                                     cb.equal(root.type(), Material.class),
-                                    cb.equal(cb.treat(root, Material.class).get("tipoMateriaPrima"), 2)
+                                    cb.equal(cb.treat(root, Material.class).get("tipoMaterial"), 2)
                             )
                     );
                 }

@@ -60,7 +60,7 @@ public class ProductoResource {
                     .body(savedMP);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error saving Materia Prima: " + e.getMessage());
+                    .body("Error guardando el Material: " + e.getMessage());
         }
     }
 
