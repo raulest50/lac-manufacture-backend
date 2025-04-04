@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.model.users;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,6 +27,21 @@ public class User {
 
     private String password;  // in a real app, store an encoded (hashed) password
 
+    // opcional
+    private String celular;
+
+    //opcional
+    private String direccion;
+
+    //opcional
+    private LocalDate fechaNacimiento;
+
+    /**
+     * 1: activo
+     * 2: inactivo
+     */
+    private int estado;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
@@ -33,4 +49,5 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
 }
