@@ -44,6 +44,10 @@ public class ProveedorService {
     public Proveedor saveProveedorWithFiles(Proveedor proveedor,
                                             MultipartFile rutFile,
                                             MultipartFile camaraFile) throws IOException {
+
+        // se revisa que no existe previamente el proveedor que se desea registrar.
+        if(proveedorRepo.existsById(proveedor.getId())) throw new IllegalArgumentException("Ya existe un Proveedor con el Id" + proveedor.getId());
+
         // Save files if provided using the file storage service.
         if (rutFile != null && !rutFile.isEmpty()) {
             // Save file to /data/proveedores/{proveedorId}/rut.pdf and update the URL.

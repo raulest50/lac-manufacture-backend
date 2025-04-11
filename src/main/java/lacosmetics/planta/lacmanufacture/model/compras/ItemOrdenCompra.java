@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.model.compras;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,8 +31,9 @@ public class ItemOrdenCompra {
     private OrdenCompra ordenCompra;
 
     // Bidirectional relationship with OrdenCompra
-    @ManyToOne
-    @JoinColumn(name = "producto_id")  // This column will hold the foreign key
+    @NotNull
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "producto_id", nullable = false)  // This column will hold the foreign key
     private Material material;
 
     private int cantidad;
