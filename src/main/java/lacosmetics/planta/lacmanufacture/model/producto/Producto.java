@@ -45,6 +45,11 @@ public abstract class Producto {
     @Min(value=0, message = "El costo no puede ser negativo") // validacion en db engine
     private int costo;
 
+    /**
+     * valores vigentes: 0%, 5% y 19%
+     */
+    private double iva_percentual;
+
     @CreationTimestamp
     private LocalDateTime fechaCreacion;
 

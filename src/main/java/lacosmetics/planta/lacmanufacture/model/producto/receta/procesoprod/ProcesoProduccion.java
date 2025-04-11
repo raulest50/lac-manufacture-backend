@@ -27,15 +27,4 @@ public class ProcesoProduccion {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "proc_node_id")
-    private List<ProcesoNode> procesoNodes;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "mat_pri_id")
-    private List<MateriaPrimaNode> materiaPrimaNodesNodes;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private TargetNode targetNode;
-
 }

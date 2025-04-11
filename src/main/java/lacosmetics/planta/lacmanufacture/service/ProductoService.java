@@ -48,6 +48,8 @@ public class ProductoService {
 
     private final MovimientoRepo movimientoRepo;
 
+    private final FileStorageService fileStorageService;
+
     // fetch all products para el producto picker component en frontend
     public Page<Producto> getAllProductos(int page, int size){
         return productoRepo.findAll(PageRequest.of(page, size));
@@ -83,23 +85,9 @@ public class ProductoService {
                     " ya esta asignadoa otro Material");
         }
         try {
-            // Define the folder where the ficha técnica PDFs will be stored.
-            Path folderPath = Paths.get("data", "fichas_tecnicas_mp");
-            Files.createDirectories(folderPath);  // Create the folder if it doesn't exist.
-
-            // Generate a unique filename using a UUID and the original filename.
-            String originalFilename = file.getOriginalFilename();
-            String newFilename = UUID.randomUUID().toString() + "_" + originalFilename;
-            Path filePath = folderPath.resolve(newFilename);
-
-            // Copy the file's content to the target folder.
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // Set the file path (or URL) to the MateriaPrima entity.
-            material.setFichaTecnicaUrl(filePath.toString());
-
-            // Persist the MateriaPrima entity.
-            return materialRepo.save(material);
+            String fichaTecnicaPath = fileStorageService.storeFichaTecnica(file); // Save the ficha técnica using the file storage service.
+            material.setFichaTecnicaUrl(fichaTecnicaPath);
+            return materialRepo.save(material); // Persist the MateriaPrima entity.
         } catch (Exception e) {
             throw new RuntimeException("Error saving MateriaPrima with ficha técnica: " + e.getMessage(), e);
         }

@@ -11,7 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +27,39 @@ public class ProveedorService {
     @Autowired
     private final ProveedorRepo proveedorRepo;
 
+    private final FileStorageService fileStorageService;
+
+
+    /**
+     * Saves a Proveedor and its optional files (RUT and Cámara).
+     * The method is transactional so that if any part fails, the whole transaction is rolled back.
+     *
+     * @param proveedor The Proveedor entity populated from the request.
+     * @param rutFile   The optional RUT file.
+     * @param camaraFile The optional Cámara file.
+     * @return The saved Proveedor entity.
+     * @throws IOException if file storage fails.
+     */
     @Transactional
-    public Proveedor saveProveedor(Proveedor proveedor){
+    public Proveedor saveProveedorWithFiles(Proveedor proveedor,
+                                            MultipartFile rutFile,
+                                            MultipartFile camaraFile) throws IOException {
+        // Save files if provided using the file storage service.
+        if (rutFile != null && !rutFile.isEmpty()) {
+            // Save file to /data/proveedores/{proveedorId}/rut.pdf and update the URL.
+            String rutPath = fileStorageService.storeFileProveedor(proveedor.getId(), rutFile, "rut.pdf");
+            proveedor.setRutUrl(rutPath);
+        }
+        if (camaraFile != null && !camaraFile.isEmpty()) {
+            String camaraPath = fileStorageService.storeFileProveedor(proveedor.getId(), camaraFile, "camara.pdf");
+            proveedor.setCamaraUrl(camaraPath);
+        }
+        // Save the proveedor entity; if any exception occurs (including in file saving),
+        // the whole transaction will roll back.
         return proveedorRepo.save(proveedor);
     }
+
+
 
 
     public List<Proveedor> searchProveedores(String searchText) {

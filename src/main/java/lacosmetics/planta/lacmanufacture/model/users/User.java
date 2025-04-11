@@ -20,6 +20,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private long cedula;
+
     @Column(unique = true) // username must be unique
     private String username;
 

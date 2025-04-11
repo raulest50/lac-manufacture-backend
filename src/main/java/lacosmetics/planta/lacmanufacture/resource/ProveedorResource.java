@@ -6,12 +6,12 @@ import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import lacosmetics.planta.lacmanufacture.service.ProveedorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -28,35 +28,21 @@ public class ProveedorResource {
             @RequestPart("proveedor") String proveedorJson,
             @RequestPart(value = "rutFile", required = false) MultipartFile rutFile,
             @RequestPart(value = "camaraFile", required = false) MultipartFile camaraFile
-    ) throws IOException {
-        // Convert JSON string to Proveedor object
-        ObjectMapper mapper = new ObjectMapper();
-        Proveedor proveedor = mapper.readValue(proveedorJson, Proveedor.class);
-
-        // If any file is provided, create a folder at /data/proveedores/{nit}/
-        if ((rutFile != null && !rutFile.isEmpty()) || (camaraFile != null && !camaraFile.isEmpty())) {
-            File folder = new File("/data/proveedores/" + proveedor.getId());
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-
-            // Save RUT file if present and update rutUrl
-            if (rutFile != null && !rutFile.isEmpty()) {
-                File rutDestination = new File(folder, "rut.pdf");
-                rutFile.transferTo(rutDestination);
-                proveedor.setRutUrl("/data/proveedores/" + proveedor.getId() + "/rut.pdf");
-            }
-
-            // Save Cámara y Comercio file if present and update camaraUrl
-            if (camaraFile != null && !camaraFile.isEmpty()) {
-                File camaraDestination = new File(folder, "camara.pdf");
-                camaraFile.transferTo(camaraDestination);
-                proveedor.setCamaraUrl("/data/proveedores/" + proveedor.getId() + "/camara.pdf");
-            }
+    ) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Proveedor proveedor = mapper.readValue(proveedorJson, Proveedor.class);
+            // Delegate all logic to the service method.
+            Proveedor saved = proveedorService.saveProveedorWithFiles(proveedor, rutFile, camaraFile);
+            return ResponseEntity.created(URI.create("/proveedor/" + saved.getId())).body(saved);
+        } catch (IOException e) {
+            // Log error as needed and return error response.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
-
-        Proveedor saved = proveedorService.saveProveedor(proveedor);
-        return ResponseEntity.created(URI.create("/proveedor/" + saved.getId())).body(saved);
     }
 
 

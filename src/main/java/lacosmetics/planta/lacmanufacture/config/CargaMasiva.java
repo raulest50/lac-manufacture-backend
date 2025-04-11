@@ -74,6 +74,7 @@ public class CargaMasiva {
                 material.setCantidadUnidad(1);
                 material.setTipoUnidades(convertUnidad(unidad));
                 material.setTipoMaterial(tipoMaterial);
+                material.setIva_percentual(0.0);
                 // fichaTecnicaUrl remains null
                 // fechaCreacion is handled automatically by @CreationTimestamp
 

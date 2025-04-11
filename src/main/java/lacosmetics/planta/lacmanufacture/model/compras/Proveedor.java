@@ -25,6 +25,12 @@ public class Proveedor {
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id; // Nit
 
+    /**
+     * 0: cedula de ciudadania
+     * 1: nit
+     */
+    private int tipoIdentificacion;
+
     private String nombre;
     private String direccion;
 
@@ -70,7 +76,7 @@ public class Proveedor {
      * 4: Equipos y Otros Servicios
      */
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "categorias", columnDefinition = "integer[]")
+    @Column(name = "categorias")
     private int[] categorias;
 
     private String rutUrl;
