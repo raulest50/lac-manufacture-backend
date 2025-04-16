@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 
 import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
-import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.real.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.MovimientosService;
 import lombok.RequiredArgsConstructor;

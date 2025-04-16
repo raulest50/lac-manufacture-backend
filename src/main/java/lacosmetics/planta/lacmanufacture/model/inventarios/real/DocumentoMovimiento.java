@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.inventarios;
+package lacosmetics.planta.lacmanufacture.model.inventarios.real;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonSubTypes;

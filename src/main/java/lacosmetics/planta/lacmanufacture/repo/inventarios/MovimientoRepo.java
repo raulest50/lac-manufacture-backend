@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.repo.inventarios;
 
-import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.real.Movimiento;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
