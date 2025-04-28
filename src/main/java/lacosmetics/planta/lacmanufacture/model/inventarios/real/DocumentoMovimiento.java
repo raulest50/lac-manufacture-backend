@@ -38,7 +38,7 @@ public abstract class DocumentoMovimiento {
 
     @OneToMany(mappedBy = "documentoMovimiento", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<Movimiento> itemsDocIngreso;
+    private List<MovimientoReal> itemsDocIngreso;
 
     @CreationTimestamp
     private LocalDateTime fechaMovimiento;

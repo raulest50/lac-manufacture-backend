@@ -16,12 +16,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "movimientos")
+@Table(name = "movimiento_almacen_real")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Movimiento {
+public class MovimientoReal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,7 +65,7 @@ public class Movimiento {
      * Constructor para se usado preferiblemente solo por
      * @param insumo
      */
-    public Movimiento(Insumo insumo){
+    public MovimientoReal(Insumo insumo){
         cantidad = insumo.getCantidadRequerida();
         producto = insumo.getProducto();
         tipo = CausaMovimiento.USO_INTERNO;
@@ -76,7 +76,7 @@ public class Movimiento {
      * usarlo en otras clases solo en casos donde realmente sea muy necesario o beneficioso.
      * @param item
      */
-    Movimiento(ItemOrdenCompra item){
+    MovimientoReal(ItemOrdenCompra item){
         this.cantidad = item.getCantidad();
         this.producto = item.getMaterial();
         this.tipo = CausaMovimiento.COMPRA;

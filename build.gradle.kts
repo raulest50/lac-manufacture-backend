@@ -28,7 +28,7 @@ dependencies {
 	implementation("org.springframework.session:spring-session-core")
 
 	// added for endpoint that implements bulk load reading uploaded excel file
-	implementation("org.apache.poi:poi-ooxml:5.2.3")
+	implementation("org.apache.poi:poi-ooxml:5.4.0")
 
 	runtimeOnly("org.postgresql:postgresql")
 

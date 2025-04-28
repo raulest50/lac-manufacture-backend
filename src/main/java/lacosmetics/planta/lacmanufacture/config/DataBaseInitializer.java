@@ -14,6 +14,7 @@ public class DataBaseInitializer {
 
     private final UsersInitializer usersInitializer;
     private final CargaMasiva cargaMasiva;
+    private final CuentasInitializer cuentasInitializer;
     private final RoleRepository roleRepository;
 
     private static final Logger log = LoggerFactory.getLogger(DataBaseInitializer.class);
@@ -27,6 +28,7 @@ public class DataBaseInitializer {
                 log.info("Database is empty. Performing initial data setup...");
                 usersInitializer.initializeUsers();
                 cargaMasiva.executeCargaMasiva();
+                cuentasInitializer.initializeCuentas();
             } else { // if already initialzed then do nothing
                 log.info("Database is already initialized. Skipping insert initialization.");
             }

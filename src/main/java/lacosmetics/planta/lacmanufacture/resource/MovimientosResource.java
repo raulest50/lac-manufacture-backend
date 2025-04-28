@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 
 import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
-import lacosmetics.planta.lacmanufacture.model.inventarios.real.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.real.MovimientoReal;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.MovimientosService;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +33,12 @@ public class MovimientosResource {
 
     // New endpoint to get movimientos for a product
     @GetMapping("/get_movimientos_by_producto")
-    public ResponseEntity<Page<Movimiento>> getMovimientosByProducto(
+    public ResponseEntity<Page<MovimientoReal>> getMovimientosByProducto(
             @RequestParam int productoId,
             @RequestParam int page,
             @RequestParam int size
     ) {
-        Page<Movimiento> movimientos = movimientoService.getMovimientosByProductoId(productoId, page, size);
+        Page<MovimientoReal> movimientos = movimientoService.getMovimientosByProductoId(productoId, page, size);
         return ResponseEntity.ok().body(movimientos);
     }
 

@@ -7,7 +7,7 @@ import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.real.DocIngresoAlmacenOC;
-import lacosmetics.planta.lacmanufacture.model.inventarios.real.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.real.MovimientoReal;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
@@ -57,8 +57,8 @@ public class MovimientosService {
     private final MaterialRepo materialRepo;
 
     @Transactional
-    public Movimiento saveMovimiento(Movimiento movimiento){
-        return movimientoRepo.save(movimiento);
+    public MovimientoReal saveMovimiento(MovimientoReal movimientoReal){
+        return movimientoRepo.save(movimientoReal);
     }
 
     public Optional<ProductoStockDTO> getStockOf(int producto_id){
@@ -74,9 +74,9 @@ public class MovimientosService {
     }
 
     public Optional<ProductoStockDTO> getStockOf2(int producto_id){
-        List<Movimiento> movs = movimientoRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
+        List<MovimientoReal> movs = movimientoRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
         if(!movs.isEmpty()){
-            double productoStock = movs.stream().mapToDouble(Movimiento::getCantidad).sum();
+            double productoStock = movs.stream().mapToDouble(MovimientoReal::getCantidad).sum();
             return Optional.of(new ProductoStockDTO(movs.getFirst().getProducto(), productoStock));
         } else{
             return Optional.empty();
@@ -116,7 +116,7 @@ public class MovimientosService {
 
 
     // Method to get movimientos for a product
-    public Page<Movimiento> getMovimientosByProductoId(int productoId, int page, int size) {
+    public Page<MovimientoReal> getMovimientosByProductoId(int productoId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return movimientoRepo.findByProducto_ProductoIdOrderByFechaMovimientoDesc(productoId, pageable);
     }

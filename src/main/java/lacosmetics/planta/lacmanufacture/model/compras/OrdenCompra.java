@@ -54,9 +54,9 @@ public class OrdenCompra {
 
     /**
      * -1: cancelada
-     *  0: pendiente aprobación proveedor
-     *  1: pendiente revisión precio
-     *  2: pendiente conteo
+     *  0: pendiente liberacion
+     *  1: pendiente envio
+     *  2: pendiente ingreso almacen
      *  3: cerrada con éxito
      */
     private int estado;

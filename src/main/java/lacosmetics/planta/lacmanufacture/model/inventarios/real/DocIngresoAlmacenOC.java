@@ -29,7 +29,7 @@ public class DocIngresoAlmacenOC extends DocumentoMovimiento{
         this.setUrlDocSoporte(urlDocSoporte);
         this.setItemsDocIngreso(
                 ordenCompra.getItemsOrdenCompra().stream()
-                        .map(Movimiento::new)
+                        .map(MovimientoReal::new)
                         .collect(Collectors.toList())
         );
         this.setObservaciones(observaciones);
@@ -44,7 +44,7 @@ public class DocIngresoAlmacenOC extends DocumentoMovimiento{
         // If an order exists, create Movimiento items from its itemsOrdenCompra.
         if (docIngresoDTO.getOrdenCompra() != null) {
             this.setItemsDocIngreso(
-                    docIngresoDTO.getOrdenCompra().getItemsOrdenCompra().stream().map(Movimiento::new).collect(Collectors.toList())
+                    docIngresoDTO.getOrdenCompra().getItemsOrdenCompra().stream().map(MovimientoReal::new).collect(Collectors.toList())
             );
         }
         this.setNombreResponsable(docIngresoDTO.getUser());

@@ -49,3 +49,6 @@ id_rsa.pub
 
 comandos.md
 
+# donde se guarda el output del script para scanear y hacer un resumen de las entidades del backend
+entity-summary.txt
+
