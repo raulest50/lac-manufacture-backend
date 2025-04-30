@@ -63,7 +63,7 @@ public class ProduccionService {
                 MovimientoReal movimientoReal = new MovimientoReal();
                 movimientoReal.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
                 movimientoReal.setProducto(insumo.getProducto());
-                movimientoReal.setTipo(MovimientoReal.CausaMovimiento.USO_INTERNO);
+                movimientoReal.setTipo(MovimientoReal.TipoMovimiento.CONSUMO);
                 //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
                 movimientoRepo.save(movimientoReal);
             }
@@ -222,7 +222,7 @@ public class ProduccionService {
         MovimientoReal movimientoReal = new MovimientoReal();
         movimientoReal.setCantidad(ordenProduccion.getProducto().getCantidadUnidad()); // Adjust as per your business logic
         movimientoReal.setProducto(ordenProduccion.getProducto());
-        movimientoReal.setTipo(MovimientoReal.CausaMovimiento.PROD_INTERNO);
+        movimientoReal.setTipo(MovimientoReal.TipoMovimiento.BACKFLUSH);
         //movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
         movimientoRepo.save(movimientoReal);
 

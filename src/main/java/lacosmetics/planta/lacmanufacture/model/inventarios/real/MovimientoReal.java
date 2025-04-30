@@ -4,6 +4,7 @@ package lacosmetics.planta.lacmanufacture.model.inventarios.real;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
@@ -39,11 +40,15 @@ public class MovimientoReal {
 
     // causa del movimiento
     // VENTA, COMPRA, AVERIA, USO_INTERNO, PROD_INTERNO, OTROS
-    private String tipo;
+    private TipoMovimiento tipo;
+
+    /** Lote asociado a este movimiento */
+    @ManyToOne
+    @JoinColumn(name = "lote_id")
+    private Lote lote;
 
     @CreationTimestamp
     private LocalDateTime fechaMovimiento;
-
 
     // Bidirectional relationship with OrdenCompra
     @ManyToOne
@@ -52,12 +57,13 @@ public class MovimientoReal {
     private DocumentoMovimiento documentoMovimiento;
 
 
-    public static class CausaMovimiento {
-        public static final String COMPRA = "COMPRA";
-        public static final String AVERIA = "AVERIA";
-        public static final String USO_INTERNO = "USO_INTERNO";
-        public static final String PROD_INTERNO = "PROD_INTERNO";
-        public static final String SALIDA_APP_VENTAS = "SALIDA_APP_VENTAS";
+    /** Enum para causas de movimiento */
+    public enum TipoMovimiento {
+        COMPRA, // asociado a orden de compra OCM
+        BAJA, // perdida de materiales por eventos fortuitos como inundacion incendio o mismanagement
+        CONSUMO, // asociado a una orden de produccion o work in progress
+        BACKFLUSH, // cuando una OP se finaliza, ingreso de semiterminado o terminado
+        VENTA // sale para venta producto terminado
     }
 
 
@@ -68,7 +74,7 @@ public class MovimientoReal {
     public MovimientoReal(Insumo insumo){
         cantidad = insumo.getCantidadRequerida();
         producto = insumo.getProducto();
-        tipo = CausaMovimiento.USO_INTERNO;
+        tipo = TipoMovimiento.USO_INTERNO;
     }
 
     /**
@@ -79,7 +85,7 @@ public class MovimientoReal {
     MovimientoReal(ItemOrdenCompra item){
         this.cantidad = item.getCantidad();
         this.producto = item.getMaterial();
-        this.tipo = CausaMovimiento.COMPRA;
+        this.tipo = TipoMovimiento.COMPRA;
     }
 
 
