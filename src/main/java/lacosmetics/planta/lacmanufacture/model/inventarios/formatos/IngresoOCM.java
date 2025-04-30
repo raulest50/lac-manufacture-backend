@@ -1,10 +1,12 @@
-package lacosmetics.planta.lacmanufacture.model.inventarios.real;
+package lacosmetics.planta.lacmanufacture.model.inventarios.formatos;
 
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.DocMovs;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimientos;
 import lombok.NoArgsConstructor;
 
 import java.util.stream.Collectors;
@@ -12,7 +14,8 @@ import java.util.stream.Collectors;
 @Entity
 @DiscriminatorValue("OC_IN")
 @NoArgsConstructor
-public class DocIngresoAlmacenOC extends DocumentoMovimiento{
+public class IngresoOCM extends DocMovs {
+
 
     
 
@@ -24,12 +27,12 @@ public class DocIngresoAlmacenOC extends DocumentoMovimiento{
      * @param nombreResponsable Name of the person creating the entry document
      * @param observaciones Additional remarks or observations
      */
-    public DocIngresoAlmacenOC(OrdenCompra ordenCompra, String urlDocSoporte, String nombreResponsable, String observaciones) {
+    public IngresoOCM(OrdenCompra ordenCompra, String urlDocSoporte, String nombreResponsable, String observaciones) {
         this.setNombreResponsable(nombreResponsable);
         this.setUrlDocSoporte(urlDocSoporte);
         this.setItemsDocIngreso(
                 ordenCompra.getItemsOrdenCompra().stream()
-                        .map(MovimientoReal::new)
+                        .map(Movimientos::new)
                         .collect(Collectors.toList())
         );
         this.setObservaciones(observaciones);
@@ -40,11 +43,11 @@ public class DocIngresoAlmacenOC extends DocumentoMovimiento{
      * The urlDocSoporte will be set later after the file is saved.
      * @param docIngresoDTO the incoming DTO containing order, user and observations.
      */
-    public DocIngresoAlmacenOC(DocIngresoDTA docIngresoDTO) {
+    public IngresoOCM(DocIngresoDTA docIngresoDTO) {
         // If an order exists, create Movimiento items from its itemsOrdenCompra.
         if (docIngresoDTO.getOrdenCompra() != null) {
             this.setItemsDocIngreso(
-                    docIngresoDTO.getOrdenCompra().getItemsOrdenCompra().stream().map(MovimientoReal::new).collect(Collectors.toList())
+                    docIngresoDTO.getOrdenCompra().getItemsOrdenCompra().stream().map(Movimientos::new).collect(Collectors.toList())
             );
         }
         this.setNombreResponsable(docIngresoDTO.getUser());

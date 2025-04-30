@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
-import lacosmetics.planta.lacmanufacture.model.inventarios.real.MovimientoReal;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimientos;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
@@ -60,10 +60,10 @@ public class ProduccionService {
             // Create Movimiento entries for each Insumo
             for (OrdenSeguimiento ordenSeguimiento : savedOrden.getOrdenesSeguimiento()) {
                 Insumo insumo = ordenSeguimiento.getInsumo();
-                MovimientoReal movimientoReal = new MovimientoReal();
+                Movimientos movimientoReal = new Movimientos();
                 movimientoReal.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
                 movimientoReal.setProducto(insumo.getProducto());
-                movimientoReal.setTipo(MovimientoReal.TipoMovimiento.CONSUMO);
+                movimientoReal.setTipo(Movimientos.TipoMovimiento.CONSUMO);
                 //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
                 movimientoRepo.save(movimientoReal);
             }
@@ -219,10 +219,10 @@ public class ProduccionService {
         OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenId).orElseThrow(() -> new RuntimeException("OrdenProduccion not found"));
 
         // Register Movimiento for the produced Producto
-        MovimientoReal movimientoReal = new MovimientoReal();
+        Movimientos movimientoReal = new Movimientos();
         movimientoReal.setCantidad(ordenProduccion.getProducto().getCantidadUnidad()); // Adjust as per your business logic
         movimientoReal.setProducto(ordenProduccion.getProducto());
-        movimientoReal.setTipo(MovimientoReal.TipoMovimiento.BACKFLUSH);
+        movimientoReal.setTipo(Movimientos.TipoMovimiento.BACKFLUSH);
         //movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
         movimientoRepo.save(movimientoReal);
 

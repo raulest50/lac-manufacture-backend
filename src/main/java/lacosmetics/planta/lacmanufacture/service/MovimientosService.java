@@ -6,8 +6,8 @@ import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
-import lacosmetics.planta.lacmanufacture.model.inventarios.real.DocIngresoAlmacenOC;
-import lacosmetics.planta.lacmanufacture.model.inventarios.real.MovimientoReal;
+import lacosmetics.planta.lacmanufacture.model.inventarios.formatos.IngresoOCM;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimientos;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
@@ -57,7 +57,7 @@ public class MovimientosService {
     private final MaterialRepo materialRepo;
 
     @Transactional
-    public MovimientoReal saveMovimiento(MovimientoReal movimientoReal){
+    public Movimientos saveMovimiento(Movimientos movimientoReal){
         return movimientoRepo.save(movimientoReal);
     }
 
@@ -74,9 +74,9 @@ public class MovimientosService {
     }
 
     public Optional<ProductoStockDTO> getStockOf2(int producto_id){
-        List<MovimientoReal> movs = movimientoRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
+        List<Movimientos> movs = movimientoRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
         if(!movs.isEmpty()){
-            double productoStock = movs.stream().mapToDouble(MovimientoReal::getCantidad).sum();
+            double productoStock = movs.stream().mapToDouble(Movimientos::getCantidad).sum();
             return Optional.of(new ProductoStockDTO(movs.getFirst().getProducto(), productoStock));
         } else{
             return Optional.empty();
@@ -116,7 +116,7 @@ public class MovimientosService {
 
 
     // Method to get movimientos for a product
-    public Page<MovimientoReal> getMovimientosByProductoId(int productoId, int page, int size) {
+    public Page<Movimientos> getMovimientosByProductoId(int productoId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return movimientoRepo.findByProducto_ProductoIdOrderByFechaMovimientoDesc(productoId, pageable);
     }
@@ -149,13 +149,13 @@ public class MovimientosService {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // Create the DocIngresoAlmacenOC entity using the DTO constructor.
-            DocIngresoAlmacenOC docIngreso = new DocIngresoAlmacenOC(docIngresoDTO);
+            IngresoOCM docIngreso = new IngresoOCM(docIngresoDTO);
             // Set the URL (or path) of the saved file.
             docIngreso.setUrlDocSoporte(filePath.toString());
 
             // Set the back-reference for each Movimiento so that their foreign key is updated.
             if (docIngreso.getItemsDocIngreso() != null) {
-                docIngreso.getItemsDocIngreso().forEach(movimiento -> movimiento.setDocumentoMovimiento(docIngreso));
+                docIngreso.getItemsDocIngreso().forEach(movimiento -> movimiento.setDocMovs(docIngreso));
             }
 
             // Persist the entity.
