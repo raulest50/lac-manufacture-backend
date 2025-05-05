@@ -6,7 +6,7 @@ import lacosmetics.planta.lacmanufacture.model.dto.UpdateEstadoOrdenCompraReques
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
-import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class ComprasService {
 
     private final FacturaCompraRepo facturaCompraRepo;
-    private final MovimientoRepo movimientoRepo;
+    private final TransaccionAlmacenRepo transaccionAlmacenRepo;
     private final ProveedorRepo proveedorRepo;
     private final MaterialRepo materialRepo;
     private final SemiTerminadoRepo semiTerminadoRepo;

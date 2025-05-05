@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocIngresoDTA {
+public class IngresoOCM_DTA {
     private OrdenCompra ordenCompra;
     private String user;
     private String observaciones;

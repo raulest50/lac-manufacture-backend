@@ -2,20 +2,20 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.transaction.Transactional;
+import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
-import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
-import lacosmetics.planta.lacmanufacture.model.inventarios.formatos.IngresoOCM;
-import lacosmetics.planta.lacmanufacture.model.inventarios.Movimientos;
+import lacosmetics.planta.lacmanufacture.model.dto.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
-import lacosmetics.planta.lacmanufacture.repo.inventarios.DocIngresoAlmacenOCRepo;
-import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
@@ -47,24 +47,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MovimientosService {
 
-    private final MovimientoRepo movimientoRepo;
+    private final TransaccionAlmacenRepo transaccionAlmacenRepo;
     private final ProductoRepo productoRepo;
+    private final TransaccionAlmacenHeaderRepo transaccionAlmacenHeaderRepo;
 
-    private final DocIngresoAlmacenOCRepo docIngresoRepo;
     private final OrdenCompraRepo ordenCompraRepo;
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
     private final MaterialRepo materialRepo;
 
     @Transactional
-    public Movimientos saveMovimiento(Movimientos movimientoReal){
-        return movimientoRepo.save(movimientoReal);
+    public Movimiento saveMovimiento(Movimiento movimientoReal){
+        return transaccionAlmacenRepo.save(movimientoReal);
     }
 
     public Optional<ProductoStockDTO> getStockOf(int producto_id){
         Optional<Producto> optionalProducto = productoRepo.findByProductoId(producto_id);
         if(optionalProducto.isPresent()){
-            Double totalCantidad = movimientoRepo.findTotalCantidadByProductoId(producto_id);
+            Double totalCantidad = transaccionAlmacenRepo.findTotalCantidadByProductoId(producto_id);
             totalCantidad = (totalCantidad != null) ? totalCantidad : 0.0;
             ProductoStockDTO productoStock = new ProductoStockDTO(optionalProducto.get(), totalCantidad);
             return Optional.of(productoStock);
@@ -74,9 +74,9 @@ public class MovimientosService {
     }
 
     public Optional<ProductoStockDTO> getStockOf2(int producto_id){
-        List<Movimientos> movs = movimientoRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
+        List<Movimiento> movs = transaccionAlmacenRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
         if(!movs.isEmpty()){
-            double productoStock = movs.stream().mapToDouble(Movimientos::getCantidad).sum();
+            double productoStock = movs.stream().mapToDouble(Movimiento::getCantidad).sum();
             return Optional.of(new ProductoStockDTO(movs.getFirst().getProducto(), productoStock));
         } else{
             return Optional.empty();
@@ -106,7 +106,7 @@ public class MovimientosService {
         Page<Producto> productosPage = productoRepo.findAll(spec, pageable);
 
         List<ProductoStockDTO> productStockDTOList = productosPage.getContent().stream().map(producto -> {
-            Double stockQuantity = movimientoRepo.findTotalCantidadByProductoId(producto.getProductoId());
+            Double stockQuantity = transaccionAlmacenRepo.findTotalCantidadByProductoId(producto.getProductoId());
             stockQuantity = (stockQuantity != null) ? stockQuantity : 0.0;
             return new ProductoStockDTO(producto, stockQuantity);
         }).collect(Collectors.toList());
@@ -116,9 +116,9 @@ public class MovimientosService {
 
 
     // Method to get movimientos for a product
-    public Page<Movimientos> getMovimientosByProductoId(int productoId, int page, int size) {
+    public Page<Movimiento> getMovimientosByProductoId(int productoId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return movimientoRepo.findByProducto_ProductoIdOrderByFechaMovimientoDesc(productoId, pageable);
+        return transaccionAlmacenRepo.findByProducto_ProductoIdOrderByFechaMovimientoDesc(productoId, pageable);
     }
 
 
@@ -132,7 +132,7 @@ public class MovimientosService {
      * @return
      */
     @Transactional
-    public ResponseEntity<?> createDocIngreso(DocIngresoDTA docIngresoDTO, MultipartFile file) {
+    public ResponseEntity<?> createDocIngreso(IngresoOCM_DTA docIngresoDTO, MultipartFile file) {
         try {
             // Create folder based on current date (yyyyMMdd)
             String currentDateFolder = LocalDate.now()
@@ -149,17 +149,17 @@ public class MovimientosService {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // Create the DocIngresoAlmacenOC entity using the DTO constructor.
-            IngresoOCM docIngreso = new IngresoOCM(docIngresoDTO);
+            TransaccionAlmacen ingresoOCM = new TransaccionAlmacen(docIngresoDTO);
             // Set the URL (or path) of the saved file.
-            docIngreso.setUrlDocSoporte(filePath.toString());
+            ingresoOCM.setUrlDocSoporte(filePath.toString());
 
             // Set the back-reference for each Movimiento so that their foreign key is updated.
-            if (docIngreso.getItemsDocIngreso() != null) {
-                docIngreso.getItemsDocIngreso().forEach(movimiento -> movimiento.setDocMovs(docIngreso));
+            if (ingresoOCM.getMovimientosTransaccion() != null) {
+                ingresoOCM.getMovimientosTransaccion().forEach(movimiento -> movimiento.setTransaccionAlmacen(ingresoOCM));
             }
 
             // Persist the entity.
-            docIngresoRepo.save(docIngreso);
+            transaccionAlmacenHeaderRepo.save(ingresoOCM);
 
             // se actualiza el estado de la orden de compra a cerrado exitosamente
             OrdenCompra oc = docIngresoDTO.getOrdenCompra();
@@ -180,7 +180,7 @@ public class MovimientosService {
                 itemOrdenCompra.setMaterial(material);
 
                 // Retrieve current stock
-                Double currentStockOpt = movimientoRepo.findTotalCantidadByProductoId(material.getProductoId());
+                Double currentStockOpt = transaccionAlmacenRepo.findTotalCantidadByProductoId(material.getProductoId());
                 int nuevoCosto = getNuevoCosto(itemOrdenCompra, currentStockOpt, material);
 
                 // Update MateriaPrima's costo
@@ -196,7 +196,7 @@ public class MovimientosService {
 
 
 
-            return ResponseEntity.ok(docIngreso);
+            return ResponseEntity.ok(ingresoOCM);
         } catch(Exception e) {
             log.error("Error saving DocIngresoAlmacenOC", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

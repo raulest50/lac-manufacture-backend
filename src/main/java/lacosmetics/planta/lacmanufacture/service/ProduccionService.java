@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
-import lacosmetics.planta.lacmanufacture.model.inventarios.Movimientos;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
@@ -11,7 +11,7 @@ import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
@@ -38,7 +38,7 @@ public class ProduccionService {
 
     private final OrdenProduccionRepo ordenProduccionRepo;
     private final TerminadoRepo terminadoRepo;
-    private final MovimientoRepo movmientoRepo;
+    private final TransaccionAlmacenRepo movmientoRepo;
 
     private final ProductoRepo productoRepo;
 
@@ -46,7 +46,7 @@ public class ProduccionService {
     private final OrdenSeguimientoRepo ordenSeguimientoRepo;
 
     @Autowired
-    private MovimientoRepo movimientoRepo;
+    private TransaccionAlmacenRepo transaccionAlmacenRepo;
 
 
     @Transactional(rollbackOn = Exception.class)
@@ -60,12 +60,12 @@ public class ProduccionService {
             // Create Movimiento entries for each Insumo
             for (OrdenSeguimiento ordenSeguimiento : savedOrden.getOrdenesSeguimiento()) {
                 Insumo insumo = ordenSeguimiento.getInsumo();
-                Movimientos movimientoReal = new Movimientos();
+                Movimiento movimientoReal = new Movimiento();
                 movimientoReal.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
                 movimientoReal.setProducto(insumo.getProducto());
-                movimientoReal.setTipo(Movimientos.TipoMovimiento.CONSUMO);
+                movimientoReal.setTipo(Movimiento.TipoMovimiento.CONSUMO);
                 //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
-                movimientoRepo.save(movimientoReal);
+                transaccionAlmacenRepo.save(movimientoReal);
             }
 
             return savedOrden;
@@ -219,12 +219,12 @@ public class ProduccionService {
         OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenId).orElseThrow(() -> new RuntimeException("OrdenProduccion not found"));
 
         // Register Movimiento for the produced Producto
-        Movimientos movimientoReal = new Movimientos();
+        Movimiento movimientoReal = new Movimiento();
         movimientoReal.setCantidad(ordenProduccion.getProducto().getCantidadUnidad()); // Adjust as per your business logic
         movimientoReal.setProducto(ordenProduccion.getProducto());
-        movimientoReal.setTipo(Movimientos.TipoMovimiento.BACKFLUSH);
+        movimientoReal.setTipo(Movimiento.TipoMovimiento.BACKFLUSH);
         //movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
-        movimientoRepo.save(movimientoReal);
+        transaccionAlmacenRepo.save(movimientoReal);
 
         return convertToDto(ordenProduccion);
     }

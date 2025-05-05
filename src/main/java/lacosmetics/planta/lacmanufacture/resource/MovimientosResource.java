@@ -1,8 +1,8 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
 
-import lacosmetics.planta.lacmanufacture.model.dto.DocIngresoDTA;
-import lacosmetics.planta.lacmanufacture.model.inventarios.Movimientos;
+import lacosmetics.planta.lacmanufacture.model.dto.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.MovimientosService;
 import lombok.RequiredArgsConstructor;
@@ -33,18 +33,18 @@ public class MovimientosResource {
 
     // New endpoint to get movimientos for a product
     @GetMapping("/get_movimientos_by_producto")
-    public ResponseEntity<Page<Movimientos>> getMovimientosByProducto(
+    public ResponseEntity<Page<Movimiento>> getMovimientosByProducto(
             @RequestParam int productoId,
             @RequestParam int page,
             @RequestParam int size
     ) {
-        Page<Movimientos> movimientos = movimientoService.getMovimientosByProductoId(productoId, page, size);
+        Page<Movimiento> movimientos = movimientoService.getMovimientosByProductoId(productoId, page, size);
         return ResponseEntity.ok().body(movimientos);
     }
 
     @PostMapping(value = "/save_doc_ingreso_oc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createDocIngreso(
-            @RequestPart("docIngresoDTA") DocIngresoDTA docIngresoDTO,
+            @RequestPart("docIngresoDTA") IngresoOCM_DTA docIngresoDTO,
             @RequestPart("file") MultipartFile file) {
         return movimientoService.createDocIngreso(docIngresoDTO, file);
     }

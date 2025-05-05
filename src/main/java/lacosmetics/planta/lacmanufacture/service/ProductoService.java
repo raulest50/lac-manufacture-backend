@@ -10,7 +10,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
-import lacosmetics.planta.lacmanufacture.repo.inventarios.MovimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +23,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,7 +42,7 @@ public class ProductoService {
 
     private final InsumoRepo insumoRepository;
 
-    private final MovimientoRepo movimientoRepo;
+    private final TransaccionAlmacenRepo transaccionAlmacenRepo;
 
     private final FileStorageService fileStorageService;
 
@@ -217,7 +213,7 @@ public class ProductoService {
         Page<Producto> productosPage = productoRepo.findAll(spec, pageable);
 
         List<ProductoStockDTO> productStockDTOList = productosPage.getContent().stream().map(producto -> {
-            Double stockQuantity = movimientoRepo.findTotalCantidadByProductoId(producto.getProductoId());
+            Double stockQuantity = transaccionAlmacenRepo.findTotalCantidadByProductoId(producto.getProductoId());
             stockQuantity = (stockQuantity != null) ? stockQuantity : 0.0;
             return new ProductoStockDTO(producto, stockQuantity);
         }).collect(Collectors.toList());
@@ -242,7 +238,7 @@ public class ProductoService {
             List<InsumoWithStockDTO> insumosWithStock = new ArrayList<>();
             for (Insumo insumo : insumos) {
                 Producto insumoProducto = insumo.getProducto();
-                Double stockActual = movimientoRepo.findTotalCantidadByProductoId(insumoProducto.getProductoId());
+                Double stockActual = transaccionAlmacenRepo.findTotalCantidadByProductoId(insumoProducto.getProductoId());
                 stockActual = (stockActual != null) ? stockActual : 0.0;
 
                 InsumoWithStockDTO dto = new InsumoWithStockDTO();
