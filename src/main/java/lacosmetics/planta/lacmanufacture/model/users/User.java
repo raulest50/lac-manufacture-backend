@@ -31,7 +31,7 @@ public class User {
     private String password;  // in a real app, store an encoded (hashed) password
 
     // opcional
-    private String celular;
+    private String cel;
 
     //opcional
     private String direccion;
