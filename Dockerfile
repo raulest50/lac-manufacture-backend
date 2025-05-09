@@ -31,5 +31,5 @@ RUN ./gradlew clean build -x test -Pprod
 # Expose the port the app runs on
 EXPOSE 8080
 
-# Command to run the application
-ENTRYPOINT ["java", "-jar", "/app/build/libs/lac-manufacture-v1.jar"]
+# Command to run the application with production profile
+ENTRYPOINT ["java", "-Dspring.profiles.active=prod", "-jar", "/app/build/libs/lac-manufacture-v1.jar"]

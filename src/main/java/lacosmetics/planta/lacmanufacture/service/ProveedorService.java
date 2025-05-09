@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
+import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchProveedor;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,6 +92,40 @@ public class ProveedorService {
             return Page.empty(pageable);
         }
     }
+
+    /**
+     * Search for providers based on the search criteria in the DTO
+     *
+     * @param searchDTO The search criteria
+     * @param page The page number
+     * @param size The page size
+     * @return A page of providers matching the search criteria
+     */
+    public Page<Proveedor> searchProveedores(DTO_SearchProveedor searchDTO, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        // 1. Buscar por ID (prefijo)
+        if (searchDTO.getSearchType() == DTO_SearchProveedor.SearchType.ID && searchDTO.getId() != null) {
+            return proveedorRepo.findByIdStartingWith(searchDTO.getId(), pageable);
+        }
+
+        // 2. Buscar por nombre y categoría (en base de datos)
+        if (searchDTO.getSearchType() == DTO_SearchProveedor.SearchType.NOMBRE_Y_CATEGORIA) {
+            String nombre = (searchDTO.getNombre() != null && !searchDTO.getNombre().isEmpty())
+                    ? searchDTO.getNombre()
+                    : null;
+
+            int[] categorias = (searchDTO.getCategorias() != null && searchDTO.getCategorias().length > 0)
+                    ? searchDTO.getCategorias()
+                    : null;
+
+            return proveedorRepo.searchByNombreAndCategorias(nombre, categorias, pageable);
+        }
+
+        // 3. Caso por defecto: retornar página vacía
+        return Page.empty(pageable);
+    }
+
 
 
 }

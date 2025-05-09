@@ -63,26 +63,14 @@ Barranquilla, Colombia.
 ## Buenas Prácticas
 
 ### Código
-- Mantener métodos concisos y enfocados
-- Documentar código complejo
-- Seguir principios SOLID
-- Implementar pruebas unitarias
+
+- siempre usar imports en lugar de los nombres completos de las clases.
+- para las clases DTO_Search... usar enums dentro de la misma clase para los tipos de busqueda
 
 ### Base de Datos
 - Usar migrations para cambios en esquema
 - Implementar índices apropiados
 - Optimizar consultas
-
-### Documentación
-- Mantener README actualizado
-- Documentar cambios significativos
-- Incluir ejemplos de uso en API
-
-## Control de Versiones
-- Usar Git Flow
-- Commits descriptivos
-- Pull Requests con revisión de código
-- No commits directos a main/master
 
 ## Despliegue
 - Configuración por ambiente (dev, qa, prod)
