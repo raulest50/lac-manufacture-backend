@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.configurers.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CorsFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -19,6 +21,7 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
     private final Environment environment;
+    private final CorsFilter corsFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -26,6 +29,7 @@ public class SecurityConfig {
         boolean isDevelopment = isDevelopmentEnvironment();
 
         http
+                .cors(withDefaults()) // Enable CORS
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
                     // For /api/backend-info endpoints:
@@ -40,7 +44,8 @@ public class SecurityConfig {
                     // For all other endpoints, require authentication
                     auth.anyRequest().authenticated();
                 })
-                .httpBasic(withDefaults());
+                .httpBasic(withDefaults())
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class); // Add CORS filter
 
         return http.build();
     }

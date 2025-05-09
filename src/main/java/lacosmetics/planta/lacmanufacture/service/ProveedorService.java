@@ -68,10 +68,9 @@ public class ProveedorService {
 
 
     public List<Proveedor> searchProveedores(String searchText) {
-        List<Proveedor> result = new ArrayList<>();
 
         // Search by nombre containing the search text
-        result.addAll(proveedorRepo.findByNombreContainingIgnoreCase(searchText));
+        List<Proveedor> result = new ArrayList<>(proveedorRepo.findByNombreContainingIgnoreCase(searchText));
 
         // Remove duplicates if an entity matched both name and id
         return result.stream().distinct().collect(Collectors.toList());

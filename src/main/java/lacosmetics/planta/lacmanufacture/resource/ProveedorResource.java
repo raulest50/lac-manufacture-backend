@@ -7,6 +7,8 @@ import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchProveedor;
 import lacosmetics.planta.lacmanufacture.service.ProveedorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,25 +56,20 @@ public class ProveedorResource {
         return ResponseEntity.ok(proveedores);
     }
 
-    /**
-     * Search for providers based on search criteria
-     * Supports two types of search:
-     * 1. ID search: Returns providers whose first digits match the ID
-     * 2. Combined search: Returns providers that match name and categories
-     * 
-     * @param searchDTO The search criteria
-     * @param page The page number (default 0)
-     * @param size The page size (default 10)
-     * @return A page of providers matching the search criteria
-     */
-    @GetMapping("/search_pag")
+    @PostMapping("/search_pag")
     public ResponseEntity<Page<Proveedor>> searchProveedores(
             @RequestBody DTO_SearchProveedor searchDTO,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        Page<Proveedor> proveedores = proveedorService.searchProveedores(searchDTO, page, size);
-        return ResponseEntity.ok(proveedores);
+        try {
+            Page<Proveedor> proveedores = proveedorService.searchProveedores(searchDTO, page, size);
+            return ResponseEntity.ok(proveedores);
+        } catch (Exception e) {
+            // Return an empty page with the same pageable
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(Page.empty(pageable));
+        }
     }
 
 
