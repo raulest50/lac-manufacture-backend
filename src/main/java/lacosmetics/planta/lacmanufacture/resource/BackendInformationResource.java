@@ -1,0 +1,84 @@
+package lacosmetics.planta.lacmanufacture.resource;
+
+import lacosmetics.planta.lacmanufacture.service.BackendInformationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * REST controller for providing information about the backend structure.
+ * This resource is designed to help frontend developers understand the backend API.
+ */
+@RestController
+@RequestMapping("/api/backend-info")
+@RequiredArgsConstructor
+public class BackendInformationResource {
+
+    private final BackendInformationService backendInformationService;
+
+    /**
+     * Get a list of all endpoints in the application.
+     * 
+     * @return A list of maps containing basic information about each endpoint
+     */
+    @GetMapping("/endpoints")
+    public ResponseEntity<List<Map<String, Object>>> getAllEndpoints() {
+        return ResponseEntity.ok(backendInformationService.getAllEndpoints());
+    }
+
+    /**
+     * Get detailed information about a specific endpoint.
+     * 
+     * @param path The path of the endpoint
+     * @param httpMethod The HTTP method of the endpoint
+     * @return Detailed information about the endpoint
+     */
+    @GetMapping("/endpoints/details")
+    public ResponseEntity<?> getEndpointDetails(
+            @RequestParam("path") String path,
+            @RequestParam("method") String httpMethod) {
+        
+        Map<String, Object> endpointDetails = backendInformationService.getEndpointDetails(path, httpMethod);
+        
+        if (endpointDetails == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        return ResponseEntity.ok(endpointDetails);
+    }
+
+    /**
+     * Get a list of model packages.
+     * 
+     * @param packageName Optional package name to filter by
+     * @return A list of model package names
+     */
+    @GetMapping("/models/packages")
+    public ResponseEntity<List<String>> getModelPackages(
+            @RequestParam(value = "package", required = false) String packageName) {
+        
+        return ResponseEntity.ok(backendInformationService.getModelClasses(packageName));
+    }
+
+    /**
+     * Get information about a model class.
+     * 
+     * @param className The fully qualified name of the class
+     * @return Information about the class
+     */
+    @GetMapping("/models/class-info")
+    public ResponseEntity<?> getModelClassInfo(
+            @RequestParam("className") String className) {
+        
+        Map<String, Object> classInfo = backendInformationService.getModelClassInfo(className);
+        
+        if (classInfo == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        return ResponseEntity.ok(classInfo);
+    }
+}
