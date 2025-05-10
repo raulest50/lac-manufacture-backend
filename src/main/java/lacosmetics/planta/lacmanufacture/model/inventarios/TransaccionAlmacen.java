@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.model.inventarios;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.dto.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.IngresoOCM_DTA;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

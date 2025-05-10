@@ -20,6 +20,8 @@ public class UsersInitializer {
     private final String ROLE_JEFE_PRODUCCION = "ROLE_JEFE_PRODUCCION";
     private final String ROLE_ASISTENTE_PRODUCCION = "ROLE_ASISTENTE_PRODUCCION";
     private final String ROLE_ALMACEN = "ROLE_ALMACEN";
+    private final String ROLE_BI = "ROLE_BI";
+    private final String ROLE_ACTIVOS = "ROLE_ACTIVOS";
 
     public void initializeUsers() {
         Role roleMaster = initRole(ROLE_MASTER);
@@ -27,6 +29,8 @@ public class UsersInitializer {
         initRole(ROLE_JEFE_PRODUCCION);
         initRole(ROLE_ASISTENTE_PRODUCCION);
         initRole(ROLE_ALMACEN);
+        initRole(ROLE_BI);
+        initRole(ROLE_ACTIVOS);
 
         userRepository.findByUsername("master").orElseGet(() -> {
             User master = User.builder()

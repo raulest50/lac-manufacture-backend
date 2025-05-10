@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto;
+package lacosmetics.planta.lacmanufacture.model.dto.compra.materiales;
 
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
 import lombok.AllArgsConstructor;

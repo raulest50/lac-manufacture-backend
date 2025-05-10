@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 import lacosmetics.planta.lacmanufacture.model.compras.FacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
-import lacosmetics.planta.lacmanufacture.model.dto.UpdateEstadoOrdenCompraRequest;
+import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.UpdateEstadoOrdenCompraRequest;
 import lacosmetics.planta.lacmanufacture.service.ComprasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/compras")

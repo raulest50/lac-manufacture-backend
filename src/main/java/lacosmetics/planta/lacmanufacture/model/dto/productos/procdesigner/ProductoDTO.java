@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto.productoservice.procdesigner;
+package lacosmetics.planta.lacmanufacture.model.dto.productos.procdesigner;
 
 import lombok.Getter;
 import lombok.Setter;
