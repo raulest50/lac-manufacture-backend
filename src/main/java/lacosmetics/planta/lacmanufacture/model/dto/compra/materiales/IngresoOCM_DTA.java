@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model.dto.compra.materiales;
 
-import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IngresoOCM_DTA {
-    private OrdenCompra ordenCompra;
+    private OrdenCompraMateriales ordenCompraMateriales;
     private String user;
     private String observaciones;
 }

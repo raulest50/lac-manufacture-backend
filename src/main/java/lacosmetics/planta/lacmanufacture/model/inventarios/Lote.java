@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.inventarios;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
-import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -39,7 +39,7 @@ public class Lote {
      */
     @ManyToOne
     @JoinColumn(name = "orden_compra_id")
-    private OrdenCompra ordenCompra;
+    private OrdenCompraMateriales ordenCompraMateriales;
 
     /**
      * Relación opcional con la orden de producción que genera este lote de FG.

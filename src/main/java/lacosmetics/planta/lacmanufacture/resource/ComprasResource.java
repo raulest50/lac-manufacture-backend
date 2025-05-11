@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.resource;
 
 import lacosmetics.planta.lacmanufacture.model.compras.FacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
-import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.UpdateEstadoOrdenCompraRequest;
 import lacosmetics.planta.lacmanufacture.service.ComprasService;
 import lombok.RequiredArgsConstructor;
@@ -47,50 +47,50 @@ public class ComprasResource {
      * Ordenes de Compra
      */
     @PostMapping("/save_orden_compra")
-    public ResponseEntity<OrdenCompra> saveOrdenCompra(@RequestBody OrdenCompra ordenCompra) {
-        OrdenCompra savedOrdenCompra = compraService.saveOrdenCompra(ordenCompra);
-        return ResponseEntity.created(URI.create("/compras/save_orden_compra/" + savedOrdenCompra.getOrdenCompraId()))
-                .body(savedOrdenCompra);
+    public ResponseEntity<OrdenCompraMateriales> saveOrdenCompra(@RequestBody OrdenCompraMateriales ordenCompraMateriales) {
+        OrdenCompraMateriales savedOrdenCompraMateriales = compraService.saveOrdenCompra(ordenCompraMateriales);
+        return ResponseEntity.created(URI.create("/compras/save_orden_compra/" + savedOrdenCompraMateriales.getOrdenCompraId()))
+                .body(savedOrdenCompraMateriales);
     }
 
 
     /**
-     * GET endpoint to search OrdenCompra by date range and estados.
+     * GET endpoint to search OrdenCompraMateriales by date range and estados.
      * Example: /compras/ordenes?date1=2025-02-01&date2=2025-02-10&estados=0,1,2&page=0&size=10
      */
     @GetMapping("/search_ordenes_by_date_estado")
-    public ResponseEntity<Page<OrdenCompra>> getOrdenesCompra(
+    public ResponseEntity<Page<OrdenCompraMateriales>> getOrdenesCompra(
             @RequestParam String date1,
             @RequestParam String date2,
             @RequestParam String estados,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        Page<OrdenCompra> ordenes = compraService.getOrdenesCompraByDateAndEstado(date1, date2, estados, page, size);
+        Page<OrdenCompraMateriales> ordenes = compraService.getOrdenesCompraByDateAndEstado(date1, date2, estados, page, size);
         return ResponseEntity.ok(ordenes);
     }
 
     @PutMapping("/orden_compra/{ordenCompraId}/cancel")
-    public ResponseEntity<OrdenCompra> cancelOrdenCompra(@PathVariable int ordenCompraId) {
-        OrdenCompra updated = compraService.cancelOrdenCompra(ordenCompraId);
+    public ResponseEntity<OrdenCompraMateriales> cancelOrdenCompra(@PathVariable int ordenCompraId) {
+        OrdenCompraMateriales updated = compraService.cancelOrdenCompra(ordenCompraId);
         return ResponseEntity.ok(updated);
     }
 
     @PutMapping("/orden_compra/{ordenCompraId}/updateEstado")
-    public ResponseEntity<OrdenCompra> updateEstadoOrdenCompra(
+    public ResponseEntity<OrdenCompraMateriales> updateEstadoOrdenCompra(
             @PathVariable int ordenCompraId,
             @RequestBody UpdateEstadoOrdenCompraRequest request
     ) {
-        OrdenCompra updated = compraService.updateEstadoOrdenCompra(ordenCompraId, request);
+        OrdenCompraMateriales updated = compraService.updateEstadoOrdenCompra(ordenCompraId, request);
         return ResponseEntity.ok(updated);
     }
 
 
     @GetMapping("/orden_by_id")
-    public ResponseEntity<OrdenCompra> getOrdenCompraByOrdenCompraId
+    public ResponseEntity<OrdenCompraMateriales> getOrdenCompraByOrdenCompraId
             (@RequestParam Integer ordenCompraId, @RequestParam(defaultValue = "2") int estado) {
         try {
-            OrdenCompra orden = compraService.getOrdenCompraByOrdenCompraIdAndEstado(ordenCompraId, estado);
+            OrdenCompraMateriales orden = compraService.getOrdenCompraByOrdenCompraIdAndEstado(ordenCompraId, estado);
             return ResponseEntity.ok(orden);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

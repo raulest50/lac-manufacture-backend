@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrdenCompra {
+public class OrdenCompraMateriales {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

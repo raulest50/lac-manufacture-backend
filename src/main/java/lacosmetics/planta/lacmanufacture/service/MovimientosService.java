@@ -5,7 +5,7 @@ import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
-import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompra;
+import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.IngresoOCM_DTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
@@ -162,14 +162,14 @@ public class MovimientosService {
             transaccionAlmacenHeaderRepo.save(ingresoOCM);
 
             // se actualiza el estado de la orden de compra a cerrado exitosamente
-            OrdenCompra oc = docIngresoDTO.getOrdenCompra();
+            OrdenCompraMateriales oc = docIngresoDTO.getOrdenCompraMateriales();
             oc.setEstado(3);
             ordenCompraRepo.save(oc);
 
 
             // se actualizan los precios de todos las materias primas
             for (ItemOrdenCompra itemOrdenCompra : oc.getItemsOrdenCompra()) {
-                itemOrdenCompra.setOrdenCompra(oc);
+                itemOrdenCompra.setOrdenCompraMateriales(oc);
 
                 // Verify that the MateriaPrima exists
                 Optional<Material> optionalMateriaPrima = materialRepo.findById(itemOrdenCompra.getMaterial().getProductoId());

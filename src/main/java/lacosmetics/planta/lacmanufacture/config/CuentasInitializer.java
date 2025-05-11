@@ -1,12 +1,10 @@
 package lacosmetics.planta.lacmanufacture.config;
 
-import lacosmetics.planta.lacmanufacture.model.contabilidad.Cuenta;
-import lacosmetics.planta.lacmanufacture.model.contabilidad.Cuenta.SaldoNormal;
-import lacosmetics.planta.lacmanufacture.model.contabilidad.Cuenta.TipoCuenta;
-import lacosmetics.planta.lacmanufacture.repo.contabilidad.CuentaRepo;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.CuentaContable;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.CuentaContable.SaldoNormal;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.CuentaContable.TipoCuenta;
+import lacosmetics.planta.lacmanufacture.repo.contabilidad.CuentaContableRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,25 +13,28 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CuentasInitializer {
 
-    private final CuentaRepo cuentaRepository;
+    private final CuentaContableRepo cuentaContableRepository;
 
     /**
      * Inicializa la tabla 'cuenta' con el catálogo mínimo
      * sólo si aún no existen registros.
      */
     public void initializeCuentas() {
-        if (cuentaRepository.count() == 0) {
-            List<Cuenta> cuentas = List.of(
-                    new Cuenta("1000", "Caja", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
-                    new Cuenta("1010", "Banco", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
-                    new Cuenta("1200", "Inventario Materiales (M)", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
-                    new Cuenta("1210", "Inventario WIP (Trabajo en Proceso)", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
-                    new Cuenta("1220", "Inventario Productos Terminados (FG)", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
-                    new Cuenta("2000", "Cuentas por Pagar – Proveedores", TipoCuenta.PASIVO, SaldoNormal.CREDITO, true),
-                    new Cuenta("5200", "Gasto por Scrap (Desperdicio)", TipoCuenta.GASTO, SaldoNormal.DEBITO, false)
+        if (cuentaContableRepository.count() == 0) {
+            List<CuentaContable> cuentaContables = List.of(
+                    new CuentaContable("1000", "Caja", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
+                    new CuentaContable("1010", "Banco", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
+                    new CuentaContable("1200", "Inventario Materiales (M)", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
+                    new CuentaContable("1210", "Inventario WIP (Trabajo en Proceso)", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
+                    new CuentaContable("1220", "Inventario Productos Terminados (FG)", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
+                    new CuentaContable("1300", "Activos Fijos", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
+                    new CuentaContable("1310", "Depreciación Acumulada", TipoCuenta.ACTIVO, SaldoNormal.CREDITO, false),
+                    new CuentaContable("2000", "Cuentas por Pagar – Proveedores", TipoCuenta.PASIVO, SaldoNormal.CREDITO, true),
+                    new CuentaContable("5100", "Gasto por Depreciación", TipoCuenta.GASTO, SaldoNormal.DEBITO, false),
+                    new CuentaContable("5200", "Gasto por Scrap (Desperdicio)", TipoCuenta.GASTO, SaldoNormal.DEBITO, false)
             );
-            cuentaRepository.saveAll(cuentas);
-            System.out.println(">> Tabla de cuentas inicializada con valores por defecto");
+            cuentaContableRepository.saveAll(cuentaContables);
+            System.out.println(">> Tabla de cuentaContables inicializada con valores por defecto");
         }
     }
 }

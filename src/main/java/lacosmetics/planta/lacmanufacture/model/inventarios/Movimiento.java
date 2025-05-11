@@ -88,7 +88,7 @@ public class Movimiento {
     }
 
     /**
-     * Constructor para ser usado preferiblemente solo por el Constructor DocumentoIngreso(OrdenCompra).
+     * Constructor para ser usado preferiblemente solo por el Constructor DocumentoIngreso(OrdenCompraMateriales).
      * usarlo en otras clases solo en casos donde realmente sea muy necesario o beneficioso.
      * @param item
      */

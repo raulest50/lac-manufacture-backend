@@ -28,6 +28,10 @@ public class AsientoContable {
     @Enumerated(EnumType.STRING)
     private EstadoAsiento estado;    // BORRADOR, PUBLICADO, REVERSADO
 
+    @ManyToOne
+    @JoinColumn(name = "periodo_contable_id")
+    private PeriodoContable periodoContable;
+
     @OneToMany(mappedBy = "asientoContable", cascade = CascadeType.ALL)
     private List<LineaAsientoContable> lineas;
 
@@ -38,4 +42,3 @@ public class AsientoContable {
     }
 
 }
-

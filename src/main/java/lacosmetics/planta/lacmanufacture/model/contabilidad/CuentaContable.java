@@ -9,7 +9,7 @@ import lombok.*;
 @Entity
 @Table(name = "cuenta")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class Cuenta {
+public class CuentaContable {
 
     @Id
     @Column(length = 10)
@@ -37,7 +37,7 @@ public class Cuenta {
 
     /*
 
-    Código | Nombre | Tipo de Cuenta | Saldo Normal | Descripción breve
+    Código | Nombre | Tipo de CuentaContable | Saldo Normal | Descripción breve
 1000 | Caja | Activo | Débito | Efectivo disponible en caja
 1010 | Banco | Activo | Débito | Saldos en cuentas bancarias
 1200 | Inventario Materias Primas | Activo | Débito | Materias primas en stock

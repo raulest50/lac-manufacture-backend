@@ -24,13 +24,13 @@ public class ItemOrdenCompra {
     @Column(name = "item_id", unique = true, updatable = false, nullable = false)
     private int itemOrdenId;
 
-    // Bidirectional relationship with OrdenCompra
+    // Bidirectional relationship with OrdenCompraMateriales
     @ManyToOne
     @JoinColumn(name = "orden_compra_id")  // This column will hold the foreign key
     @JsonBackReference
-    private OrdenCompra ordenCompra;
+    private OrdenCompraMateriales ordenCompraMateriales;
 
-    // Bidirectional relationship with OrdenCompra
+    // Bidirectional relationship with OrdenCompraMateriales
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "producto_id", nullable = false)  // This column will hold the foreign key

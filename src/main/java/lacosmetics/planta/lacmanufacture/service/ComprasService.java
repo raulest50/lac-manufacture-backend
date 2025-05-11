@@ -64,26 +64,26 @@ public class ComprasService {
      * Ordenes de Compra
      *
      */
-    public OrdenCompra saveOrdenCompra(OrdenCompra ordenCompra) {
+    public OrdenCompraMateriales saveOrdenCompra(OrdenCompraMateriales ordenCompraMateriales) {
         // Verify the Proveedor exists
-        Optional<Proveedor> optProveedor = proveedorRepo.findById(ordenCompra.getProveedor().getId());
+        Optional<Proveedor> optProveedor = proveedorRepo.findById(ordenCompraMateriales.getProveedor().getId());
         if (!optProveedor.isPresent()) {
-            throw new RuntimeException("Proveedor not found with ID: " + ordenCompra.getProveedor().getId());
+            throw new RuntimeException("Proveedor not found with ID: " + ordenCompraMateriales.getProveedor().getId());
         }
-        ordenCompra.setProveedor(optProveedor.get());
+        ordenCompraMateriales.setProveedor(optProveedor.get());
 
         // For each ItemOrdenCompra, set the back‑reference and initialize check fields to 0
-        for (ItemOrdenCompra item : ordenCompra.getItemsOrdenCompra()) {
-            item.setOrdenCompra(ordenCompra);
+        for (ItemOrdenCompra item : ordenCompraMateriales.getItemsOrdenCompra()) {
+            item.setOrdenCompraMateriales(ordenCompraMateriales);
             if(item.getCantidadCorrecta() == 0) item.setCantidadCorrecta(0);
             if(item.getPrecioCorrecto() == 0) item.setPrecioCorrecto(0);
         }
 
-        // Save and return the OrdenCompra
-        return ordenCompraRepo.save(ordenCompra);
+        // Save and return the OrdenCompraMateriales
+        return ordenCompraRepo.save(ordenCompraMateriales);
     }
 
-    public Page<OrdenCompra> getOrdenesCompraByDateAndEstado(String date1, String date2, String estados, int page, int size) {
+    public Page<OrdenCompraMateriales> getOrdenesCompraByDateAndEstado(String date1, String date2, String estados, int page, int size) {
         // Parse the date strings
         LocalDateTime startDate = LocalDate.parse(date1).atStartOfDay();
         LocalDateTime endDate = LocalDate.parse(date2).atTime(LocalTime.MAX);
@@ -98,22 +98,22 @@ public class ComprasService {
         return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoIn(startDate, endDate, estadoList, pageable);
     }
 
-    public OrdenCompra cancelOrdenCompra(int ordenCompraId) {
-        OrdenCompra orden = ordenCompraRepo.findById(ordenCompraId)
-                .orElseThrow(() -> new RuntimeException("OrdenCompra not found with id: " + ordenCompraId));
+    public OrdenCompraMateriales cancelOrdenCompra(int ordenCompraId) {
+        OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId)
+                .orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with id: " + ordenCompraId));
         orden.setEstado(-1);
         return ordenCompraRepo.save(orden);
     }
 
-    public OrdenCompra updateEstadoOrdenCompra(int ordenCompraId, UpdateEstadoOrdenCompraRequest ue) {
-        OrdenCompra orden = ordenCompraRepo.findById(ordenCompraId).orElseThrow(() -> new RuntimeException("OrdenCompra not found with id: " + ordenCompraId));
+    public OrdenCompraMateriales updateEstadoOrdenCompra(int ordenCompraId, UpdateEstadoOrdenCompraRequest ue) {
+        OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId).orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with id: " + ordenCompraId));
         orden.setEstado(ue.getNewEstado());
         return ordenCompraRepo.save(orden);
     }
 
-    public OrdenCompra getOrdenCompraByOrdenCompraIdAndEstado(Integer ordenCompraId, int estado) {
+    public OrdenCompraMateriales getOrdenCompraByOrdenCompraIdAndEstado(Integer ordenCompraId, int estado) {
         return ordenCompraRepo.findByOrdenCompraIdAndEstado(ordenCompraId, estado)
-                .orElseThrow(() -> new RuntimeException("OrdenCompra not found with OrdenCompraId: "
+                .orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with OrdenCompraId: "
                         + ordenCompraId + " and estado = " + estado));
     }
 

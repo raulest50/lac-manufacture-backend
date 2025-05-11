@@ -1,0 +1,70 @@
+package lacosmetics.planta.lacmanufacture.model.personal;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class IntegrantePersonal {
+
+    /**
+     * se deberia usar la cedula
+     */
+    @Id
+    @Column(nullable = false)
+    private long id;
+
+    @Column(nullable = false)
+    private String nombres;
+
+    @Column(nullable = false)
+    private String apellidos;
+
+    @Column(nullable = false)
+    private String celular;
+
+    @Column(nullable = false)
+    private String direccion;
+    
+    private String email;
+    
+    private String cargo;
+    
+    private Departamento departamento;
+    
+    private String centroDeCosto;
+    
+    private String centroDeProduccion;
+
+    /**
+     * en COP, se usa para el centro de costos
+     */
+    private int salario;
+
+    private Estado estado;
+
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idIntegrante")
+    private List<DocumentoDePersonal> documentos;
+
+    public enum Departamento {
+        PRODUCCION,
+        ADMINISTRATIVO,
+    }
+
+    public enum Estado {
+        ACTIVO,
+        INACTIVO,
+    }
+
+    @ManyToOne
+    private IntegrantePersonal idIntegrante;
+}
