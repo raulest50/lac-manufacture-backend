@@ -79,4 +79,10 @@ public class Activo {
 
     @OneToMany(mappedBy = "activo", cascade = CascadeType.ALL)
     private List<MantenimientoActivo> mantenimientos;
+
+    @OneToOne(mappedBy = "activo", cascade = CascadeType.ALL)
+    private IncorporacionActivoLine lineaIncorporacion;
+
+    @OneToMany(mappedBy = "activo", cascade = CascadeType.ALL)
+    private List<DocumentoBajaActivo> documentosBaja;
 }
