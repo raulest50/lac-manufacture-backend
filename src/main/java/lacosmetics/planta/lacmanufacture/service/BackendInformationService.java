@@ -27,6 +27,13 @@ public class BackendInformationService {
 
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
+    private static final Set<String> PRIMITIVE_OR_BUILTIN = Set.of(
+            "int", "long", "double", "float", "boolean", "char", "byte", "short",
+            "Integer", "Long", "Double", "Float", "Boolean", "Character", "Byte", "Short",
+            "String", "LocalDate", "LocalDateTime", "Date", "Object", "Authentication"
+    );
+
+
     /**
      * Get a list of all endpoints in the application.
      * 
@@ -67,7 +74,23 @@ public class BackendInformationService {
             
             endpoints.add(endpointInfo);
         }
-        
+
+        // Add full model details to each summary
+        for (Map<String, Object> endpoint : endpoints) {
+            Set<String> paths = (Set<String>) endpoint.get("paths");
+            Set<String> methods = (Set<String>) endpoint.get("httpMethods");
+
+            for (String path : paths) {
+                for (String method : methods) {
+                    Map<String, Object> fullDetail = getEndpointDetails(path, method);
+                    if (fullDetail != null) {
+                        endpoint.put("parameters", fullDetail.get("parameters"));
+                        endpoint.put("models", fullDetail.get("models"));
+                    }
+                }
+            }
+        }
+
         return endpoints;
     }
     
@@ -80,62 +103,70 @@ public class BackendInformationService {
      */
     public Map<String, Object> getEndpointDetails(String path, String httpMethod) {
         Map<RequestMappingInfo, HandlerMethod> handlerMethods = requestMappingHandlerMapping.getHandlerMethods();
-        
+
         for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : handlerMethods.entrySet()) {
             RequestMappingInfo mappingInfo = entry.getKey();
             HandlerMethod handlerMethod = entry.getValue();
-            
-            // Check if this is the endpoint we're looking for
+
             boolean pathMatches = mappingInfo.getPatternValues().contains(path);
             boolean methodMatches = mappingInfo.getMethodsCondition().getMethods().stream()
                     .anyMatch(method -> method.name().equalsIgnoreCase(httpMethod));
-            
+
             if (pathMatches && methodMatches) {
                 Map<String, Object> endpointDetails = new HashMap<>();
-                
-                // Basic info
+
                 endpointDetails.put("path", path);
                 endpointDetails.put("httpMethod", httpMethod);
                 endpointDetails.put("controller", handlerMethod.getBeanType().getSimpleName());
                 endpointDetails.put("methodName", handlerMethod.getMethod().getName());
-                
-                // Method parameters
+
                 Method method = handlerMethod.getMethod();
                 List<Map<String, Object>> parameters = new ArrayList<>();
-                
+                Map<String, Object> models = new HashMap<>();
+
                 for (Parameter parameter : method.getParameters()) {
                     Map<String, Object> paramInfo = new HashMap<>();
+                    String typeName = parameter.getType().getSimpleName();
+                    String fullClassName = parameter.getType().getName();
+
                     paramInfo.put("name", parameter.getName());
-                    paramInfo.put("type", parameter.getType().getSimpleName());
-                    
-                    // Get parameter annotations
+                    paramInfo.put("type", typeName);
+
                     List<String> annotations = new ArrayList<>();
                     for (Annotation annotation : parameter.getAnnotations()) {
                         annotations.add(annotation.annotationType().getSimpleName());
                     }
                     paramInfo.put("annotations", annotations);
-                    
                     parameters.add(paramInfo);
+
+                    // if it's a custom class, get its field info
+                    if (!PRIMITIVE_OR_BUILTIN.contains(typeName)) {
+                        Map<String, Object> modelInfo = getModelClassInfo(fullClassName);
+                        if (modelInfo != null) {
+                            models.put(typeName, modelInfo);
+                        }
+                    }
                 }
+
                 endpointDetails.put("parameters", parameters);
-                
-                // Return type
+                endpointDetails.put("models", models);
+
                 endpointDetails.put("returnType", method.getReturnType().getSimpleName());
-                
-                // Method annotations
+
                 List<String> methodAnnotations = new ArrayList<>();
                 for (Annotation annotation : method.getAnnotations()) {
                     methodAnnotations.add(annotation.annotationType().getSimpleName());
                 }
                 endpointDetails.put("methodAnnotations", methodAnnotations);
-                
+
                 return endpointDetails;
             }
         }
-        
-        return null; // Endpoint not found
+
+        return null;
     }
-    
+
+
     /**
      * Get information about a model class.
      * 

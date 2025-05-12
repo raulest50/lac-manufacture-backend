@@ -34,7 +34,7 @@ public class OrdenCompraMateriales {
     @JoinColumn(name = "proveedor_id", referencedColumnName = "id")
     private Proveedor proveedor;
 
-    @OneToMany(mappedBy = "ordenCompra", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "ordenCompraMateriales", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ItemOrdenCompra> itemsOrdenCompra;
 
