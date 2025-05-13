@@ -43,6 +43,9 @@ dependencies {
 	// Added line for Spring Boot DevTools
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
+	// for email sending capabilities
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+
 }
 
 
