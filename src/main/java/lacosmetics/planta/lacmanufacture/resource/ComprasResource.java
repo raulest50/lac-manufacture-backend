@@ -7,8 +7,10 @@ import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.UpdateEstad
 import lacosmetics.planta.lacmanufacture.service.ComprasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
@@ -76,11 +78,17 @@ public class ComprasResource {
         return ResponseEntity.ok(updated);
     }
 
-    @PutMapping("/orden_compra/{ordenCompraId}/updateEstado")
+    @PutMapping(value = "/orden_compra/{ordenCompraId}/updateEstado", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<OrdenCompraMateriales> updateEstadoOrdenCompra(
             @PathVariable int ordenCompraId,
-            @RequestBody UpdateEstadoOrdenCompraRequest request
+            @RequestPart("request") UpdateEstadoOrdenCompraRequest request,
+            @RequestPart(value = "OCMpdf", required = false) MultipartFile pdfAttachment
     ) {
+        // Si se proporciona un archivo, asignarlo al request
+        if (pdfAttachment != null) {
+            request.setOCMpdf(pdfAttachment);
+        }
+
         OrdenCompraMateriales updated = compraService.updateEstadoOrdenCompra(ordenCompraId, request);
         return ResponseEntity.ok(updated);
     }

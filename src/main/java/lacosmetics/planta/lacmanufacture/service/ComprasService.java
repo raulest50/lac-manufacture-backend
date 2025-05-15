@@ -1,5 +1,6 @@
 package lacosmetics.planta.lacmanufacture.service;
 
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.*;
 import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.UpdateEstadoOrdenCompraRequest;
@@ -11,11 +12,13 @@ import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ComprasService {
 
     private final FacturaCompraRepo facturaCompraRepo;
@@ -36,6 +40,8 @@ public class ComprasService {
     private final TerminadoRepo terminadoRepo;
 
     private final OrdenCompraRepo ordenCompraRepo;
+
+    private final EmailService emailService;
 
     /**
      *
@@ -106,8 +112,55 @@ public class ComprasService {
     }
 
     public OrdenCompraMateriales updateEstadoOrdenCompra(int ordenCompraId, UpdateEstadoOrdenCompraRequest ue) {
-        OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId).orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with id: " + ordenCompraId));
+        OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId)
+                .orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with id: " + ordenCompraId));
+
+        // Actualizar el estado
         orden.setEstado(ue.getNewEstado());
+
+        // Si el nuevo estado es 2 y hay un archivo PDF adjunto, enviar correo al proveedor
+        if (ue.getNewEstado() == 2 && ue.getOCMpdf() != null && !ue.getOCMpdf().isEmpty()) {
+            try {
+                // Obtener el proveedor y su información de contacto
+                Proveedor proveedor = orden.getProveedor();
+
+                // Buscar el email del proveedor en la lista de contactos
+                String emailProveedor = null;
+                for (Map<String, Object> contacto : proveedor.getContactos()) {
+                    if (contacto.containsKey("email")) {
+                        emailProveedor = (String) contacto.get("email");
+                        break;
+                    }
+                }
+
+                if (emailProveedor != null) {
+                    // Preparar el asunto y cuerpo del correo
+                    String subject = "Actualización de Orden de Compra #" + ordenCompraId;
+                    String text = "Estimado proveedor,\n\n" +
+                            "La orden de compra #" + ordenCompraId + " ha sido actualizada a estado 'pendiente ingreso almacén'.\n" +
+                            "Adjuntamos el documento PDF con los detalles de la orden.\n\n" +
+                            "Saludos cordiales,\n" +
+                            "LA Cosmetics";
+
+                    // Enviar el correo con el PDF adjunto
+                    emailService.sendEmailWithAttachment(
+                            emailProveedor,
+                            subject,
+                            text,
+                            ue.getOCMpdf()
+                    );
+
+                    log.info("Email sent to provider {} with order details for order ID: {}", emailProveedor, ordenCompraId);
+                } else {
+                    log.warn("No email found for provider with ID: {}", proveedor.getId());
+                }
+            } catch (MessagingException | IOException e) {
+                // Loguear el error pero permitir que la actualización de estado continúe
+                // No queremos que un error en el envío de correo impida la actualización
+                log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
+            }
+        }
+
         return ordenCompraRepo.save(orden);
     }
 
@@ -118,4 +171,3 @@ public class ComprasService {
     }
 
 }
-

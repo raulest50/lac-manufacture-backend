@@ -48,6 +48,11 @@ dependencies {
 
 	// para escanear las clases, se usa en backend endpoins information
 	implementation("org.reflections:reflections:0.10.2")
+
+	// for PDF generation
+	implementation("com.itextpdf:itextpdf:5.5.13.3")
+	implementation("com.itextpdf:layout:7.2.5")
+	implementation("com.itextpdf:kernel:7.2.5")
 }
 
 
