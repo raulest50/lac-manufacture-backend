@@ -50,35 +50,6 @@ public class BackendInformationResource {
         return ResponseEntity.ok(endpointDetails);
     }
 
-    /**
-     * Get a list of model packages.
-     * 
-     * @param packageName Optional package name to filter by
-     * @return A list of model package names
-     */
-    @GetMapping("/models/packages")
-    public ResponseEntity<List<String>> getModelPackages(
-            @RequestParam(value = "package", required = false) String packageName) {
-        
-        return ResponseEntity.ok(backendInformationService.getModelClasses(packageName));
-    }
 
-    /**
-     * Get information about a model class.
-     * 
-     * @param className The fully qualified name of the class
-     * @return Information about the class
-     */
-    @GetMapping("/models/class-info")
-    public ResponseEntity<?> getModelClassInfo(
-            @RequestParam("className") String className) {
-        
-        Map<String, Object> classInfo = backendInformationService.getModelClassInfo(className);
-        
-        if (classInfo == null) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        return ResponseEntity.ok(classInfo);
-    }
+
 }

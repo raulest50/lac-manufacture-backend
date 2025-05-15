@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -48,6 +50,20 @@ public class OrdenCompraActivo {
     private String tiempoEntrega;
 
     private int plazoPago;
+
+    /**
+     * la cotizacion principal, la que se selecciono para hacer la compra
+     */
+    private String cotizacionUrl;
+
+    /**
+     * lista de cotizaciones con el proposito de reforzar que para
+     * hacer una compra de activos se deberian hacer varias cotizaciones
+     * siempre que sea posible para encontrar el mejor proveedor.
+     */
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "cotizaciones_urls")
+    private String[] cotizacionesUrls;
 
     /**
      * -1: cancelada

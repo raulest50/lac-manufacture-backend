@@ -46,6 +46,8 @@ dependencies {
 	// for email sending capabilities
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 
+	// para escanear las clases, se usa en backend endpoins information
+	implementation("org.reflections:reflections:0.10.2")
 }
 
 

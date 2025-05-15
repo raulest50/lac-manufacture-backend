@@ -103,14 +103,23 @@ public class ProveedorService {
     public Page<Proveedor> searchProveedores(DTO_SearchProveedor searchDTO, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
+        // Verificar si la cadena de búsqueda está vacía o solo contiene espacios en blanco
+        // Si es así, devolver todos los proveedores
+
         // 1. Buscar por ID (prefijo)
         if (searchDTO.getSearchType() == DTO_SearchProveedor.SearchType.ID && searchDTO.getId() != null) {
+            // Si el ID está vacío o solo contiene espacios en blanco, devolver todos los proveedores
+            if (isBlank(searchDTO.getId())) {
+                return proveedorRepo.findAll(pageable);
+            }
             return proveedorRepo.findByIdStartingWith(searchDTO.getId(), pageable);
         }
 
         // 2. Buscar por nombre y categoría (en base de datos)
         if (searchDTO.getSearchType() == DTO_SearchProveedor.SearchType.NOMBRE_Y_CATEGORIA) {
-            String nombre = (searchDTO.getNombre() != null && !searchDTO.getNombre().isEmpty())
+            // Si el nombre está vacío o solo contiene espacios en blanco, establecerlo como null
+            // para que la consulta SQL ignore esa condición y devuelva todos los proveedores
+            String nombre = (searchDTO.getNombre() != null && !isBlank(searchDTO.getNombre()))
                     ? searchDTO.getNombre()
                     : null;
 
@@ -127,4 +136,13 @@ public class ProveedorService {
 
 
 
+    /**
+     * Checks if a string is null, empty, or contains only whitespace.
+     *
+     * @param str The string to check
+     * @return true if the string is null, empty, or contains only whitespace
+     */
+    private boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
+    }
 }

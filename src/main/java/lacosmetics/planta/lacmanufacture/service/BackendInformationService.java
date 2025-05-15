@@ -3,6 +3,9 @@ package lacosmetics.planta.lacmanufacture.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
@@ -15,6 +18,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.reflections.scanners.Scanners.SubTypes;
 
 /**
  * Service for providing information about the backend structure, including endpoints and model classes.
@@ -169,7 +174,7 @@ public class BackendInformationService {
 
     /**
      * Get information about a model class.
-     * 
+     *
      * @param className The fully qualified name of the class
      * @return A map containing information about the class, or null if not found
      */
@@ -177,11 +182,11 @@ public class BackendInformationService {
         try {
             Class<?> clazz = Class.forName(className);
             Map<String, Object> classInfo = new HashMap<>();
-            
+
             // Basic class info
             classInfo.put("name", clazz.getSimpleName());
             classInfo.put("package", clazz.getPackage().getName());
-            
+
             // Class annotations
             List<Map<String, Object>> classAnnotations = new ArrayList<>();
             for (Annotation annotation : clazz.getAnnotations()) {
@@ -191,19 +196,19 @@ public class BackendInformationService {
                 classAnnotations.add(annotationInfo);
             }
             classInfo.put("annotations", classAnnotations);
-            
+
             // Is it a JPA entity?
             boolean isEntity = Arrays.stream(clazz.getAnnotations())
                     .anyMatch(a -> a.annotationType().getSimpleName().equals("Entity"));
             classInfo.put("isEntity", isEntity);
-            
+
             // Fields
             List<Map<String, Object>> fields = new ArrayList<>();
             for (Field field : clazz.getDeclaredFields()) {
                 Map<String, Object> fieldInfo = new HashMap<>();
                 fieldInfo.put("name", field.getName());
                 fieldInfo.put("type", field.getType().getSimpleName());
-                
+
                 // Field annotations
                 List<Map<String, Object>> fieldAnnotations = new ArrayList<>();
                 for (Annotation annotation : field.getAnnotations()) {
@@ -213,25 +218,25 @@ public class BackendInformationService {
                     fieldAnnotations.add(annotationInfo);
                 }
                 fieldInfo.put("annotations", fieldAnnotations);
-                
+
                 // Is it a primary key?
                 boolean isPrimaryKey = Arrays.stream(field.getAnnotations())
                         .anyMatch(a -> a.annotationType().getSimpleName().equals("Id"));
                 fieldInfo.put("isPrimaryKey", isPrimaryKey);
-                
+
                 // Is it a foreign key?
                 boolean isForeignKey = Arrays.stream(field.getAnnotations())
                         .anyMatch(a -> {
                             String name = a.annotationType().getSimpleName();
-                            return name.equals("ManyToOne") || name.equals("OneToOne") || 
+                            return name.equals("ManyToOne") || name.equals("OneToOne") ||
                                    name.equals("JoinColumn");
                         });
                 fieldInfo.put("isForeignKey", isForeignKey);
-                
+
                 fields.add(fieldInfo);
             }
             classInfo.put("fields", fields);
-            
+
             // Methods (excluding getters and setters for brevity)
             List<Map<String, Object>> methods = new ArrayList<>();
             for (Method method : clazz.getDeclaredMethods()) {
@@ -239,11 +244,11 @@ public class BackendInformationService {
                 if (method.getName().startsWith("get") || method.getName().startsWith("set")) {
                     continue;
                 }
-                
+
                 Map<String, Object> methodInfo = new HashMap<>();
                 methodInfo.put("name", method.getName());
                 methodInfo.put("returnType", method.getReturnType().getSimpleName());
-                
+
                 // Method parameters
                 List<Map<String, Object>> methodParams = new ArrayList<>();
                 for (Parameter param : method.getParameters()) {
@@ -253,43 +258,39 @@ public class BackendInformationService {
                     methodParams.add(paramInfo);
                 }
                 methodInfo.put("parameters", methodParams);
-                
+
                 methods.add(methodInfo);
             }
             classInfo.put("methods", methods);
-            
+
             return classInfo;
         } catch (ClassNotFoundException e) {
             log.error("Class not found: {}", className, e);
             return null;
         }
     }
-    
+
     /**
      * Get a list of all model classes in the specified package.
-     * 
+     *
      * @param packageName The package name to search in (e.g., "lacosmetics.planta.lacmanufacture.model")
      * @return A list of class names
      */
     public List<String> getModelClasses(String packageName) {
-        // This is a simplified implementation that returns a hardcoded list of model packages
-        // In a real implementation, you would use a library like Reflections to scan the classpath
-        List<String> modelPackages = Arrays.asList(
-            "lacosmetics.planta.lacmanufacture.model.compras",
-            "lacosmetics.planta.lacmanufacture.model.contabilidad",
-            "lacosmetics.planta.lacmanufacture.model.dto",
-            "lacosmetics.planta.lacmanufacture.model.inventarios",
-            "lacosmetics.planta.lacmanufacture.model.produccion",
-            "lacosmetics.planta.lacmanufacture.model.producto",
-            "lacosmetics.planta.lacmanufacture.model.users"
+        Reflections reflections = new Reflections(
+                new ConfigurationBuilder()
+                        .forPackage(packageName)
+                        .addScanners(Scanners.TypesAnnotated, SubTypes)
         );
-        
-        if (packageName != null && !packageName.isEmpty()) {
-            return modelPackages.stream()
-                .filter(pkg -> pkg.startsWith(packageName))
+
+        Set<Class<?>> classes = reflections.get(SubTypes.of(Object.class).asClass());
+
+        return classes.stream()
+                .map(Class::getName)
+                .filter(name -> name.startsWith(packageName))
                 .collect(Collectors.toList());
-        }
-        
-        return modelPackages;
     }
+
+
+
 }
