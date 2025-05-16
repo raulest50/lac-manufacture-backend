@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 /**
  * Para dar ingreso, hacer una modificacion de salario o algun otro parametro
@@ -20,7 +19,8 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentoDePersonal {
+@Table(name = "doc_tran_de_personal")
+public class DocTranDePersonal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,16 +29,16 @@ public class DocumentoDePersonal {
     /**
      * Referencia al integrante de personal al que pertenece este documento
      */
-    @ManyToOne
-    @JoinColumn(name = "integrante_id", nullable = false)
-    private IntegrantePersonal idIntegrante;
+    /*@ManyToOne
+    @JoinColumn(name = "idIntegrante", nullable = false)
+    private IntegrantePersonal idIntegrante;*/
 
     /**
      * Tipo de cambio realizado
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TipoDocumento tipoDocumento;
+    private TipoDocTran tipoDocTran;
 
     /**
      * Fecha y hora en que se realizó el cambio
@@ -72,7 +72,7 @@ public class DocumentoDePersonal {
     /**
      * Tipos de documentos de personal
      */
-    public enum TipoDocumento {
+    public enum TipoDocTran {
         INGRESO("Ingreso de personal"),
         MODIFICACION_SALARIO("Modificación de salario"),
         MODIFICACION_CARGO("Modificación de cargo"),
@@ -84,7 +84,7 @@ public class DocumentoDePersonal {
 
         private final String descripcion;
 
-        TipoDocumento(String descripcion) {
+        TipoDocTran(String descripcion) {
             this.descripcion = descripcion;
         }
 
@@ -96,10 +96,10 @@ public class DocumentoDePersonal {
     /**
      * Crea un documento de ingreso para un nuevo integrante de personal
      */
-    public static DocumentoDePersonal crearDocumentoIngreso(IntegrantePersonal integrante, String usuarioResponsable) {
-        DocumentoDePersonal documento = new DocumentoDePersonal();
-        documento.setIdIntegrante(integrante);
-        documento.setTipoDocumento(TipoDocumento.INGRESO);
+    public static DocTranDePersonal crearDocumentoIngreso(IntegrantePersonal integrante, String usuarioResponsable) {
+        DocTranDePersonal documento = new DocTranDePersonal();
+        //documento.setIdIntegrante(integrante);
+        documento.setTipoDocTran(TipoDocTran.INGRESO);
         documento.setFechaHora(LocalDateTime.now());
         documento.setDescripcion("Ingreso de nuevo integrante de personal");
         documento.setUsuarioResponsable(usuarioResponsable);
@@ -109,17 +109,17 @@ public class DocumentoDePersonal {
     /**
      * Crea un documento de modificación para un cambio en los atributos del integrante
      */
-    public static DocumentoDePersonal crearDocumentoModificacion(
+    public static DocTranDePersonal crearDocumentoModificacion(
             IntegrantePersonal integrante, 
-            TipoDocumento tipoDocumento,
+            TipoDocTran tipoDocTran,
             String descripcion,
             String valoresAnteriores,
             String valoresNuevos,
             String usuarioResponsable) {
 
-        DocumentoDePersonal documento = new DocumentoDePersonal();
-        documento.setIdIntegrante(integrante);
-        documento.setTipoDocumento(tipoDocumento);
+        DocTranDePersonal documento = new DocTranDePersonal();
+        //documento.setIdIntegrante(integrante);
+        documento.setTipoDocTran(tipoDocTran);
         documento.setFechaHora(LocalDateTime.now());
         documento.setDescripcion(descripcion);
         documento.setValoresAnteriores(valoresAnteriores);
@@ -131,14 +131,14 @@ public class DocumentoDePersonal {
     /**
      * Crea un documento de salida para un integrante que deja la empresa
      */
-    public static DocumentoDePersonal crearDocumentoSalida(
+    public static DocTranDePersonal crearDocumentoSalida(
             IntegrantePersonal integrante,
             String motivo,
             String usuarioResponsable) {
 
-        DocumentoDePersonal documento = new DocumentoDePersonal();
-        documento.setIdIntegrante(integrante);
-        documento.setTipoDocumento(TipoDocumento.SALIDA);
+        DocTranDePersonal documento = new DocTranDePersonal();
+        //documento.setIdIntegrante(integrante);
+        documento.setTipoDocTran(TipoDocTran.SALIDA);
         documento.setFechaHora(LocalDateTime.now());
         documento.setDescripcion("Salida de integrante: " + motivo);
         documento.setUsuarioResponsable(usuarioResponsable);

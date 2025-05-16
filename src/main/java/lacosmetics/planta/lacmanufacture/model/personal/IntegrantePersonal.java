@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "integrante_personal")
 public class IntegrantePersonal {
 
     /**
@@ -52,8 +53,8 @@ public class IntegrantePersonal {
     private Estado estado;
 
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "idIntegrante")
-    private List<DocumentoDePersonal> documentos;
+    /*@OneToMany(cascade = CascadeType.ALL, mappedBy = "idIntegrante")
+    private List<DocTranDePersonal> documentos;*/
 
     public enum Departamento {
         PRODUCCION,
@@ -65,6 +66,4 @@ public class IntegrantePersonal {
         INACTIVO,
     }
 
-    @ManyToOne
-    private IntegrantePersonal idIntegrante;
 }
