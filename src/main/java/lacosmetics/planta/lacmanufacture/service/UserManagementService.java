@@ -7,6 +7,7 @@ import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.RoleRepository;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -20,13 +21,16 @@ public class UserManagementService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     public User createUser(User user) {
-        // In a real app, encode the password.
+        // Encrypt the password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPasswordEncoded(true);
         return userRepository.save(user);
     }
 
@@ -34,7 +38,13 @@ public class UserManagementService {
         User existing = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         existing.setUsername(updatedUser.getUsername());
-        existing.setPassword(updatedUser.getPassword());
+
+        // Only encrypt the password if it has been changed
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+            existing.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            existing.setPasswordEncoded(true);
+        }
+
         existing.setRoles(updatedUser.getRoles());
         return userRepository.save(existing);
     }

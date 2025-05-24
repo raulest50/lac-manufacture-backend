@@ -28,7 +28,11 @@ public class User {
 
     private String nombreCompleto;
 
-    private String password;  // in a real app, store an encoded (hashed) password
+    private String password;  // will be stored as encoded (hashed) password
+
+    // Indicates if the password is encoded (true) or plain text (false)
+    @Column(columnDefinition = "boolean default false")
+    private boolean passwordEncoded = false;
 
     // opcional
     private String cel;

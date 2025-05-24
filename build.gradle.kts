@@ -53,6 +53,11 @@ dependencies {
 	implementation("com.itextpdf:itextpdf:5.5.13.3")
 	implementation("com.itextpdf:layout:7.2.5")
 	implementation("com.itextpdf:kernel:7.2.5")
+
+	// JWT dependencies for secure authentication
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }
 
 

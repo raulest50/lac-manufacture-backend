@@ -55,13 +55,13 @@ public class DocTranDePersonal {
     /**
      * Valores anteriores en formato JSON (para cambios)
      */
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "varchar")
     private String valoresAnteriores;
 
     /**
      * Valores nuevos en formato JSON (para cambios)
      */
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "varchar")
     private String valoresNuevos;
 
     /**
