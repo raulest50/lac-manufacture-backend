@@ -33,9 +33,11 @@ public class UsersInitializer {
         initRole(ROLE_ACTIVOS);
 
         userRepository.findByUsername("master").orElseGet(() -> {
+            String username = "master";
+            String rawPassword = "m1243";
             User master = User.builder()
-                    .username("master")
-                    .password("m1243") // Development only! (consider password encoding for production)
+                    .username(username)
+                    .password(PasswordConfig.encodePassword(rawPassword, username)) // Properly encoded with Argon2
                     .roles(Set.of(roleMaster))
                     .build();
             return userRepository.save(master);

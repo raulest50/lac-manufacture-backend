@@ -35,23 +35,8 @@ public class MigrationAuthenticationProvider implements AuthenticationProvider {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
 
-        boolean authenticated = false;
-
-        if (user.isPasswordEncoded()) {
-            // Password is already encoded, use BCrypt to verify
-            authenticated = passwordEncoder.matches(password, user.getPassword());
-        } else {
-            // Password is in plain text, compare directly
-            authenticated = password.equals(user.getPassword());
-
-            // If authentication is successful, update to BCrypt
-            if (authenticated) {
-                log.info("Migrating password for user: {}", username);
-                user.setPassword(passwordEncoder.encode(password));
-                user.setPasswordEncoded(true);
-                userRepository.save(user);
-            }
-        }
+        // All passwords are now encoded with Argon2 using username as salt
+        boolean authenticated = passwordEncoder.matches(password, user.getPassword());
 
         if (!authenticated) {
             throw new BadCredentialsException("Invalid username or password");

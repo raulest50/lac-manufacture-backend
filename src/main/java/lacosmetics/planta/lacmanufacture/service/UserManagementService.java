@@ -2,6 +2,7 @@
 package lacosmetics.planta.lacmanufacture.service;
 
 import jakarta.transaction.Transactional;
+import lacosmetics.planta.lacmanufacture.config.PasswordConfig;
 import lacosmetics.planta.lacmanufacture.model.users.Role;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.RoleRepository;
@@ -28,9 +29,8 @@ public class UserManagementService {
     }
 
     public User createUser(User user) {
-        // Encrypt the password before saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setPasswordEncoded(true);
+        // Encrypt the password before saving using Argon2 with username as salt
+        user.setPassword(PasswordConfig.encodePassword(user.getPassword(), user.getUsername()));
         return userRepository.save(user);
     }
 
@@ -41,8 +41,7 @@ public class UserManagementService {
 
         // Only encrypt the password if it has been changed
         if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-            existing.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-            existing.setPasswordEncoded(true);
+            existing.setPassword(PasswordConfig.encodePassword(updatedUser.getPassword(), existing.getUsername()));
         }
 
         existing.setRoles(updatedUser.getRoles());
