@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.Map;
 
@@ -48,6 +49,17 @@ public class AuthResource {
     public Object whoAmI(Authentication authentication) {
         return authentication;
         // or return a custom DTO with roles, username, etc.
+    }
+
+    /**
+     * para que el usuario pida envio de link al correo para hacer cambio de contraseña
+     * @param email
+     * @return
+     */
+    @PostMapping("/request_passw_reset")
+    public ResponseEntity<String> requestPasswordReset(@RequestBody String email)
+    {
+        throw new UnsupportedOperationException("Password reset functionality not implemented yet");
     }
 
     /**
