@@ -15,6 +15,8 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -52,14 +54,78 @@ public class AuthResource {
     }
 
     /**
-     * para que el usuario pida envio de link al correo para hacer cambio de contraseña
-     * @param email
-     * @return
+     * Endpoint for requesting a password reset.
+     * If a user with the given email exists, an email with a reset link will be sent.
+     * 
+     * @param request the request containing the email
+     * @return a response indicating success or failure
      */
-    @PostMapping("/request_passw_reset")
-    public ResponseEntity<String> requestPasswordReset(@RequestBody String email)
-    {
-        throw new UnsupportedOperationException("Password reset functionality not implemented yet");
+    @PostMapping("/request_reset_passw")
+    public ResponseEntity<?> requestPasswordReset(@RequestBody EmailRequest request) {
+        boolean success = authService.requestPasswordReset(request.getEmail());
+
+        // Always return success to prevent user enumeration attacks
+        return ResponseEntity.ok(Map.of("message", "If an account with that email exists, a password reset link has been sent."));
+    }
+
+    /**
+     * Endpoint for setting a new password using a reset token.
+     * 
+     * @param request the request containing the token and new password
+     * @return a response indicating success or failure
+     */
+    @PostMapping("/set_new_passw")
+    public ResponseEntity<?> setNewPassword(@RequestBody PasswordResetRequest request) {
+        boolean success = authService.setNewPassword(request.getToken(), request.getNewPassword());
+
+        if (success) {
+            return ResponseEntity.ok(Map.of("message", "Password has been reset successfully."));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired token."));
+        }
+    }
+
+    /**
+     * Request body for email-based requests
+     */
+    public static class EmailRequest {
+        @JsonProperty("email")
+        private String email;
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+    }
+
+    /**
+     * Request body for password reset
+     */
+    public static class PasswordResetRequest {
+        @JsonProperty("token")
+        private String token;
+
+        @JsonProperty("newPassword")
+        private String newPassword;
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
+
+        public String getNewPassword() {
+            return newPassword;
+        }
+
+        public void setNewPassword(String newPassword) {
+            this.newPassword = newPassword;
+        }
     }
 
     /**
