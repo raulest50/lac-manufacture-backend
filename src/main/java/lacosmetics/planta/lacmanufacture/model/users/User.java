@@ -30,6 +30,8 @@ public class User {
 
     private String password;  // always stored as encoded (hashed) password
 
+    private String email;
+
     // opcional
     private String cel;
 

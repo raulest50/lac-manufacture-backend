@@ -84,7 +84,7 @@ public class AuthService {
      */
     @Transactional
     public boolean requestPasswordReset(String username) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
+        Optional<User> userOpt = userRepository.findByEmail(username);
 
         if (userOpt.isEmpty()) {
             // User not found, but don't reveal this information for security reasons
@@ -105,8 +105,8 @@ public class AuthService {
         // Send email with reset link
         try {
             String resetUrl = getDomain() + "/reset-password?token=" + token;
-            String emailContent = createPasswordResetEmailContent(user.getUsername(), resetUrl);
-            emailService.sendHtmlEmail(user.getUsername(), "Password Reset Request", emailContent);
+            String emailContent = createPasswordResetEmailContent(user.getUsername(), user.getNombreCompleto(), resetUrl);
+            emailService.sendHtmlEmail(user.getEmail(), "Solicitud de Restablecimiento de Contraseña", emailContent);
             log.info("Password reset email sent to: {}", user.getUsername());
             return true;
         } catch (MessagingException e) {
@@ -167,20 +167,25 @@ public class AuthService {
      * Creates the HTML content for the password reset email.
      *
      * @param username the username of the user
+     * @param nombreCompleto the full name of the user
      * @param resetUrl the URL to reset the password
      * @return the HTML content for the email
      */
-    private String createPasswordResetEmailContent(String username, String resetUrl) {
+    private String createPasswordResetEmailContent(String username, String nombreCompleto, String resetUrl) {
         return "<html>"
                 + "<body style='font-family: Arial, sans-serif;'>"
                 + "<div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>"
-                + "<h2 style='color: #333;'>Password Reset Request</h2>"
-                + "<p>Hello " + username + ",</p>"
-                + "<p>You have requested to reset your password. Please click the link below to set a new password:</p>"
-                + "<p><a href='" + resetUrl + "' style='display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px;'>Reset Password</a></p>"
-                + "<p>This link will expire in 1 hour.</p>"
-                + "<p>If you did not request a password reset, please ignore this email or contact support if you have concerns.</p>"
-                + "<p>Regards,<br>LA Cosmetics Team</p>"
+                + "<h2 style='color: #333;'>Solicitud de Restablecimiento de Contraseña</h2>"
+                + "<p>Hola " + nombreCompleto + ",</p>"
+                + "<p>Has solicitado restablecer tu contraseña. Por favor, haz clic en el enlace a continuación para establecer una nueva contraseña:</p>"
+                + "<p><a href='" + resetUrl + "' style='display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px;'>Restablecer Contraseña</a></p>"
+                + "<p>Este enlace expirará en 1 hora.</p>"
+                + "<div style='background-color: #f8f9fa; border-radius: 4px; padding: 10px; margin: 15px 0; border-left: 4px solid #4CAF50;'>"
+                + "<p style='margin: 0; font-weight: bold;'>Información de la cuenta:</p>"
+                + "<p style='margin: 5px 0;'>Usuario: <span style='background-color: #e8f5e9; padding: 2px 6px; border-radius: 3px; font-family: monospace;'>" + username + "</span></p>"
+                + "</div>"
+                + "<p>Si no solicitaste restablecer tu contraseña, por favor ignora este correo o contacta a soporte si tienes alguna inquietud.</p>"
+                + "<p>Saludos,<br>Equipo de LA Cosmetics</p>"
                 + "</div>"
                 + "</body>"
                 + "</html>";
