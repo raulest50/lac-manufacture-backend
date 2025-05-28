@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.service;
 
-import lacosmetics.planta.lacmanufacture.model.users.Role;
+import lacosmetics.planta.lacmanufacture.model.users.Acceso;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     /**
-     * Given a username, find the user in the DB, map roles to GrantedAuthorities
+     * Given a username, find the user in the DB, map accesos to GrantedAuthorities
      */
     @Override
     @Transactional
@@ -34,8 +34,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User appUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        Set<GrantedAuthority> authorities = appUser.getRoles().stream()
-                .map(Role::getName) // e.g. "ROLE_MASTER"
+        Set<GrantedAuthority> authorities = appUser.getAccesos().stream()
+                .map(acceso -> "ACCESO_" + acceso.getModuloAcceso().name()) // e.g. "ACCESO_USUARIOS"
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
 

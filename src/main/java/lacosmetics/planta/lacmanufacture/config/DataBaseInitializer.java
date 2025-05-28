@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.config;
 
-import lacosmetics.planta.lacmanufacture.repo.usuarios.RoleRepository;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.AccesoRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,16 +15,16 @@ public class DataBaseInitializer {
     private final UsersInitializer usersInitializer;
     private final CargaMasiva cargaMasiva;
     private final CuentasInitializer cuentasInitializer;
-    private final RoleRepository roleRepository;
+    private final AccesoRepository accesoRepository;
 
     private static final Logger log = LoggerFactory.getLogger(DataBaseInitializer.class);
 
     @Bean
     CommandLineRunner initDatabase() {
         return args -> {
-            // Check if the roles table is empty (you can also check other key tables if desired)
+            // Check if the accesos table is empty (you can also check other key tables if desired)
             // this check is to see if db is already initialized.
-            if (roleRepository.count() == 0) { // if not initialized, then it does the carga masiva
+            if (accesoRepository.count() == 0) { // if not initialized, then it does the carga masiva
                 log.info("Database is empty. Performing initial data setup...");
                 usersInitializer.initializeUsers();
                 cargaMasiva.executeCargaMasiva();

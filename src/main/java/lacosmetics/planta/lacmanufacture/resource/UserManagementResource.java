@@ -1,6 +1,7 @@
 // src/main/java/lacosmetics/planta/lacmanufacture/resource/UserManagementResource.java
 package lacosmetics.planta.lacmanufacture.resource;
 
+import lacosmetics.planta.lacmanufacture.model.users.Acceso;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.service.UserManagementService;
 import lombok.RequiredArgsConstructor;
@@ -41,19 +42,28 @@ public class UserManagementResource {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{userId}/roles")
-    public ResponseEntity<User> addRoleToUser(
+    @PostMapping("/{userId}/accesos")
+    public ResponseEntity<User> addAccesoToUser(
             @PathVariable Long userId,
-            @RequestParam String roleName) {
-        User updated = userManagementService.addRoleToUser(userId, roleName);
+            @RequestParam String moduloName) {
+        User updated = userManagementService.addAccesoToUser(userId, moduloName);
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{userId}/roles/{roleId}")
-    public ResponseEntity<User> removeRoleFromUser(
+    @DeleteMapping("/{userId}/accesos/{accesoId}")
+    public ResponseEntity<User> removeAccesoFromUser(
             @PathVariable Long userId,
-            @PathVariable Long roleId) {
-        User updated = userManagementService.removeRoleFromUser(userId, roleId);
+            @PathVariable Long accesoId) {
+        User updated = userManagementService.removeAccesoFromUser(userId, accesoId);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/{userId}/accesos/modulo")
+    public ResponseEntity<User> addAccesoToUserByModulo(
+            @PathVariable Long userId,
+            @RequestParam Acceso.Modulo modulo,
+            @RequestParam(defaultValue = "1") int nivel) {
+        User updated = userManagementService.addAccesoToUserByModulo(userId, modulo, nivel);
         return ResponseEntity.ok(updated);
     }
 }

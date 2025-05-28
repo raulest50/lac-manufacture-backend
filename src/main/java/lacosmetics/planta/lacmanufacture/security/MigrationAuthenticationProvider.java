@@ -42,9 +42,9 @@ public class MigrationAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        // Convert user roles to Spring Security authorities
-        Set<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+        // Convert user accesos to Spring Security authorities
+        Set<GrantedAuthority> authorities = user.getAccesos().stream()
+                .map(acceso -> new SimpleGrantedAuthority("ACCESO_" + acceso.getModuloAcceso().name()))
                 .collect(Collectors.toSet());
 
         return new UsernamePasswordAuthenticationToken(username, null, authorities);

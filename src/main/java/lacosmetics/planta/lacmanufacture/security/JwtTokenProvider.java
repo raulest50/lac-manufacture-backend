@@ -25,64 +25,64 @@ public class JwtTokenProvider {
 
     @Value("${jwt.secret:defaultSecretKeyThatShouldBeOverriddenInProduction}")
     private String jwtSecret;
-    
+
     @Value("${jwt.expiration:86400000}") // Default: 24 hours
     private long jwtExpiration;
-    
+
     private Key key;
-    
+
     @PostConstruct
     public void init() {
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
-    
+
     public String generateToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        
+
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
-        
+
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-        
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
-                .claim("roles", authorities)
+                .claim("accesos", authorities)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(key)
                 .compact();
     }
-    
+
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        
+
         return claims.getSubject();
     }
-    
+
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        
+
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("roles").toString().split(","))
+                Arrays.stream(claims.get("accesos").toString().split(","))
                         .filter(auth -> !auth.trim().isEmpty())
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
-        
+
         UserDetails principal = new User(claims.getSubject(), "", authorities);
-        
+
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
-    
+
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
