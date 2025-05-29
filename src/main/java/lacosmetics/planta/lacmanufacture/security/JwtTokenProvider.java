@@ -44,6 +44,7 @@ public class JwtTokenProvider {
 
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
+                .map(auth -> auth.replace("ACCESO_", "")) // Remove the prefix
                 .collect(Collectors.joining(","));
 
         return Jwts.builder()
@@ -75,6 +76,7 @@ public class JwtTokenProvider {
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get("accesos").toString().split(","))
                         .filter(auth -> !auth.trim().isEmpty())
+                        .map(auth -> "ACCESO_" + auth) // Add the prefix back
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
