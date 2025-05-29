@@ -1,5 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model.users;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Acceso {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     private int nivel; // nivel de acceso al modulo desde 1 en adelante

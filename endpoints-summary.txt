@@ -57,6 +57,33 @@ axios.post('/api/endpoint', formData, {
 
 ## Endpoints
 
+=== lacosmetics\planta\lacmanufacture\resource\AuthResource.java ===
+Controller: AuthResource
+Base Path: /api/auth
+
+Endpoint: Post /api/auth/login
+  Method: authenticateUser
+  Returns: ?
+  Parameters:
+    - LoginRequest loginRequest
+
+Endpoint: Get /api/auth/whoami
+  Method: whoAmI
+  Returns: Object
+
+Endpoint: Post /api/auth/request_reset_passw
+  Method: requestPasswordReset
+  Returns: ?
+  Parameters:
+    - EmailRequest request
+
+Endpoint: Post /api/auth/set_new_passw
+  Method: setNewPassword
+  Returns: ?
+  Parameters:
+    - PasswordResetRequest request
+
+
 === lacosmetics\planta\lacmanufacture\resource\BackendInformationResource.java ===
 Controller: BackendInformationResource
 Base Path: /api/backend-info
@@ -374,6 +401,7 @@ Endpoint: Get /usuarios
       • username : String
       • nombreCompleto : String
       • password : String
+      • email : String
       • cel : String
       • direccion : String
       • fechaNacimiento : LocalDate
@@ -391,6 +419,7 @@ Endpoint: Post /usuarios
       • username : String
       • nombreCompleto : String
       • password : String
+      • email : String
       • cel : String
       • direccion : String
       • fechaNacimiento : LocalDate
@@ -409,6 +438,7 @@ Endpoint: Put /usuarios/{userId}
       • username : String
       • nombreCompleto : String
       • password : String
+      • email : String
       • cel : String
       • direccion : String
       • fechaNacimiento : LocalDate
@@ -420,21 +450,16 @@ Endpoint: Delete /usuarios/{userId}
   Parameters:
     - Long userId
 
-Endpoint: Post /usuarios/{userId}/roles
+Endpoint: Post /usuarios/{userId}/accesos
   Method: 
   Returns: 
 
-Endpoint: Delete /usuarios/{userId}/roles/{roleId}
+Endpoint: Delete /usuarios/{userId}/accesos/{accesoId}
   Method: 
   Returns: 
 
-
-=== lacosmetics\planta\lacmanufacture\resource\UserResource.java ===
-Controller: UserResource
-Base Path: /user
-
-Endpoint: Get /user/whoami
-  Method: whoAmI
-  Returns: Object
+Endpoint: Post /usuarios/{userId}/accesos/modulo
+  Method: 
+  Returns: 
 
 
