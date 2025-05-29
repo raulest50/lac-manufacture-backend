@@ -35,7 +35,7 @@ public class Acceso {
         PROVEEDORES,
         COMPRAS,
         SEGUIMIENTO_PRODUCCION,
-        TRANSACCIONES_ALMACE,
+        TRANSACCIONES_ALMACEN,
         ACTIVOS,
         CONTABILIDAD,
         PERSONAL_PLANTA,
