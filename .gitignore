@@ -47,7 +47,12 @@ src/main/resources/application.properties
 id_rsa
 id_rsa.pub
 
+id_rsa2
+id_rsa2.ppk
+id_rsa2.pub
+
 comandos.md
+COMANDOS_CP.md
 
 # donde se guarda el output del script para scanear y hacer un resumen de las entidades del backend
 entity-summary.txt
