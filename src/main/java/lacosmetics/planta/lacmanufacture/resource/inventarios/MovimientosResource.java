@@ -1,10 +1,10 @@
-package lacosmetics.planta.lacmanufacture.resource;
+package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 
 import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.IngresoOCM_DTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
-import lacosmetics.planta.lacmanufacture.service.MovimientosService;
+import lacosmetics.planta.lacmanufacture.service.inventarios.MovimientosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;

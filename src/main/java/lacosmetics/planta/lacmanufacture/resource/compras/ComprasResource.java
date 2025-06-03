@@ -1,10 +1,10 @@
-package lacosmetics.planta.lacmanufacture.resource;
+package lacosmetics.planta.lacmanufacture.resource.compras;
 
 import lacosmetics.planta.lacmanufacture.model.compras.FacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.UpdateEstadoOrdenCompraRequest;
-import lacosmetics.planta.lacmanufacture.service.ComprasService;
+import lacosmetics.planta.lacmanufacture.service.compras.ComprasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -77,6 +77,7 @@ public class ComprasResource {
         OrdenCompraMateriales updated = compraService.cancelOrdenCompra(ordenCompraId);
         return ResponseEntity.ok(updated);
     }
+
 
     @PutMapping(value = "/orden_compra/{ordenCompraId}/updateEstado", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<OrdenCompraMateriales> updateEstadoOrdenCompra(

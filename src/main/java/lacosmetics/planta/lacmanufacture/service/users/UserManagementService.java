@@ -1,5 +1,5 @@
 // src/main/java/lacosmetics/planta/lacmanufacture/service/UserManagementService.java
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.users;
 
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.config.PasswordConfig;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor

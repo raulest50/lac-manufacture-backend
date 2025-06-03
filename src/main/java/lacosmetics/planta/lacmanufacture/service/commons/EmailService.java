@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.commons;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

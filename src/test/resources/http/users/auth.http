@@ -1,0 +1,31 @@
+### Variables globales
+@host = http://localhost:8080
+@contentType = application/json
+
+### Login para obtener token JWT
+# Este endpoint permite autenticarse y obtener un token JWT
+# IMPORTANTE: Reemplaza "tu_usuario" y "tu_contraseña" con credenciales válidas
+POST {{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": {{user}},
+  "password": {{password}}
+}
+
+### Verificar usuario autenticado
+# Este endpoint devuelve información sobre el usuario autenticado actualmente
+# IMPORTANTE: Primero debes ejecutar el login y copiar el token recibido en la variable auth_token abajo
+GET {{host}}/api/auth/whoami
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+### Token para usar en este archivo
+# Copia el token de la respuesta del login y pégalo aquí
+@auth_token = eyJhbGciOiJIUzI1NiJ9...
+
+### INSTRUCCIONES PARA USAR EL TOKEN EN OTROS ARCHIVOS
+# Para usar el token en email.http:
+# 1. Ejecuta la petición de login arriba con credenciales válidas
+# 2. Copia el token JWT de la respuesta (campo "token")
+# 3. Ve al archivo email.http y pega el token en la variable correspondiente

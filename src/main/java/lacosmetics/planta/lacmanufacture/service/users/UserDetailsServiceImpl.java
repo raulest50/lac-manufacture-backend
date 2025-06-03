@@ -1,6 +1,5 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.users;
 
-import lacosmetics.planta.lacmanufacture.model.users.Acceso;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lombok.RequiredArgsConstructor;

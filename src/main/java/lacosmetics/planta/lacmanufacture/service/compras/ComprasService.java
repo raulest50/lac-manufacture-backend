@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.compras;
 
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
@@ -11,6 +11,7 @@ import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo
 import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
+import lacosmetics.planta.lacmanufacture.service.commons.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

@@ -1,6 +1,6 @@
-package lacosmetics.planta.lacmanufacture.resource;
+package lacosmetics.planta.lacmanufacture.resource.commons;
 
-import lacosmetics.planta.lacmanufacture.service.DocumentPdfService;
+import lacosmetics.planta.lacmanufacture.service.commons.DocumentPdfService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

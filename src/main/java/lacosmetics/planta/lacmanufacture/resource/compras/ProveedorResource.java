@@ -1,10 +1,10 @@
-package lacosmetics.planta.lacmanufacture.resource;
+package lacosmetics.planta.lacmanufacture.resource.compras;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchProveedor;
-import lacosmetics.planta.lacmanufacture.service.ProveedorService;
+import lacosmetics.planta.lacmanufacture.service.compras.ProveedorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

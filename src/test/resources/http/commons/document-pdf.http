@@ -1,0 +1,11 @@
+### Variables globales
+@host = http://localhost:8080
+
+### Descargar PDF de orden de compra
+# Este endpoint genera y descarga un PDF para una orden de compra específica
+# Reemplaza {ordenCompraId} con el ID real de la orden de compra que deseas descargar
+GET {{host}}/documents/orden-compra/1/pdf
+
+### Ejemplo alternativo con otro ID
+# Puedes modificar el ID para descargar diferentes órdenes de compra
+GET {{host}}/documents/orden-compra/2/pdf

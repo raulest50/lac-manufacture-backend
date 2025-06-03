@@ -1,9 +1,9 @@
 // src/main/java/lacosmetics/planta/lacmanufacture/resource/UserManagementResource.java
-package lacosmetics.planta.lacmanufacture.resource;
+package lacosmetics.planta.lacmanufacture.resource.users;
 
 import lacosmetics.planta.lacmanufacture.model.users.Acceso;
 import lacosmetics.planta.lacmanufacture.model.users.User;
-import lacosmetics.planta.lacmanufacture.service.UserManagementService;
+import lacosmetics.planta.lacmanufacture.service.users.UserManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

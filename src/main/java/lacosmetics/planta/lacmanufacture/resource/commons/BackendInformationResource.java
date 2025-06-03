@@ -1,6 +1,6 @@
-package lacosmetics.planta.lacmanufacture.resource;
+package lacosmetics.planta.lacmanufacture.resource.commons;
 
-import lacosmetics.planta.lacmanufacture.service.BackendInformationService;
+import lacosmetics.planta.lacmanufacture.service.commons.BackendInformationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

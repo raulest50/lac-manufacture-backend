@@ -39,6 +39,10 @@ public class Acceso {
         ACTIVOS,
         CONTABILIDAD,
         PERSONAL_PLANTA,
-        BINTELLIGENCE
+        BINTELLIGENCE,
+        CARGA_MASIVA, // nuevos endpoints de aca para abajo
+        ADMINISTRACION_ALERTAS,
+        MASTER_CONFIGS,
+        CRONOGRAMA,
     }
 }

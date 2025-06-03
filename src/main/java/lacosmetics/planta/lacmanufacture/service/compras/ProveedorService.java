@@ -1,10 +1,11 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.compras;
 
 
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchProveedor;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
+import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

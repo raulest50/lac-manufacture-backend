@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.commons;
 
 import lacosmetics.planta.lacmanufacture.config.StorageProperties;
 import org.springframework.stereotype.Service;

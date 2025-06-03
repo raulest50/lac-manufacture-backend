@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.inventarios;
 
 
 import jakarta.transaction.Transactional;

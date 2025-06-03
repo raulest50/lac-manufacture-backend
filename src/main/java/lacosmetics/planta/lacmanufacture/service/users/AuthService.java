@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.users;
 
 import jakarta.mail.MessagingException;
 import lacosmetics.planta.lacmanufacture.config.PasswordConfig;
@@ -7,9 +7,9 @@ import lacosmetics.planta.lacmanufacture.model.users.auth.PasswordResetToken;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.PasswordResetTokenRepository;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lacosmetics.planta.lacmanufacture.security.JwtTokenProvider;
+import lacosmetics.planta.lacmanufacture.service.commons.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

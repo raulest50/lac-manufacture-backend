@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.commons;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
