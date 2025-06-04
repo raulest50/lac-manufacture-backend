@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/compras")
@@ -80,18 +81,23 @@ public class ComprasResource {
 
 
     @PutMapping(value = "/orden_compra/{ordenCompraId}/updateEstado", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<OrdenCompraMateriales> updateEstadoOrdenCompra(
+    public ResponseEntity<?> updateEstadoOrdenCompra(
             @PathVariable int ordenCompraId,
             @RequestPart("request") UpdateEstadoOrdenCompraRequest request,
             @RequestPart(value = "OCMpdf", required = false) MultipartFile pdfAttachment
     ) {
-        // Si se proporciona un archivo, asignarlo al request
-        if (pdfAttachment != null) {
-            request.setOCMpdf(pdfAttachment);
-        }
+        try {
+            // Si se proporciona un archivo, asignarlo al request
+            if (pdfAttachment != null) {
+                request.setOCMpdf(pdfAttachment);
+            }
 
-        OrdenCompraMateriales updated = compraService.updateEstadoOrdenCompra(ordenCompraId, request);
-        return ResponseEntity.ok(updated);
+            OrdenCompraMateriales updated = compraService.updateEstadoOrdenCompra(ordenCompraId, request);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            // Devolver un error con el mensaje específico
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
 

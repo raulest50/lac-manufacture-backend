@@ -10,7 +10,7 @@
 # 3. Copia el token JWT recibido en la respuesta (campo "token")
 # 4. Pega el token aquí reemplazando el texto "TU_TOKEN_JWT_AQUI"
 # 5. Luego puedes ejecutar las peticiones de este archivo
-@auth_token = TU_TOKEN_JWT_AQUI
+@auth_token = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJtYXN0ZXIiLCJhY2Nlc29zIjoiIiwiaWF0IjoxNzQ4OTc4MjgxLCJleHAiOjE3NDkwNjQ2ODF9.vE9Yvc0SN10uXZ9KxqRGaveTzVs2nNUfry0m65Mldjf4HC6sIZx9_TlyUfnTeroG
 
 ### Enviar email simple
 # Este endpoint permite enviar un email de texto simple a un destinatario

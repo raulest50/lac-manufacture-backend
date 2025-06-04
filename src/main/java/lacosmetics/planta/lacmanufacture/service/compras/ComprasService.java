@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -112,12 +113,61 @@ public class ComprasService {
         return ordenCompraRepo.save(orden);
     }
 
+    /**
+     * Envía un correo electrónico al proveedor con la orden de compra adjunta.
+     * 
+     * @param orden La orden de compra a enviar
+     * @param pdfAttachment El archivo PDF adjunto con los detalles de la orden
+     * @throws MessagingException Si hay un error al enviar el correo
+     * @throws IOException Si hay un error al procesar el archivo adjunto
+     * @throws RuntimeException Si no se encuentra un email para el proveedor
+     */
+    public void enviarCorreoOrdenCompraProveedor(OrdenCompraMateriales orden, MultipartFile pdfAttachment) 
+            throws MessagingException, IOException {
+
+        if (pdfAttachment == null || pdfAttachment.isEmpty()) {
+            throw new RuntimeException("No se proporcionó archivo PDF para enviar por email para la orden: " + orden.getOrdenCompraId());
+        }
+
+        // Obtener el proveedor y su información de contacto
+        Proveedor proveedor = orden.getProveedor();
+
+        // Buscar el email del proveedor en la lista de contactos
+        String emailProveedor = null;
+        for (Map<String, Object> contacto : proveedor.getContactos()) {
+            if (contacto.containsKey("email")) {
+                emailProveedor = (String) contacto.get("email");
+                break;
+            }
+        }
+
+        if (emailProveedor == null) {
+            throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
+        }
+
+        // Preparar el asunto y cuerpo del correo
+        String subject = "Actualización de Orden de Compra #" + orden.getOrdenCompraId();
+        String text = "Estimado proveedor,\n\n" +
+                "La orden de compra #" + orden.getOrdenCompraId() + " ha sido actualizada a estado 'pendiente ingreso almacén'.\n" +
+                "Adjuntamos el documento PDF con los detalles de la orden.\n\n" +
+                "Saludos cordiales,\n" +
+                "LA Cosmetics";
+
+        // Enviar el correo con el PDF adjunto
+        emailService.sendEmailWithAttachment(
+                emailProveedor,
+                subject,
+                text,
+                pdfAttachment
+        );
+
+        log.info("Email sent to provider {} with order details for order ID: {}", emailProveedor, orden.getOrdenCompraId());
+    }
+
+    @Transactional
     public OrdenCompraMateriales updateEstadoOrdenCompra(int ordenCompraId, UpdateEstadoOrdenCompraRequest ue) {
         OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId)
                 .orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with id: " + ordenCompraId));
-
-        // Actualizar el estado
-        orden.setEstado(ue.getNewEstado());
 
         // Si el nuevo estado es 2 y estamos cambiando desde estado 1, manejar según el tipo de envío
         if (ue.getNewEstado() == 2 && orden.getEstado() == 1) {
@@ -131,48 +181,16 @@ public class ComprasService {
 
                     case EMAIL:
                         // Para envío por email, verificar que exista el PDF y enviarlo
-                        if (ue.getOCMpdf() != null && !ue.getOCMpdf().isEmpty()) {
-                            try {
-                                // Obtener el proveedor y su información de contacto
-                                Proveedor proveedor = orden.getProveedor();
-
-                                // Buscar el email del proveedor en la lista de contactos
-                                String emailProveedor = null;
-                                for (Map<String, Object> contacto : proveedor.getContactos()) {
-                                    if (contacto.containsKey("email")) {
-                                        emailProveedor = (String) contacto.get("email");
-                                        break;
-                                    }
-                                }
-
-                                if (emailProveedor != null) {
-                                    // Preparar el asunto y cuerpo del correo
-                                    String subject = "Actualización de Orden de Compra #" + ordenCompraId;
-                                    String text = "Estimado proveedor,\n\n" +
-                                            "La orden de compra #" + ordenCompraId + " ha sido actualizada a estado 'pendiente ingreso almacén'.\n" +
-                                            "Adjuntamos el documento PDF con los detalles de la orden.\n\n" +
-                                            "Saludos cordiales,\n" +
-                                            "LA Cosmetics";
-
-                                    // Enviar el correo con el PDF adjunto
-                                    emailService.sendEmailWithAttachment(
-                                            emailProveedor,
-                                            subject,
-                                            text,
-                                            ue.getOCMpdf()
-                                    );
-
-                                    log.info("Email sent to provider {} with order details for order ID: {}", emailProveedor, ordenCompraId);
-                                } else {
-                                    log.warn("No email found for provider with ID: {}", proveedor.getId());
-                                }
-                            } catch (MessagingException | IOException e) {
-                                // Loguear el error pero permitir que la actualización de estado continúe
-                                // No queremos que un error en el envío de correo impida la actualización
-                                log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
-                            }
-                        } else {
-                            log.warn("No se proporcionó archivo PDF para enviar por email para la orden: {}", ordenCompraId);
+                        try {
+                            enviarCorreoOrdenCompraProveedor(orden, ue.getOCMpdf());
+                        } catch (MessagingException | IOException e) {
+                            // Lanzar una excepción para que la transacción se revierta
+                            log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
+                            throw new RuntimeException("Error al enviar correo al proveedor: " + e.getMessage(), e);
+                        } catch (RuntimeException e) {
+                            // Propagar la excepción para que la transacción se revierta
+                            log.error(e.getMessage());
+                            throw e;
                         }
                         break;
 
@@ -183,56 +201,28 @@ public class ComprasService {
 
                     default:
                         log.warn("Tipo de envío no reconocido para la orden: {}", ordenCompraId);
+                        throw new RuntimeException("Tipo de envío no reconocido para la orden: " + ordenCompraId);
                 }
             } else {
                 // Si no se especificó tipo de envío, usar el comportamiento predeterminado (email)
                 log.warn("No se especificó tipo de envío para la orden: {}, usando email por defecto", ordenCompraId);
 
-                // Verificar si hay un PDF adjunto
-                if (ue.getOCMpdf() != null && !ue.getOCMpdf().isEmpty()) {
-                    try {
-                        // Obtener el proveedor y su información de contacto
-                        Proveedor proveedor = orden.getProveedor();
-
-                        // Buscar el email del proveedor en la lista de contactos
-                        String emailProveedor = null;
-                        for (Map<String, Object> contacto : proveedor.getContactos()) {
-                            if (contacto.containsKey("email")) {
-                                emailProveedor = (String) contacto.get("email");
-                                break;
-                            }
-                        }
-
-                        if (emailProveedor != null) {
-                            // Preparar el asunto y cuerpo del correo
-                            String subject = "Actualización de Orden de Compra #" + ordenCompraId;
-                            String text = "Estimado proveedor,\n\n" +
-                                    "La orden de compra #" + ordenCompraId + " ha sido actualizada a estado 'pendiente ingreso almacén'.\n" +
-                                    "Adjuntamos el documento PDF con los detalles de la orden.\n\n" +
-                                    "Saludos cordiales,\n" +
-                                    "LA Cosmetics";
-
-                            // Enviar el correo con el PDF adjunto
-                            emailService.sendEmailWithAttachment(
-                                    emailProveedor,
-                                    subject,
-                                    text,
-                                    ue.getOCMpdf()
-                            );
-
-                            log.info("Email sent to provider {} with order details for order ID: {}", emailProveedor, ordenCompraId);
-                        } else {
-                            log.warn("No email found for provider with ID: {}", proveedor.getId());
-                        }
-                    } catch (MessagingException | IOException e) {
-                        // Loguear el error pero permitir que la actualización de estado continúe
-                        // No queremos que un error en el envío de correo impida la actualización
-                        log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
-                    }
+                try {
+                    enviarCorreoOrdenCompraProveedor(orden, ue.getOCMpdf());
+                } catch (MessagingException | IOException e) {
+                    // Lanzar una excepción para que la transacción se revierta
+                    log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
+                    throw new RuntimeException("Error al enviar correo al proveedor: " + e.getMessage(), e);
+                } catch (RuntimeException e) {
+                    // Propagar la excepción para que la transacción se revierta
+                    log.error(e.getMessage());
+                    throw e;
                 }
             }
         }
 
+        // Actualizar el estado solo después de que todo el proceso haya sido exitoso
+        orden.setEstado(ue.getNewEstado());
         return ordenCompraRepo.save(orden);
     }
 
