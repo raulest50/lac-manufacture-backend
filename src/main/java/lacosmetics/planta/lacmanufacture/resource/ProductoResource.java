@@ -82,19 +82,32 @@ public class ProductoResource {
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String search,
-            @RequestParam String tipoBusqueda)
-    {
-        if(tipoBusqueda.equals("ID")){
-            Optional<Material> materiaPrimaOptional = productoService.findMateriaPrimaByProductoId(Integer.parseInt(search));
-            if (materiaPrimaOptional.isPresent()) {
-                List<Material> materialList = List.of(materiaPrimaOptional.get());
-                Pageable pageable = PageRequest.of(page, size);
-                return ResponseEntity.ok().body(new PageImpl<>(materialList, pageable, 1));
-            } else {
-                return ResponseEntity.ok().body(new PageImpl<>(List.of(), PageRequest.of(page, size), 0));
+            @RequestParam String tipoBusqueda) {
+
+        // Si estamos en modo ID pero el parámetro 'search' está vacío,
+        // redirigimos a la búsqueda por nombre (que hace LIKE "%%" y retorna todo).
+        if ("ID".equalsIgnoreCase(tipoBusqueda)) {
+            if (search == null || search.trim().isEmpty()) {
+                // -> devuelve todas las materias primas (paginadas)
+                Page<Material> todas = productoService.searchByName_MP("", page, size);
+                return ResponseEntity.ok(todas);
             }
-        } else{
-            return ResponseEntity.ok().body(productoService.searchByName_MP(search, page, size));
+            // Si 'search' no está vacío, intentar parsear como entero:
+            try {
+                int id = Integer.parseInt(search.trim());
+                Optional<Material> mpOpt = productoService.findMateriaPrimaByProductoId(id);
+                List<Material> lista = mpOpt.map(List::of).orElse(List.of());
+                Page<Material> resultado = new PageImpl<>(lista, PageRequest.of(page, size), lista.size());
+                return ResponseEntity.ok(resultado);
+            } catch (NumberFormatException e) {
+                // Si vino texto no numérico, devolvemos página vacía en lugar de 403/500
+                Page<Material> vacio = new PageImpl<>(List.of(), PageRequest.of(page, size), 0);
+                return ResponseEntity.ok(vacio);
+            }
+        } else {
+            // Modo NOMBRE (incluye el caso search == "")
+            Page<Material> resultadoNombre = productoService.searchByName_MP(search, page, size);
+            return ResponseEntity.ok(resultadoNombre);
         }
     }
 
