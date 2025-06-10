@@ -267,7 +267,7 @@ public class DocumentPdfService {
         table.addCell(createValueCell(String.valueOf(orden.getSubTotal()), normalFont));
         
         table.addCell(createLabelCell("Iva 19%", normalFont));
-        table.addCell(createValueCell(String.valueOf(orden.getIva19()), normalFont));
+        table.addCell(createValueCell(String.valueOf(orden.getIvaCOP()), normalFont));
         
         table.addCell(createLabelCell("Total Pagar", normalFont));
         table.addCell(createValueCell(String.valueOf(orden.getTotalPagar()), normalFont));

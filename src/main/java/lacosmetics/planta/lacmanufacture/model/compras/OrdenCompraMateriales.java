@@ -39,7 +39,7 @@ public class OrdenCompraMateriales {
     private List<ItemOrdenCompra> itemsOrdenCompra;
 
     private int subTotal;
-    private int iva19;
+    private int ivaCOP;
     private int totalPagar;
 
     /**

@@ -38,11 +38,11 @@ public class ItemOrdenCompra {
 
     private int cantidad;
     private int precioUnitario;
-    private int iva19;
+    private int ivaCOP;
     private int subTotal;
 
     public int getPrecioUnitarioFinal(){
-        return precioUnitario + iva19;
+        return precioUnitario + ivaCOP;
     }
 
     /**
