@@ -162,7 +162,7 @@ public class MovimientosService {
             transaccionAlmacenHeaderRepo.save(ingresoOCM);
 
             // se actualiza el estado de la orden de compra a cerrado exitosamente
-            OrdenCompraMateriales oc = docIngresoDTO.getTransaccionAlmacen();
+            OrdenCompraMateriales oc = docIngresoDTO.getOrdenCompraMateriales();
             oc.setEstado(3);
             ordenCompraRepo.save(oc);
 

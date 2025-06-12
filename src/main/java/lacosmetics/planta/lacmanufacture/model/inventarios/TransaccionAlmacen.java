@@ -24,15 +24,15 @@ import java.util.List;
 public class TransaccionAlmacen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "transaccion_id", unique = true, updatable = false, nullable = false)
-    private int TransaccionId;
+    @Column(unique = true, updatable = false, nullable = false)
+    private int transaccionId;
 
     @OneToMany(mappedBy = "transaccionAlmacen", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Movimiento> movimientosTransaccion;
 
     @CreationTimestamp
-    private LocalDateTime fechaMovimiento;
+    private LocalDateTime fechaTransaccion;
 
     /**
      * url de la foto, scan o documento fisico de soporte si lo hay
