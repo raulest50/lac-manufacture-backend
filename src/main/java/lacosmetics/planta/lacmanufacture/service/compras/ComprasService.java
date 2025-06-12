@@ -146,12 +146,15 @@ public class ComprasService {
         }
 
         // Preparar el asunto y cuerpo del correo
-        String subject = "Actualización de Orden de Compra #" + orden.getOrdenCompraId();
-        String text = "Estimado proveedor,\n\n" +
-                "La orden de compra #" + orden.getOrdenCompraId() + " ha sido actualizada a estado 'pendiente ingreso almacén'.\n" +
-                "Adjuntamos el documento PDF con los detalles de la orden.\n\n" +
+        String subject = "No Reply - Orden de Compra Exotic Expert #" + orden.getOrdenCompraId();
+        String text = "Estimado proveedor: " + orden.getProveedor() + ",\n\n" +
+                "Por medio de la presente le hacemos llegar la orden de compra #" + orden.getOrdenCompraId() +
+                "correspondiente a los productos/servicios detallados en el documento adjunto.\n" +
+                "Le agradeceremos confirmar la recepción de esta orden y, en caso de ser necesario," +
+                "informarnos sobre el tiempo estimado de entrega o cualquier observación relevante.\n\n" +
+                "Quedamos atentos a su confirmación y agradecemos de antemano su atención y colaboración.\n\n" +
                 "Saludos cordiales,\n" +
-                "LA Cosmetics";
+                "Exotic Expert - Departamento de Compras";
 
         // Enviar el correo con el PDF adjunto
         emailService.sendEmailWithAttachment(
