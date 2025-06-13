@@ -13,7 +13,7 @@ public class IngresoOCM_DTA {
 
     private TransaccionAlmacen transaccionAlmacen;
     private OrdenCompraMateriales ordenCompraMateriales;
-    private String user;
+    private String userId;
     private String observaciones;
 
 }

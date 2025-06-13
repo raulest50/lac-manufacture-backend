@@ -1,17 +1,25 @@
 package lacosmetics.planta.lacmanufacture.resource.users;
 
+import lacosmetics.planta.lacmanufacture.model.users.User;
+import lacosmetics.planta.lacmanufacture.model.users.Acceso;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lacosmetics.planta.lacmanufacture.service.users.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AuthResource {
 
     private final AuthService authService;
+    private final UserRepository userRepository;
 
     /**
      * Login endpoint that authenticates a user and returns a JWT token
@@ -45,11 +54,54 @@ public class AuthResource {
 
     /**
      * Returns information about the currently authenticated user
+     * with custom response that includes nivel for each authority
      */
     @GetMapping("/whoami")
-    public Object whoAmI(Authentication authentication) {
-        return authentication;
-        // or return a custom DTO with roles, username, etc.
+    public ResponseEntity<?> whoAmI(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Obtener el nombre de usuario del principal
+        String username = authentication.getName();
+
+        // Buscar el usuario en la base de datos para obtener sus accesos con niveles
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        // Crear un mapa para la respuesta personalizada
+        Map<String, Object> response = new HashMap<>();
+        response.put("name", username);
+        response.put("authenticated", authentication.isAuthenticated());
+        response.put("credentials", authentication.getCredentials());
+        response.put("details", authentication.getDetails());
+
+        // Crear una lista de autoridades con nivel
+        List<Map<String, Object>> authoritiesWithLevel = new ArrayList<>();
+
+        // Mapear cada acceso a una autoridad con nivel
+        for (Acceso acceso : user.getAccesos()) {
+            Map<String, Object> authorityWithLevel = new HashMap<>();
+            authorityWithLevel.put("authority", "ACCESO_" + acceso.getModuloAcceso().name());
+            authorityWithLevel.put("nivel", String.valueOf(acceso.getNivel()));
+            authoritiesWithLevel.add(authorityWithLevel);
+        }
+
+        response.put("authorities", authoritiesWithLevel);
+
+        // Agregar el principal (información del usuario)
+        Map<String, Object> principalInfo = new HashMap<>();
+        principalInfo.put("username", username);
+        principalInfo.put("password", ""); // No incluir la contraseña real
+        principalInfo.put("authorities", authoritiesWithLevel);
+        principalInfo.put("accountNonExpired", true);
+        principalInfo.put("accountNonLocked", true);
+        principalInfo.put("credentialsNonExpired", true);
+        principalInfo.put("enabled", true);
+
+        response.put("principal", principalInfo);
+
+        return ResponseEntity.ok(response);
     }
 
     /**

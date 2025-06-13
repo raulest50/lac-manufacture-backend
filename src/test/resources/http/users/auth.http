@@ -9,8 +9,8 @@ POST {{host}}/api/auth/login
 Content-Type: {{contentType}}
 
 {
-  "username":"{{user}}",
-  "password":"{{password}}"
+  "username":"{{user2}}",
+  "password":"{{password2}}"
 }
 
 ### Verificar usuario autenticado
@@ -22,7 +22,7 @@ Authorization: Bearer {{auth_token}}
 
 ### Token para usar en este archivo
 # Copia el token de la respuesta del login y pégalo aquí
-@auth_token = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJtYXN0ZXIiLCJhY2Nlc29zIjoiIiwiaWF0IjoxNzQ4OTc4MjgxLCJleHAiOjE3NDkwNjQ2ODF9.vE9Yvc0SN10uXZ9KxqRGaveTzVs2nNUfry0m65Mldjf4HC6sIZx9_TlyUfnTeroG
+@auth_token = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJlc3RlYmFuIiwiYWNjZXNvcyI6IkFDVElWT1MsQ09NUFJBUyxQUk9EVUNUT1MsUFJPVkVFRE9SRVMsU0VHVUlNSUVOVE9fUFJPRFVDQ0lPTiIsImlhdCI6MTc0OTc3Nzk1MywiZXhwIjoxNzQ5ODY0MzUzfQ.rAwtzW935gZxPovyHh4FWsQDOVaLK9CWnR278KTC91a3U0NtmlwQ3tjk63EJr_XK
 
 ### INSTRUCCIONES PARA USAR EL TOKEN EN OTROS ARCHIVOS
 # Para usar el token en email.http:

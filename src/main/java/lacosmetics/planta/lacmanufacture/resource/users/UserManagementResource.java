@@ -42,6 +42,7 @@ public class UserManagementResource {
         return ResponseEntity.noContent().build();
     }
 
+/*
     @PostMapping("/{userId}/accesos")
     public ResponseEntity<User> addAccesoToUser(
             @PathVariable Long userId,
@@ -49,6 +50,7 @@ public class UserManagementResource {
         User updated = userManagementService.addAccesoToUser(userId, moduloName);
         return ResponseEntity.ok(updated);
     }
+*/
 
     @DeleteMapping("/{userId}/accesos/{accesoId}")
     public ResponseEntity<User> removeAccesoFromUser(

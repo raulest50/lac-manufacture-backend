@@ -56,7 +56,7 @@ public class UserManagementService {
         userRepository.delete(existing);
     }
 
-    public User addAccesoToUser(Long userId, String moduloName) {
+    /*public User addAccesoToUser(Long userId, String moduloName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -69,7 +69,7 @@ public class UserManagementService {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Módulo no válido: " + moduloName);
         }
-    }
+    }*/
 
     public User removeAccesoFromUser(Long userId, Long accesoId) {
         User user = userRepository.findById(userId)

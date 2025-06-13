@@ -127,12 +127,12 @@ public class MovimientosService {
      * esto se debe ver reflejado inmediatamente en la tabla de movimientos, y actualizar los precios de cada
      * materia prima y de las recetas dependientes de cada materia prima. tambien el estado de la orden de compra
      * debe cambiar automaticamente a 3, que es cerrada exitosamente
-     * @param docIngresoDTO
+     * @param ingresoOCM_dta
      * @param file
      * @return
      */
     @Transactional
-    public ResponseEntity<?> createDocIngreso(IngresoOCM_DTA docIngresoDTO, MultipartFile file) {
+    public ResponseEntity<?> createDocIngreso(IngresoOCM_DTA ingresoOCM_dta, MultipartFile file) {
         try {
             // Create folder based on current date (yyyyMMdd)
             String currentDateFolder = LocalDate.now()
@@ -149,7 +149,7 @@ public class MovimientosService {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // Create the DocIngresoAlmacenOC entity using the DTO constructor.
-            TransaccionAlmacen ingresoOCM = new TransaccionAlmacen(docIngresoDTO);
+            TransaccionAlmacen ingresoOCM = new TransaccionAlmacen(ingresoOCM_dta);
             // Set the URL (or path) of the saved file.
             ingresoOCM.setUrlDocSoporte(filePath.toString());
 
@@ -162,7 +162,7 @@ public class MovimientosService {
             transaccionAlmacenHeaderRepo.save(ingresoOCM);
 
             // se actualiza el estado de la orden de compra a cerrado exitosamente
-            OrdenCompraMateriales oc = docIngresoDTO.getOrdenCompraMateriales();
+            OrdenCompraMateriales oc = ingresoOCM_dta.getOrdenCompraMateriales();
             oc.setEstado(3);
             ordenCompraRepo.save(oc);
 

@@ -147,7 +147,7 @@ public class ComprasService {
 
         // Preparar el asunto y cuerpo del correo
         String subject = "No Reply - Orden de Compra Exotic Expert #" + orden.getOrdenCompraId();
-        String text = "Estimado proveedor: " + orden.getProveedor() + ",\n\n" +
+        String text = "Estimado proveedor: " + orden.getProveedor().getNombre() + ",\n\n" +
                 "Por medio de la presente le hacemos llegar la orden de compra #" + orden.getOrdenCompraId() +
                 "correspondiente a los productos/servicios detallados en el documento adjunto.\n" +
                 "Le agradeceremos confirmar la recepción de esta orden y, en caso de ser necesario," +
