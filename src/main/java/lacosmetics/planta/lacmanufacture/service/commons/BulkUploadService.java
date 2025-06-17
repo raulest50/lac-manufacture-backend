@@ -3,9 +3,14 @@ package lacosmetics.planta.lacmanufacture.service.commons;
 import lacosmetics.planta.lacmanufacture.config.StorageProperties;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.BulkUploadResponseDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
+import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.LoteRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
@@ -28,6 +33,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -56,6 +62,7 @@ public class BulkUploadService {
     private final InsumoRepo insumoRepo;
     private final OrdenProduccionRepo ordenProduccionRepo;
     private final OrdenSeguimientoRepo ordenSeguimientoRepo;
+    private final LoteRepo loteRepo;
 
     /**
      * Limpia todos los datos relacionados con proveedores para permitir una carga masiva.
@@ -469,26 +476,207 @@ public class BulkUploadService {
 
     /**
      * Procesa un archivo Excel con datos de productos.
-     * Lee cada fila del archivo, valida los datos y crea objetos Producto.
-     * 
-     * Este método será implementado posteriormente.
+     * Lee cada fila del archivo, valida los datos y crea objetos Material.
+     * Ignora materiales sin ID asignado en NUEVO CODIGO o con STOCK = 0.
+     * Crea lotes con fecha de vencimiento a 6 meses.
+     * Crea transacciones de almacén con movimientos para inicializar el inventario.
      * 
      * @param file El archivo Excel con datos de productos
      * @return Resultado de la operación con detalles sobre éxitos y fallos
      */
+
+    /**
+     * Procesa una fila del archivo Excel y crea un objeto Material.
+     * 
+     * @param row La fila del Excel a procesar
+     * @return Objeto Material creado a partir de los datos de la fila, o null si debe ser ignorado
+     */
+    private Material processExcelMaterialRow(Row row) {
+        // Obtener los valores de las celdas
+        String codigo = getCellValueAsString(row.getCell(0)); // CODIGO (ignorado)
+        String descripcion = getCellValueAsString(row.getCell(1)); // DESCRIPCION
+        String lote = getCellValueAsString(row.getCell(2)); // LOTE (ignorado)
+        String unidadMedida = getCellValueAsString(row.getCell(3)); // UNI/MEDIDAS
+        String entrada = getCellValueAsString(row.getCell(4)); // ENTRADA (ignorado)
+        String salida = getCellValueAsString(row.getCell(5)); // SALIDAS (ignorado)
+        String stock = getCellValueAsString(row.getCell(6)); // STOCK
+        String nuevoCodigo = getCellValueAsString(row.getCell(7)); // NUEVO CODIGO
+        String iva = getCellValueAsString(row.getCell(10)); // IVA
+
+        // Validar que exista un nuevo código y que el stock sea mayor que cero
+        if (nuevoCodigo == null || nuevoCodigo.trim().isEmpty()) {
+            return null; // Ignorar este material
+        }
+
+        double stockValue = 0;
+        try {
+            // Manejar posibles formatos de número (con comas, etc.)
+            String stockNormalized = stock.replace(",", ".");
+            stockValue = Double.parseDouble(stockNormalized);
+        } catch (NumberFormatException | NullPointerException e) {
+            stockValue = 0;
+        }
+
+        if (stockValue <= 0) {
+            return null; // Ignorar este material
+        }
+
+        // Crear el objeto Material
+        Material material = new Material();
+
+        // Determinar el tipo de material basado en el prefijo del nuevo código
+        if (nuevoCodigo.startsWith("me")) {
+            material.setTipoMaterial(2); // Material de Empaque
+        } else {
+            material.setTipoMaterial(1); // Materia Prima
+        }
+
+        // Establecer el ID (nuevo código)
+        try {
+            // Si el nuevo código tiene formato alfanumérico, extraer la parte numérica
+            String numericPart = nuevoCodigo.replaceAll("[^0-9]", "");
+            int productoId = Integer.parseInt(numericPart);
+            material.setProductoId(productoId);
+        } catch (NumberFormatException e) {
+            // Si no se puede convertir a número, usar un hash del código
+            material.setProductoId(Math.abs(nuevoCodigo.hashCode()));
+        }
+
+        // Establecer el nombre (descripción)
+        material.setNombre(descripcion);
+
+        // Establecer el tipo de unidades
+        material.setTipoUnidades(unidadMedida);
+
+        // Establecer la cantidad por unidad (por defecto 1)
+        material.setCantidadUnidad(1.0);
+
+        // Establecer el IVA
+        try {
+            double ivaValue = Double.parseDouble(iva) / 100.0; // Convertir de porcentaje a decimal
+            material.setIva_percentual(ivaValue);
+        } catch (NumberFormatException | NullPointerException e) {
+            material.setIva_percentual(0.19); // Por defecto 19%
+        }
+
+        // Establecer el costo (por defecto 0)
+        material.setCosto(0);
+
+        return material;
+    }
+
     private BulkUploadResponseDTO processExcelProductData(MultipartFile file) {
         log.info("Processing Excel file with product data: {}", file.getOriginalFilename());
 
-        // Este método será implementado posteriormente
-        // Debe leer el archivo Excel, procesar cada fila y crear los objetos Producto correspondientes
-        // Debe manejar los diferentes tipos de productos (Material, SemiTerminado, Terminado)
-        // Debe validar los datos y manejar errores
-
-        return BulkUploadResponseDTO.builder()
+        BulkUploadResponseDTO response = BulkUploadResponseDTO.builder()
                 .totalRecords(0)
                 .successCount(0)
                 .failureCount(0)
                 .errors(new ArrayList<>())
                 .build();
+
+        try (InputStream is = file.getInputStream();
+             Workbook workbook = new XSSFWorkbook(is)) {
+
+            // Obtener la primera hoja del libro
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // Obtener el iterador de filas
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            // Leer la primera fila (encabezados)
+            if (rowIterator.hasNext()) {
+                rowIterator.next(); // Saltar la fila de encabezados
+            }
+
+            // Crear una transacción de almacén para la inicialización de inventario
+            TransaccionAlmacen transaccionAlmacen = new TransaccionAlmacen();
+            transaccionAlmacen.setTipoEntidadCausante(TransaccionAlmacen.TipoEntidadCausante.OAA); // Orden de Ajuste de Almacén
+            transaccionAlmacen.setIdEntidadCausante(0); // ID especial para inicialización
+            transaccionAlmacen.setObservaciones("Inicialización de inventario desde carga masiva");
+            transaccionAlmacen.setMovimientosTransaccion(new ArrayList<>());
+
+            // Fecha actual para los lotes
+            LocalDate currentDate = LocalDate.now();
+            // Fecha de vencimiento (6 meses después)
+            LocalDate expirationDate = currentDate.plusMonths(6);
+
+            // Contador para generar batch numbers únicos
+            int batchCounter = 1;
+
+            // Procesar cada fila
+            int rowNumber = 1; // Empezamos en 1 porque ya saltamos la fila de encabezados
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                rowNumber++;
+                response.setTotalRecords(response.getTotalRecords() + 1);
+
+                try {
+                    // Procesar la fila
+                    Material material = processExcelMaterialRow(row);
+
+                    // Si el material es null, significa que debe ser ignorado
+                    if (material == null) {
+                        response.setFailureCount(response.getFailureCount() + 1);
+                        response.getErrors().add(
+                            BulkUploadResponseDTO.ErrorRecord.builder()
+                                .rowNumber(rowNumber)
+                                .errorMessage("Material ignorado: sin ID asignado o stock cero")
+                                .build()
+                        );
+                        continue;
+                    }
+
+                    // Guardar el material en la base de datos
+                    materialRepo.save(material);
+
+                    // Crear un lote para este material
+                    String batchNumber = "INIT" + String.format("%06d", batchCounter++);
+                    Lote lote = new Lote();
+                    lote.setBatchNumber(batchNumber);
+                    lote.setProductionDate(currentDate);
+                    lote.setExpirationDate(expirationDate);
+                    // No hay orden de compra ni producción asociada
+
+                    // Guardar el lote en la base de datos
+                    loteRepo.save(lote);
+
+                    // Crear un movimiento para este material
+                    Movimiento movimiento = new Movimiento();
+                    movimiento.setProducto(material);
+                    movimiento.setCantidad(Double.parseDouble(getCellValueAsString(row.getCell(6)))); // STOCK
+                    movimiento.setTipo(Movimiento.TipoMovimiento.COMPRA); // Usamos COMPRA como tipo para inicialización
+                    movimiento.setAlmacen(Movimiento.Almacen.GENERAL);
+                    movimiento.setLote(lote);
+                    movimiento.setTransaccionAlmacen(transaccionAlmacen);
+
+                    // Añadir el movimiento a la transacción
+                    transaccionAlmacen.getMovimientosTransaccion().add(movimiento);
+
+                    response.setSuccessCount(response.getSuccessCount() + 1);
+
+                } catch (Exception e) {
+                    response.setFailureCount(response.getFailureCount() + 1);
+                    response.getErrors().add(
+                        BulkUploadResponseDTO.ErrorRecord.builder()
+                            .rowNumber(rowNumber)
+                            .errorMessage("Error al procesar fila: " + e.getMessage())
+                            .build()
+                    );
+                    log.error("Error processing row {}: {}", rowNumber, e.getMessage());
+                }
+            }
+
+            // Guardar la transacción de almacén si hay movimientos
+            if (!transaccionAlmacen.getMovimientosTransaccion().isEmpty()) {
+                transaccionAlmacenHeaderRepo.save(transaccionAlmacen);
+            }
+
+        } catch (Exception e) {
+            log.error("Error processing Excel file: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al procesar archivo Excel: " + e.getMessage(), e);
+        }
+
+        return response;
     }
 }
