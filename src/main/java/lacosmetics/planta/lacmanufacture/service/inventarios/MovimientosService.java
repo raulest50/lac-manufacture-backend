@@ -6,20 +6,26 @@ import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
 import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
+import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.LoteRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
+import lacosmetics.planta.lacmanufacture.service.contabilidad.ContabilidadService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,6 +62,9 @@ public class MovimientosService {
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
     private final MaterialRepo materialRepo;
+    private final LoteRepo loteRepo;
+    private final UserRepository userRepository;
+    private final ContabilidadService contabilidadService;
 
     @Transactional
     public Movimiento saveMovimiento(Movimiento movimientoReal){
@@ -153,9 +163,40 @@ public class MovimientosService {
             // Set the URL (or path) of the saved file.
             ingresoOCM.setUrlDocSoporte(filePath.toString());
 
-            // Set the back-reference for each Movimiento so that their foreign key is updated.
+            // Set the user if userId is provided
+            if (ingresoOCM_dta.getUserId() != null && !ingresoOCM_dta.getUserId().isEmpty()) {
+                try {
+                    Long userId = Long.parseLong(ingresoOCM_dta.getUserId());
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+                    ingresoOCM.setUser(user);
+                } catch (NumberFormatException e) {
+                    log.error("Error al convertir userId a Long: " + ingresoOCM_dta.getUserId(), e);
+                }
+            }
+
+            // Set the back-reference for each Movimiento and create Lote for each one
             if (ingresoOCM.getMovimientosTransaccion() != null) {
-                ingresoOCM.getMovimientosTransaccion().forEach(movimiento -> movimiento.setTransaccionAlmacen(ingresoOCM));
+                for (Movimiento movimiento : ingresoOCM.getMovimientosTransaccion()) {
+                    movimiento.setTransaccionAlmacen(ingresoOCM);
+
+                    // Crear un nuevo lote para este movimiento
+                    Lote lote = new Lote();
+                    lote.setBatchNumber(generateBatchNumber(movimiento.getProducto()));
+                    lote.setProductionDate(LocalDate.now());
+
+                    // En una futura implementación, se podría agregar lógica para calcular
+                    // la fecha de vencimiento basada en propiedades del material
+
+                    // Asociar con la orden de compra
+                    lote.setOrdenCompraMateriales(ingresoOCM_dta.getOrdenCompraMateriales());
+
+                    // Guardar el lote
+                    loteRepo.save(lote);
+
+                    // Asociar el lote al movimiento
+                    movimiento.setLote(lote);
+                }
             }
 
             // Persist the entity.
@@ -166,6 +207,21 @@ public class MovimientosService {
             oc.setEstado(3);
             ordenCompraRepo.save(oc);
 
+            // Calcular el monto total para el asiento contable
+            BigDecimal montoTotal = BigDecimal.ZERO;
+            for (ItemOrdenCompra itemOrdenCompra : oc.getItemsOrdenCompra()) {
+                BigDecimal valorItem = BigDecimal.valueOf(itemOrdenCompra.getPrecioUnitario() * itemOrdenCompra.getCantidad());
+                montoTotal = montoTotal.add(valorItem);
+            }
+
+            // Registrar el asiento contable
+            try {
+                AsientoContable asiento = contabilidadService.registrarAsientoIngresoOCM(ingresoOCM, oc, montoTotal);
+                log.info("Asiento contable registrado con ID: " + asiento.getId());
+            } catch (Exception e) {
+                log.error("Error al registrar asiento contable: " + e.getMessage(), e);
+                // No interrumpimos el flujo principal si falla la contabilidad
+            }
 
             // se actualizan los precios de todos las materias primas
             for (ItemOrdenCompra itemOrdenCompra : oc.getItemsOrdenCompra()) {
@@ -194,14 +250,23 @@ public class MovimientosService {
                 updateCostoCascade(material, updatedProductIds);
             }
 
-
-
             return ResponseEntity.ok(ingresoOCM);
         } catch(Exception e) {
             log.error("Error saving DocIngresoAlmacenOC", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error saving document: " + e.getMessage());
         }
+    }
+
+    /**
+     * Genera un número de lote único para un producto
+     */
+    private String generateBatchNumber(Producto producto) {
+        // Formato: MP-YYYYMMDD-XXXX (MP=Materia Prima, fecha, secuencial)
+        String prefix = "MP";
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String random = String.format("%04d", new Random().nextInt(10000));
+        return prefix + "-" + date + "-" + random;
     }
 
 

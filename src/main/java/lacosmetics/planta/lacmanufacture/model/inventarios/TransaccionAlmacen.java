@@ -60,7 +60,11 @@ public class TransaccionAlmacen {
     private String observaciones;
 
     public TransaccionAlmacen(IngresoOCM_DTA ingresoOCM_dta) {
-
+        this.movimientosTransaccion = ingresoOCM_dta.getTransaccionAlmacen().getMovimientosTransaccion();
+        this.tipoEntidadCausante = TipoEntidadCausante.OCM;
+        this.idEntidadCausante = ingresoOCM_dta.getOrdenCompraMateriales().getOrdenCompraId();
+        this.observaciones = ingresoOCM_dta.getObservaciones();
+        // El usuario se asignará en el servicio
     }
 
     public enum TipoEntidadCausante{
