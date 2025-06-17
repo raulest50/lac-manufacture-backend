@@ -27,7 +27,7 @@ public class DataBaseInitializer {
             if (accesoRepository.count() == 0) { // if not initialized, then it does the carga masiva
                 log.info("Database is empty. Performing initial data setup...");
                 usersInitializer.initializeUsers();
-                cargaMasiva.executeCargaMasiva();
+                //cargaMasiva.executeCargaMasiva();
                 cuentasInitializer.initializeCuentas();
             } else { // if already initialzed then do nothing
                 log.info("Database is already initialized. Skipping insert initialization.");
