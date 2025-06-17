@@ -8,6 +8,13 @@ import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
+import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
+import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.InsumoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -40,6 +47,15 @@ public class BulkUploadService {
     private final FacturaCompraRepo facturaCompraRepo;
     private final ProveedorRepo proveedorRepo;
     private final StorageProperties storageProperties;
+
+    // Repositorios adicionales para productos
+    private final ProductoRepo productoRepo;
+    private final MaterialRepo materialRepo;
+    private final SemiTerminadoRepo semiTerminadoRepo;
+    private final TerminadoRepo terminadoRepo;
+    private final InsumoRepo insumoRepo;
+    private final OrdenProduccionRepo ordenProduccionRepo;
+    private final OrdenSeguimientoRepo ordenSeguimientoRepo;
 
     /**
      * Limpia todos los datos relacionados con proveedores para permitir una carga masiva.
@@ -354,22 +370,125 @@ public class BulkUploadService {
     }
 
     /**
+     * Limpia todos los datos relacionados con productos para permitir una carga masiva.
+     * Elimina registros en el siguiente orden para mantener la integridad referencial:
+     * 1. Transacciones de almacén y sus movimientos
+     * 2. Órdenes de producción y seguimiento
+     * 3. Insumos (recetas)
+     * 4. Productos (Material, SemiTerminado, Terminado)
+     */
+    @Transactional
+    public void cleanAllProductsData() {
+        log.info("Iniciando limpieza de datos de productos para carga masiva");
+
+        try {
+            // Nivel 1: Eliminar transacciones de almacén y sus movimientos
+            log.info("Eliminando transacciones de almacén y movimientos");
+            transaccionAlmacenRepo.deleteAll(); // Elimina los movimientos
+            transaccionAlmacenHeaderRepo.deleteAll(); // Elimina las cabeceras de transacción
+
+            // Nivel 2: Eliminar órdenes de producción y seguimiento
+            log.info("Eliminando órdenes de producción y seguimiento");
+            ordenSeguimientoRepo.deleteAll(); // Primero eliminar el seguimiento
+            ordenProduccionRepo.deleteAll(); // Luego eliminar las órdenes
+
+            // Nivel 3: Eliminar insumos (recetas)
+            log.info("Eliminando insumos (recetas)");
+            insumoRepo.deleteAll();
+
+            // Nivel 4: Finalmente eliminar los productos
+            log.info("Eliminando productos");
+            // No es necesario eliminar específicamente por tipo, ya que todos están en la misma tabla
+            // con herencia de tabla única (SINGLE_TABLE)
+            productoRepo.deleteAll();
+
+            // Eliminar archivos de productos si es necesario
+            deleteProductsFiles();
+
+            log.info("Limpieza de datos de productos completada con éxito");
+        } catch (Exception e) {
+            log.error("Error durante la limpieza de datos de productos", e);
+            throw new RuntimeException("Error al limpiar datos de productos: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Elimina todos los archivos y carpetas en el directorio de productos.
+     */
+    private void deleteProductsFiles() {
+        try {
+            String baseDir = storageProperties.getUPLOAD_DIR();
+            String productosDir = storageProperties.getPRODUCTOS();
+            Path productosFolderPath = Paths.get(baseDir, productosDir);
+
+            if (Files.exists(productosFolderPath)) {
+                log.info("Eliminando archivos en la carpeta de productos: {}", productosFolderPath);
+
+                // Eliminar recursivamente todos los archivos y subcarpetas
+                try (Stream<Path> paths = Files.walk(productosFolderPath)) {
+                    // Ordenar en reversa para eliminar primero los archivos y luego las carpetas
+                    paths.sorted((a, b) -> b.compareTo(a))
+                         .forEach(path -> {
+                             try {
+                                 if (!path.equals(productosFolderPath)) {
+                                     Files.delete(path);
+                                     log.debug("Eliminado: {}", path);
+                                 }
+                             } catch (IOException e) {
+                                 log.warn("No se pudo eliminar: {}", path, e);
+                             }
+                         });
+                }
+
+                log.info("Eliminación de archivos de productos completada");
+            } else {
+                log.info("La carpeta de productos no existe: {}", productosFolderPath);
+            }
+        } catch (IOException e) {
+            log.error("Error al eliminar archivos de productos", e);
+            throw new RuntimeException("Error al eliminar archivos de productos: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Process a bulk upload of products from a file.
+     * Before processing, it cleans up all existing product data.
      * 
-     * @param file The file containing product data (CSV or Excel)
+     * @param file The file containing product data (Excel)
      * @return Result of the processing operation with details about success and failures
      */
     public BulkUploadResponseDTO processBulkProductUpload(MultipartFile file) {
-        // The implementation will be added later
         log.info("Processing bulk product upload from file: {}", file.getOriginalFilename());
 
-        // Aquí iría la implementación de la carga de datos
-        // (no implementada según requerimiento)
+        // Limpiar datos existentes antes de la carga
+        cleanAllProductsData();
+
+        // Procesar el archivo Excel
+        return processExcelProductData(file);
+    }
+
+    /**
+     * Procesa un archivo Excel con datos de productos.
+     * Lee cada fila del archivo, valida los datos y crea objetos Producto.
+     * 
+     * Este método será implementado posteriormente.
+     * 
+     * @param file El archivo Excel con datos de productos
+     * @return Resultado de la operación con detalles sobre éxitos y fallos
+     */
+    private BulkUploadResponseDTO processExcelProductData(MultipartFile file) {
+        log.info("Processing Excel file with product data: {}", file.getOriginalFilename());
+
+        // Este método será implementado posteriormente
+        // Debe leer el archivo Excel, procesar cada fila y crear los objetos Producto correspondientes
+        // Debe manejar los diferentes tipos de productos (Material, SemiTerminado, Terminado)
+        // Debe validar los datos y manejar errores
 
         return BulkUploadResponseDTO.builder()
                 .totalRecords(0)
                 .successCount(0)
                 .failureCount(0)
+                .errors(new ArrayList<>())
                 .build();
     }
 }

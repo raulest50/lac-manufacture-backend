@@ -21,4 +21,6 @@ public class StorageProperties {
 
     private final String PROVEEDORES = "proveedores";
 
+    private final String PRODUCTOS = "productos";
+
 }
