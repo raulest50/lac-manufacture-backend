@@ -35,7 +35,7 @@ public abstract class Producto {
     @Id
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "producto_id", unique = true, updatable = false, nullable = false)
-    private int productoId;
+    private String productoId;
 
     @Column(length = 200)
     private String nombre;
@@ -75,5 +75,3 @@ public abstract class Producto {
     }
 
 }
-
-

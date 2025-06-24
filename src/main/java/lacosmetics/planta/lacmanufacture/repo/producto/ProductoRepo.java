@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ProductoRepo extends JpaRepository<Producto, Integer>, JpaSpecificationExecutor<Producto> {
+public interface ProductoRepo extends JpaRepository<Producto, String>, JpaSpecificationExecutor<Producto> {
 
-    Optional<Producto> findByProductoId(int id);
+    Optional<Producto> findByProductoId(String id);
 
 }

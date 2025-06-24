@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class InsumoWithStockDTO {
     private int insumoId;
-    private int productoId;
+    private String productoId;
     private String productoNombre;
     private double cantidadRequerida;
     private double stockActual;

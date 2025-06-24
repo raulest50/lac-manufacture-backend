@@ -82,11 +82,14 @@ public class ProductoService {
                     " ya esta asignadoa otro Material");
         }
         try {
-            String fichaTecnicaPath = fileStorageService.storeFichaTecnica(file); // Save the ficha técnica using the file storage service.
-            material.setFichaTecnicaUrl(fichaTecnicaPath);
+            // Solo guardar la ficha técnica si se proporciona un archivo
+            if (file != null && !file.isEmpty()) {
+                String fichaTecnicaPath = fileStorageService.storeFichaTecnica(file);
+                material.setFichaTecnicaUrl(fichaTecnicaPath);
+            }
             return materialRepo.save(material); // Persist the MateriaPrima entity.
         } catch (Exception e) {
-            throw new RuntimeException("Error saving MateriaPrima with ficha técnica: " + e.getMessage(), e);
+            throw new RuntimeException("Error saving MateriaPrima: " + e.getMessage(), e);
         }
     }
 
@@ -94,7 +97,7 @@ public class ProductoService {
         Pageable pageable = PageRequest.of(page, size);
         if ("ID".equalsIgnoreCase(tipoBusqueda)) {
             try {
-                int id = Integer.parseInt(searchTerm);
+                String id = searchTerm;
                 if ("M".equalsIgnoreCase(clasificacion)) { // return MateriaPrima list
                     Optional<Material> mpOpt = materialRepo.findById(id);
                     List<Material> result = mpOpt.map(List::of).orElse(List.of());
@@ -181,11 +184,11 @@ public class ProductoService {
         return terminadoRepo.findAll(spec, PageRequest.of(page, size));
     }
 
-    public Optional<Material> findMateriaPrimaByProductoId(int productoId) {
+    public Optional<Material> findMateriaPrimaByProductoId(String productoId) {
         return materialRepo.findById(productoId);
     }
-    
-    public Optional<SemiTerminado> findSemiTerminadoByProductoId(int productoId) {
+
+    public Optional<SemiTerminado> findSemiTerminadoByProductoId(String productoId) {
         return semiTerminadoRepo.findById(productoId);
     }
 
@@ -200,7 +203,7 @@ public class ProductoService {
                 return criteriaBuilder.and(tipoPredicate, nombrePredicate);
             } else if ("ID".equalsIgnoreCase(tipoBusqueda)) {
                 try {
-                    Integer id = Integer.parseInt(searchTerm);
+                    String id = searchTerm;
                     Predicate idPredicate = criteriaBuilder.equal(root.get("productoId"), id);
                     return criteriaBuilder.and(tipoPredicate, idPredicate);
                 } catch (NumberFormatException e) {
@@ -222,7 +225,7 @@ public class ProductoService {
         return new PageImpl<>(productStockDTOList, pageable, productosPage.getTotalElements());
     }
 
-    public List<InsumoWithStockDTO> getInsumosWithStock(int productoId) {
+    public List<InsumoWithStockDTO> getInsumosWithStock(String productoId) {
         Optional<Producto> optionalProducto = productoRepo.findById(productoId);
         if (optionalProducto.isPresent()) {
             Producto producto = optionalProducto.get();
@@ -293,11 +296,17 @@ public class ProductoService {
                     // Read cell values (trim spaces)
                     String nombre = cellName.getStringCellValue().trim();
                     String tipoUnidades = cellTipoUnidad.getStringCellValue().trim();
-                    int productoId;
-                    // Read the product ID as numeric (you might add more validation if needed)
+                    String productoId;
+                    // Read the product ID (you might add more validation if needed)
                     try {
-                        productoId = (int) cellProductoId.getNumericCellValue();
-                    } catch (Exception ex) {
+                        if (cellProductoId.getCellType() == CellType.NUMERIC) {
+                            // Si es un valor numérico, convertirlo a String sin forzar a entero
+                            productoId = String.valueOf(cellProductoId.getNumericCellValue()).replaceAll("\\.0$", "");
+                        } else {
+                            // Si es un valor de texto, obtenerlo directamente
+                            productoId = cellProductoId.getStringCellValue().trim();
+                        }
+                    } catch (Exception e) {
                         continue; // Skip rows with invalid product id
                     }
 

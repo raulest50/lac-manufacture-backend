@@ -142,7 +142,7 @@ public class ProduccionService {
         }
 
         // Map to hold Producto ID and corresponding InventarioEnTransitoDTO
-        Map<Integer, InventarioEnTransitoDTO> inventarioMap = new HashMap<>();
+        Map<String, InventarioEnTransitoDTO> inventarioMap = new HashMap<>();
 
         // Process each Orden de Producción
         for (OrdenProduccion orden : ordenesProduccion) {
@@ -150,7 +150,7 @@ public class ProduccionService {
             for (OrdenSeguimiento seguimiento : orden.getOrdenesSeguimiento()) {
                 Insumo insumo = seguimiento.getInsumo();
                 Producto producto = insumo.getProducto();
-                int productoId = producto.getProductoId();
+                String productoId = producto.getProductoId();
                 String productoNombre = producto.getNombre();
                 double cantidadRequerida = insumo.getCantidadRequerida();
 

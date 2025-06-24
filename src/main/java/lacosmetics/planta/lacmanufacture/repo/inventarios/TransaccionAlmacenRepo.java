@@ -12,11 +12,11 @@ import java.util.List;
 public interface TransaccionAlmacenRepo extends JpaRepository<Movimiento, Integer> {
 
     @Query("SELECT COALESCE(SUM(m.cantidad), 0) FROM Movimiento m WHERE m.producto.productoId = :productoId")
-    Double findTotalCantidadByProductoId(@Param("productoId") int productoId);
+    Double findTotalCantidadByProductoId(@Param("productoId") String productoId);
 
     List<Movimiento> findMovimientosByCantidad(Double cantidad);
 
     // New method
-    Page<Movimiento> findByProducto_ProductoIdOrderByFechaMovimientoDesc(int productoId, Pageable pageable);
+    Page<Movimiento> findByProducto_ProductoIdOrderByFechaMovimientoDesc(String productoId, Pageable pageable);
 
 }

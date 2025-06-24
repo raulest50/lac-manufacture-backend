@@ -34,7 +34,7 @@ public class MovimientosResource {
     // New endpoint to get movimientos for a product
     @GetMapping("/get_movimientos_by_producto")
     public ResponseEntity<Page<Movimiento>> getMovimientosByProducto(
-            @RequestParam int productoId,
+            @RequestParam String productoId,
             @RequestParam int page,
             @RequestParam int size
     ) {

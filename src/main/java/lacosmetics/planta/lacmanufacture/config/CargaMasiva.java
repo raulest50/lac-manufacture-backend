@@ -280,7 +280,15 @@ public class CargaMasiva {
                 }
                 String nombre = nombreCell.getStringCellValue().trim();
                 String unidad = unidadCell.getStringCellValue().trim();
-                int codigo = (int) codigoCell.getNumericCellValue();
+                String codigo;
+
+                if (codigoCell.getCellType() == CellType.NUMERIC) {
+                    // Si es un valor numérico, convertirlo a String sin forzar a entero
+                    codigo = String.valueOf(codigoCell.getNumericCellValue()).replaceAll("\\.0$", "");
+                } else {
+                    // Si es un valor de texto, obtenerlo directamente
+                    codigo = codigoCell.getStringCellValue().trim();
+                }
 
                 Material material = new Material();
                 material.setProductoId(codigo);

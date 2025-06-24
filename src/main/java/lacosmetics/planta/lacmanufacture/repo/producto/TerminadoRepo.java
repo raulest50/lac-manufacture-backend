@@ -12,7 +12,7 @@ import java.util.List;
 // removed extend : , JpaSpecificationExecutor<Terminado>
 
 @Repository
-public interface TerminadoRepo extends JpaRepository<Terminado, Integer>, JpaSpecificationExecutor<Terminado> {
+public interface TerminadoRepo extends JpaRepository<Terminado, String>, JpaSpecificationExecutor<Terminado> {
 
     List<Terminado> findByInsumos_Producto(Producto producto);
 

@@ -357,7 +357,8 @@ public class BulkUploadService {
                     return cell.getLocalDateTimeCellValue().toString();
                 } else {
                     // Convertir a String para evitar problemas con números formateados
-                    return String.valueOf(cell.getNumericCellValue());
+                    // Eliminar el ".0" que se agrega a los números enteros
+                    return String.valueOf(cell.getNumericCellValue()).replaceAll("\\.0$", "");
                 }
             case BOOLEAN:
                 return String.valueOf(cell.getBooleanCellValue());
@@ -366,7 +367,7 @@ public class BulkUploadService {
                     return cell.getStringCellValue();
                 } catch (Exception e) {
                     try {
-                        return String.valueOf(cell.getNumericCellValue());
+                        return String.valueOf(cell.getNumericCellValue()).replaceAll("\\.0$", "");
                     } catch (Exception ex) {
                         return cell.getCellFormula();
                     }
@@ -532,15 +533,8 @@ public class BulkUploadService {
         }
 
         // Establecer el ID (nuevo código)
-        try {
-            // Si el nuevo código tiene formato alfanumérico, extraer la parte numérica
-            String numericPart = nuevoCodigo.replaceAll("[^0-9]", "");
-            int productoId = Integer.parseInt(numericPart);
-            material.setProductoId(productoId);
-        } catch (NumberFormatException e) {
-            // Si no se puede convertir a número, usar un hash del código
-            material.setProductoId(Math.abs(nuevoCodigo.hashCode()));
-        }
+        // Usar directamente el código alfanumérico como ID del producto
+        material.setProductoId(nuevoCodigo);
 
         // Establecer el nombre (descripción)
         material.setNombre(descripcion);

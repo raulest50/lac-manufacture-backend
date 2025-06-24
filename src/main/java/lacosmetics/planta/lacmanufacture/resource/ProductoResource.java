@@ -52,7 +52,7 @@ public class ProductoResource {
     @PostMapping(value = "/save_mprima_v2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> saveMateriaPrimaV2(
             @RequestPart("materiaPrima") Material material,
-            @RequestPart("file") MultipartFile file) {
+            @RequestPart(value = "file", required = false) MultipartFile file) {
         try {
             Material savedMP = productoService.saveMateriaPrimaV2(material, file);
             // You can customize the URI as needed.
@@ -94,7 +94,7 @@ public class ProductoResource {
             }
             // Si 'search' no está vacío, intentar parsear como entero:
             try {
-                int id = Integer.parseInt(search.trim());
+                String id = search.trim();
                 Optional<Material> mpOpt = productoService.findMateriaPrimaByProductoId(id);
                 List<Material> lista = mpOpt.map(List::of).orElse(List.of());
                 Page<Material> resultado = new PageImpl<>(lista, PageRequest.of(page, size), lista.size());
@@ -119,7 +119,7 @@ public class ProductoResource {
             @RequestParam String tipoBusqueda)
     {
         if(tipoBusqueda.equals("ID")){
-            Optional<SemiTerminado> semiTerminadoOptional = productoService.findSemiTerminadoByProductoId(Integer.parseInt(search));
+            Optional<SemiTerminado> semiTerminadoOptional = productoService.findSemiTerminadoByProductoId(search);
             if (semiTerminadoOptional.isPresent()) {
                 List<SemiTerminado> semiTerminadoList = List.of(semiTerminadoOptional.get());
                 Pageable pageable = PageRequest.of(page, size);
@@ -146,7 +146,7 @@ public class ProductoResource {
 
 
     @GetMapping("/{productoId}/insumos_with_stock")
-    public ResponseEntity<List<InsumoWithStockDTO>> getInsumosWithStock(@PathVariable int productoId) {
+    public ResponseEntity<List<InsumoWithStockDTO>> getInsumosWithStock(@PathVariable String productoId) {
         List<InsumoWithStockDTO> insumosWithStock = productoService.getInsumosWithStock(productoId);
         return ResponseEntity.ok().body(insumosWithStock);
     }

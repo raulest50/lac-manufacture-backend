@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class OrdenProduccionDTO_save {
-    private int productoId;
+    private String productoId;
     private int responsableId;
     private String observaciones;
 }

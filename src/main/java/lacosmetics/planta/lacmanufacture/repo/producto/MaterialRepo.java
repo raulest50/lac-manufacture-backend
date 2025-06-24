@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MaterialRepo extends JpaRepository<Material, Integer>, JpaSpecificationExecutor<Material> {
+public interface MaterialRepo extends JpaRepository<Material, String>, JpaSpecificationExecutor<Material> {
 
 
 }

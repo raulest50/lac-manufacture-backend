@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TargetDTO {
-    private int productoId;
+    private String productoId;
     private String nombre;
     private String observaciones;
     private int costo;

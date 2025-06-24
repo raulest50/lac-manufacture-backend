@@ -71,7 +71,7 @@ public class MovimientosService {
         return transaccionAlmacenRepo.save(movimientoReal);
     }
 
-    public Optional<ProductoStockDTO> getStockOf(int producto_id){
+    public Optional<ProductoStockDTO> getStockOf(String producto_id){
         Optional<Producto> optionalProducto = productoRepo.findByProductoId(producto_id);
         if(optionalProducto.isPresent()){
             Double totalCantidad = transaccionAlmacenRepo.findTotalCantidadByProductoId(producto_id);
@@ -83,14 +83,20 @@ public class MovimientosService {
         }
     }
 
-    public Optional<ProductoStockDTO> getStockOf2(int producto_id){
-        List<Movimiento> movs = transaccionAlmacenRepo.findMovimientosByCantidad( Double.valueOf( (double) producto_id) );
-        if(!movs.isEmpty()){
-            double productoStock = movs.stream().mapToDouble(Movimiento::getCantidad).sum();
-            return Optional.of(new ProductoStockDTO(movs.getFirst().getProducto(), productoStock));
-        } else{
-            return Optional.empty();
+    public Optional<ProductoStockDTO> getStockOf2(String producto_id){
+        try {
+            // Intentar convertir a double solo si es necesario para la compatibilidad con el método existente
+            double productoIdDouble = Double.parseDouble(producto_id);
+            List<Movimiento> movs = transaccionAlmacenRepo.findMovimientosByCantidad(productoIdDouble);
+            if(!movs.isEmpty()){
+                double productoStock = movs.stream().mapToDouble(Movimiento::getCantidad).sum();
+                return Optional.of(new ProductoStockDTO(movs.getFirst().getProducto(), productoStock));
+            }
+        } catch (NumberFormatException e) {
+            // Si el ID no es numérico, no podemos usar findMovimientosByCantidad
+            // En este caso, podríamos buscar por el ID directamente si hay un método disponible
         }
+        return Optional.empty();
     }
 
 
@@ -102,12 +108,8 @@ public class MovimientosService {
             if ("NOMBRE".equalsIgnoreCase(tipoBusqueda)) {
                 return criteriaBuilder.like(criteriaBuilder.lower(root.get("nombre")), "%" + searchTerm.toLowerCase() + "%");
             } else if ("ID".equalsIgnoreCase(tipoBusqueda)) {
-                try {
-                    Integer id = Integer.parseInt(searchTerm);
-                    return criteriaBuilder.equal(root.get("productoId"), id);
-                } catch (NumberFormatException e) {
-                    return criteriaBuilder.disjunction(); // Return no results if ID is invalid
-                }
+                // Usar directamente el searchTerm como String para la comparación
+                return criteriaBuilder.equal(root.get("productoId"), searchTerm);
             } else {
                 return null;
             }
@@ -126,7 +128,7 @@ public class MovimientosService {
 
 
     // Method to get movimientos for a product
-    public Page<Movimiento> getMovimientosByProductoId(int productoId, int page, int size) {
+    public Page<Movimiento> getMovimientosByProductoId(String productoId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return transaccionAlmacenRepo.findByProducto_ProductoIdOrderByFechaMovimientoDesc(productoId, pageable);
     }
@@ -246,7 +248,7 @@ public class MovimientosService {
                 materialRepo.save(material);
 
                 // Update costs of dependent products if necessary
-                Set<Integer> updatedProductIds = new HashSet<>();
+                Set<String> updatedProductIds = new HashSet<>();
                 updateCostoCascade(material, updatedProductIds);
             }
 
@@ -270,7 +272,7 @@ public class MovimientosService {
     }
 
 
-    private void updateCostoCascade(Producto producto, Set<Integer> updatedProductIds) {
+    private void updateCostoCascade(Producto producto, Set<String> updatedProductIds) {
         // If we've already updated this product, return to prevent infinite recursion
         if (updatedProductIds.contains(producto.getProductoId())) {
             return;

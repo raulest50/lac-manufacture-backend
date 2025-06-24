@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class InventarioEnTransitoDTO {
-    private int productoId;
+    private String productoId;
     private String productoNombre;
     private double cantidadTotal;
     private List<Integer> ordenesProduccionIds;

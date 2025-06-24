@@ -9,9 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SemiTerminadoRepo extends JpaRepository<SemiTerminado, Integer>, JpaSpecificationExecutor<SemiTerminado> {
+public interface SemiTerminadoRepo extends JpaRepository<SemiTerminado, String>, JpaSpecificationExecutor<SemiTerminado> {
 
     List<SemiTerminado> findByInsumos_Producto(Producto producto);
 
 }
-
