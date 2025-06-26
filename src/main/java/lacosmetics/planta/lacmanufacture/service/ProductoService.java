@@ -80,7 +80,7 @@ public class ProductoService {
         // Prevent accidental overwrite: if a material with the same productoId already exists, throw an exception.
         if (materialRepo.existsById(material.getProductoId())) {
             throw new IllegalArgumentException("El codigo: " + material.getProductoId() +
-                    " ya esta asignadoa otro Material");
+                    " ya esta asignado a otro Material");
         }
         try {
             // Solo guardar la ficha técnica si se proporciona un archivo
@@ -342,8 +342,7 @@ public class ProductoService {
 
         // 1) Sin categorías → vacío
         if (categories == null || categories.isEmpty()) {
-            // ← aquí ramificación 1
-            return;
+            return Page.empty(pageable);
         }
 
         boolean mp = categories.contains(ProductoSearchCriteria.CATEGORIA_MATERIA_PRIMA);
@@ -353,19 +352,110 @@ public class ProductoService {
 
         // 2) Sólo “materia prima” y/o “material empaque” (y nada más)
         if ((mp || me) && !se && !te) {
-            // ← ramificación 2
+            // Create a specification to filter materials by name and type
+            Specification<Material> spec = (root, query, criteriaBuilder) -> {
+                List<Predicate> predicates = new ArrayList<>();
+
+                // Add name search predicate if search term is provided
+                if (search != null && !search.isEmpty()) {
+                    predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("nombre")), 
+                        "%" + search.toLowerCase() + "%"
+                    ));
+                }
+
+                // Add material type predicates based on selected categories
+                List<Integer> tipoMaterialList = new ArrayList<>();
+                if (mp) tipoMaterialList.add(1); // Materia Prima
+                if (me) tipoMaterialList.add(2); // Material Empaque
+
+                predicates.add(root.get("tipoMaterial").in(tipoMaterialList));
+
+                return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            };
+
+            // Execute the query
+            Page<Material> materialsPage = materialRepo.findAll(spec, pageable);
+
+            // Convert to Page<Producto>
+            List<Producto> productos = new ArrayList<>(materialsPage.getContent());
+            return new PageImpl<>(productos, pageable, materialsPage.getTotalElements());
         }
         // 3) Sólo “terminado”
         else if (te && !se && !mp && !me) {
-            // ← ramificación 3
+            // Create a specification to filter terminados by name
+            Specification<Terminado> spec = (root, query, criteriaBuilder) -> {
+                List<Predicate> predicates = new ArrayList<>();
+
+                // Add name search predicate if search term is provided
+                if (search != null && !search.isEmpty()) {
+                    predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("nombre")), 
+                        "%" + search.toLowerCase() + "%"
+                    ));
+                }
+
+                return predicates.isEmpty() ? null : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            };
+
+            // Execute the query
+            Page<Terminado> terminadosPage = terminadoRepo.findAll(spec, pageable);
+
+            // Convert to Page<Producto>
+            List<Producto> productos = new ArrayList<>(terminadosPage.getContent());
+            return new PageImpl<>(productos, pageable, terminadosPage.getTotalElements());
         }
         // 4) Sólo “semiterminado”
         else if (se && !te && !mp && !me) {
-            // ← ramificación 4
+            // Create a specification to filter semiterminados by name
+            Specification<SemiTerminado> spec = (root, query, criteriaBuilder) -> {
+                List<Predicate> predicates = new ArrayList<>();
+
+                // Add name search predicate if search term is provided
+                if (search != null && !search.isEmpty()) {
+                    predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("nombre")), 
+                        "%" + search.toLowerCase() + "%"
+                    ));
+                }
+
+                return predicates.isEmpty() ? null : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            };
+
+            // Execute the query
+            Page<SemiTerminado> semiTerminadosPage = semiTerminadoRepo.findAll(spec, pageable);
+
+            // Convert to Page<Producto>
+            List<Producto> productos = new ArrayList<>(semiTerminadosPage.getContent());
+            return new PageImpl<>(productos, pageable, semiTerminadosPage.getTotalElements());
         }
         // 5) “semiterminado” + “terminado” (pero sin materiales)
         else if (se && te && !mp && !me) {
-            // ← ramificación 5
+            // Create a specification to filter products by type (S or T) and name
+            Specification<Producto> spec = (root, query, criteriaBuilder) -> {
+                List<Predicate> predicates = new ArrayList<>();
+
+                // Filter by product type (S or T)
+                Predicate tipoSemiTerminado = criteriaBuilder.equal(root.get("tipo_producto"), "S");
+                Predicate tipoTerminado = criteriaBuilder.equal(root.get("tipo_producto"), "T");
+                predicates.add(criteriaBuilder.or(tipoSemiTerminado, tipoTerminado));
+
+                // Add name search predicate if search term is provided
+                if (search != null && !search.isEmpty()) {
+                    predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("nombre")), 
+                        "%" + search.toLowerCase() + "%"
+                    ));
+                }
+
+                return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            };
+
+            // Execute the query using the general producto repository
+            Page<Producto> productosPage = productoRepo.findAll(spec, pageable);
+
+            // Return the results (already in Page<Producto> format)
+            return productosPage;
         }
         // 6) “semiterminado” + “terminado” + exactamente uno de los materiales
         else if (se && te && (mp ^ me)) {
@@ -379,6 +469,8 @@ public class ProductoService {
             // ← cualquier otra combinación que no caiga en los anteriores
         }
 
+        // Default return if no condition is met
+        return Page.empty(pageable);
     }
 
 
