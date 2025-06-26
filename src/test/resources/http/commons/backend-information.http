@@ -1,6 +1,6 @@
 ### Variables globales
-@host = http://localhost:8080
-@contentType = application/json
+@host = {{host}}
+@contentType = {{contentType}}
 
 ### Obtener todos los endpoints
 # Este endpoint devuelve una lista de todos los endpoints disponibles en la aplicación

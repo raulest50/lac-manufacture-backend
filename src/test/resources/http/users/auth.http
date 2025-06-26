@@ -1,31 +1,42 @@
 ### Variables globales
-@host = http://localhost:8080
-@contentType = application/json
+@host = {{host}}
+@contentType = {{contentType}}
 
 ### Login para obtener token JWT
 # Este endpoint permite autenticarse y obtener un token JWT
-# IMPORTANTE: Reemplaza "tu_usuario" y "tu_contraseña" con credenciales válidas
+# El token se guardará automáticamente en la variable global auth_token
 POST {{host}}/api/auth/login
 Content-Type: {{contentType}}
 
 {
-  "username":"{{user2}}",
-  "password":"{{password2}}"
+  "username":"{{user}}",
+  "password":"{{password}}"
 }
+
+> {%
+    // Extraer el token de la respuesta
+    var token = response.body.token;
+
+    // Guardar el token en la variable de entorno global
+    if (token) {
+        client.global.set("auth_token", token);
+        client.log("Token JWT guardado con éxito: " + token.substring(0, 15) + "...");
+    }
+%}
 
 ### Verificar usuario autenticado
 # Este endpoint devuelve información sobre el usuario autenticado actualmente
-# IMPORTANTE: Primero debes ejecutar el login y copiar el token recibido en la variable auth_token abajo
+# IMPORTANTE: Primero debes ejecutar el login para obtener el token automáticamente
 GET {{host}}/api/auth/whoami
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
-### Token para usar en este archivo
-# Copia el token de la respuesta del login y pégalo aquí
-@auth_token = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJlc3RlYmFuIiwiYWNjZXNvcyI6IkFDVElWT1MsQ09NUFJBUyxQUk9EVUNUT1MsUFJPVkVFRE9SRVMsU0VHVUlNSUVOVE9fUFJPRFVDQ0lPTiIsImlhdCI6MTc0OTc3Nzk1MywiZXhwIjoxNzQ5ODY0MzUzfQ.rAwtzW935gZxPovyHh4FWsQDOVaLK9CWnR278KTC91a3U0NtmlwQ3tjk63EJr_XK
-
 ### INSTRUCCIONES PARA USAR EL TOKEN EN OTROS ARCHIVOS
-# Para usar el token en email.http:
+# El token JWT ahora se guarda automáticamente en la variable global auth_token
+# Para usar el token en otros archivos:
 # 1. Ejecuta la petición de login arriba con credenciales válidas
-# 2. Copia el token JWT de la respuesta (campo "token")
-# 3. Ve al archivo email.http y pega el token en la variable correspondiente
+# 2. El token se guardará automáticamente y estará disponible en todos los archivos HTTP
+# 3. Usa {{auth_token}} en tus peticiones que requieran autenticación
+#
+# Ejemplo de uso en otros archivos:
+# Authorization: Bearer {{auth_token}}

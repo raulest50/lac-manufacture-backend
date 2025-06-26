@@ -92,18 +92,12 @@ public class ProductoResource {
                 Page<Material> todas = productoService.searchByName_MP("", page, size);
                 return ResponseEntity.ok(todas);
             }
-            // Si 'search' no está vacío, intentar parsear como entero:
-            try {
-                String id = search.trim();
-                Optional<Material> mpOpt = productoService.findMateriaPrimaByProductoId(id);
-                List<Material> lista = mpOpt.map(List::of).orElse(List.of());
-                Page<Material> resultado = new PageImpl<>(lista, PageRequest.of(page, size), lista.size());
-                return ResponseEntity.ok(resultado);
-            } catch (NumberFormatException e) {
-                // Si vino texto no numérico, devolvemos página vacía en lugar de 403/500
-                Page<Material> vacio = new PageImpl<>(List.of(), PageRequest.of(page, size), 0);
-                return ResponseEntity.ok(vacio);
-            }
+
+            String id = search.trim();
+            Optional<Material> mpOpt = productoService.findMateriaPrimaByProductoId(id);
+            List<Material> lista = mpOpt.map(List::of).orElse(List.of());
+            Page<Material> resultado = new PageImpl<>(lista, PageRequest.of(page, size), lista.size());
+            return ResponseEntity.ok(resultado);
         } else {
             // Modo NOMBRE (incluye el caso search == "")
             Page<Material> resultadoNombre = productoService.searchByName_MP(search, page, size);
@@ -165,7 +159,18 @@ public class ProductoResource {
             @RequestParam String tipoBusqueda,  // "NOMBRE" or "ID"
             @RequestParam int page,
             @RequestParam int size) {
-        Page<Terminado> pageResult = productoService.searchByName_T(searchTerm, page, size);
+        Page<Terminado> pageResult;
+
+        if ("ID".equalsIgnoreCase(tipoBusqueda)) {
+            // Search by ID
+            Optional<Terminado> terminadoOpt = productoService.findTerminadoByProductoId(searchTerm);
+            List<Terminado> result = terminadoOpt.map(List::of).orElse(List.of());
+            pageResult = new PageImpl<>(result, PageRequest.of(page, size), result.size());
+        } else {
+            // Search by name
+            pageResult = productoService.searchByName_T(searchTerm, page, size);
+        }
+
         Page<TargetDTO> dtoPage = pageResult.map(TargetDTO::fromProducto);
         return ResponseEntity.ok(dtoPage);
     }
@@ -177,7 +182,18 @@ public class ProductoResource {
             @RequestParam String tipoBusqueda, // "NOMBRE" or "ID"
             @RequestParam int page,
             @RequestParam int size) {
-        Page<SemiTerminado> pageResult = productoService.searchByName_S(search, page, size);
+        Page<SemiTerminado> pageResult;
+
+        if ("ID".equalsIgnoreCase(tipoBusqueda)) {
+            // Search by ID
+            Optional<SemiTerminado> semiTerminadoOpt = productoService.findSemiTerminadoByProductoId(search);
+            List<SemiTerminado> result = semiTerminadoOpt.map(List::of).orElse(List.of());
+            pageResult = new PageImpl<>(result, PageRequest.of(page, size), result.size());
+        } else {
+            // Search by name
+            pageResult = productoService.searchByName_S(search, page, size);
+        }
+
         Page<TargetDTO> dtoPage = pageResult.map(TargetDTO::fromProducto);
         return ResponseEntity.ok(dtoPage);
     }

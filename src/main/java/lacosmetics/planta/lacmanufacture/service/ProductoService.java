@@ -96,24 +96,21 @@ public class ProductoService {
     public Page<Producto> searchP4RecetaV2(String searchTerm, String tipoBusqueda, String clasificacion, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         if ("ID".equalsIgnoreCase(tipoBusqueda)) {
-            try {
-                String id = searchTerm;
-                if ("M".equalsIgnoreCase(clasificacion)) { // return MateriaPrima list
-                    Optional<Material> mpOpt = materialRepo.findById(id);
-                    List<Material> result = mpOpt.map(List::of).orElse(List.of());
-                    List<Producto> productos = new ArrayList<>();
-                    productos.addAll(result);
-                    return new PageImpl<>(productos, pageable, productos.size());
-                } else if ("S".equalsIgnoreCase(clasificacion)) {
-                    Optional<SemiTerminado> stOpt = semiTerminadoRepo.findById(id);
-                    List<SemiTerminado> result = stOpt.map(List::of).orElse(List.of());
-                    List<Producto> productos = new ArrayList<>();
-                    productos.addAll(result);
-                    return new PageImpl<>(productos, pageable, productos.size());
-                }
-            } catch (NumberFormatException e) {
-                return Page.empty(pageable);
+            String id = searchTerm;
+            if ("M".equalsIgnoreCase(clasificacion)) { // return MateriaPrima list
+                Optional<Material> mpOpt = materialRepo.findById(id);
+                List<Material> result = mpOpt.map(List::of).orElse(List.of());
+                List<Producto> productos = new ArrayList<>();
+                productos.addAll(result);
+                return new PageImpl<>(productos, pageable, productos.size());
+            } else if ("S".equalsIgnoreCase(clasificacion)) {
+                Optional<SemiTerminado> stOpt = semiTerminadoRepo.findById(id);
+                List<SemiTerminado> result = stOpt.map(List::of).orElse(List.of());
+                List<Producto> productos = new ArrayList<>();
+                productos.addAll(result);
+                return new PageImpl<>(productos, pageable, productos.size());
             }
+            return Page.empty(pageable);
         } else { // Name search with partial matching
             if ("M".equalsIgnoreCase(clasificacion)) {
                 Specification<Material> spec = (root, query, cb) ->
@@ -192,6 +189,10 @@ public class ProductoService {
         return semiTerminadoRepo.findById(productoId);
     }
 
+    public Optional<Terminado> findTerminadoByProductoId(String productoId) {
+        return terminadoRepo.findById(productoId);
+    }
+
     public Page<ProductoStockDTO> searchTerminadoAndSemiTerminadoWithStock(String searchTerm, String tipoBusqueda, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -202,13 +203,9 @@ public class ProductoService {
                 Predicate nombrePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("nombre")), "%" + searchTerm.toLowerCase() + "%");
                 return criteriaBuilder.and(tipoPredicate, nombrePredicate);
             } else if ("ID".equalsIgnoreCase(tipoBusqueda)) {
-                try {
-                    String id = searchTerm;
-                    Predicate idPredicate = criteriaBuilder.equal(root.get("productoId"), id);
-                    return criteriaBuilder.and(tipoPredicate, idPredicate);
-                } catch (NumberFormatException e) {
-                    return criteriaBuilder.disjunction(); // Return no results if ID is invalid
-                }
+                String id = searchTerm;
+                Predicate idPredicate = criteriaBuilder.equal(root.get("productoId"), id);
+                return criteriaBuilder.and(tipoPredicate, idPredicate);
             } else {
                 return null;
             }

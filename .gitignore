@@ -57,7 +57,4 @@ COMANDOS_CP.md
 # donde se guarda el output del script para scanear y hacer un resumen de las entidades del backend
 entity-summary.txt
 
-/src/test/resources/http-client.env.json
-/src/test/resources/http/users/http-client.private.env.json
-/src/test/resources/http/users/http-client.env.json
 /.junie/temp/
