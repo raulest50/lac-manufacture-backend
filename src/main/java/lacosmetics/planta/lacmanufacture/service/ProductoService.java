@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
+import lacosmetics.planta.lacmanufacture.model.dto.productos.search.ProductoSearchCriteria;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
@@ -332,56 +333,55 @@ public class ProductoService {
     }
 
 
+    public Page<Producto> consultaProductos(String search,
+                                            List<String> categories,
+                                            int page,
+                                            int size) {
 
+        Pageable pageable = PageRequest.of(page, size);
 
-    public Page<Producto> consultaProductos(String search, List<String> categories, int page, int size) {
-        Specification<Producto> spec = Specification.where(null);
-
-        // Use partial matching on 'nombre'
-        if (search != null && !search.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("nombre")), "%" + search.toLowerCase() + "%")
-            );
+        // 1) Sin categorías → vacío
+        if (categories == null || categories.isEmpty()) {
+            // ← aquí ramificación 1
+            return;
         }
 
-        // Map checkbox selections to product type and subcategory conditions
-        if (categories != null && !categories.isEmpty()) {
-            spec = spec.and((root, query, cb) -> {
-                Predicate categoryPredicate = cb.disjunction();
-                if (categories.contains("materia prima")) {
-                    // For MateriaPrima with tipoMateriaPrima = 1
-                    categoryPredicate = cb.or(categoryPredicate,
-                            cb.and(
-                                    cb.equal(root.type(), Material.class),
-                                    cb.equal(cb.treat(root, Material.class).get("tipoMaterial"), 1)
-                            )
-                    );
-                }
-                if (categories.contains("material empaque")) {
-                    // For MateriaPrima with tipoMateriaPrima = 2
-                    categoryPredicate = cb.or(categoryPredicate,
-                            cb.and(
-                                    cb.equal(root.type(), Material.class),
-                                    cb.equal(cb.treat(root, Material.class).get("tipoMaterial"), 2)
-                            )
-                    );
-                }
-                if (categories.contains("semiterminado")) {
-                    categoryPredicate = cb.or(categoryPredicate,
-                            cb.equal(root.type(), SemiTerminado.class)
-                    );
-                }
-                if (categories.contains("terminado")) {
-                    categoryPredicate = cb.or(categoryPredicate,
-                            cb.equal(root.type(), Terminado.class)
-                    );
-                }
-                return categoryPredicate;
-            });
+        boolean mp = categories.contains(ProductoSearchCriteria.CATEGORIA_MATERIA_PRIMA);
+        boolean me = categories.contains(ProductoSearchCriteria.CATEGORIA_MATERIAL_EMPAQUE);
+        boolean se = categories.contains(ProductoSearchCriteria.CATEGORIA_SEMITERMINADO);
+        boolean te = categories.contains(ProductoSearchCriteria.CATEGORIA_TERMINADO);
+
+        // 2) Sólo “materia prima” y/o “material empaque” (y nada más)
+        if ((mp || me) && !se && !te) {
+            // ← ramificación 2
+        }
+        // 3) Sólo “terminado”
+        else if (te && !se && !mp && !me) {
+            // ← ramificación 3
+        }
+        // 4) Sólo “semiterminado”
+        else if (se && !te && !mp && !me) {
+            // ← ramificación 4
+        }
+        // 5) “semiterminado” + “terminado” (pero sin materiales)
+        else if (se && te && !mp && !me) {
+            // ← ramificación 5
+        }
+        // 6) “semiterminado” + “terminado” + exactamente uno de los materiales
+        else if (se && te && (mp ^ me)) {
+            // ← ramificación 6
+        }
+        // 7) Todas las categorías seleccionadas
+        else if (se && te && mp && me) {
+            // ← ramificación 7
+        }
+        else {
+            // ← cualquier otra combinación que no caiga en los anteriores
         }
 
-        return productoRepo.findAll(spec, PageRequest.of(page, size));
     }
+
+
 
 
 }

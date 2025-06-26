@@ -5,65 +5,33 @@
 # Nota: Si este endpoint requiere autenticación, primero ejecuta el login en auth.http
 # El token JWT se guardará automáticamente y estará disponible para todas las peticiones
 
-### Buscar todos los productos terminados
-# Este endpoint devuelve una lista paginada de productos terminados
-POST {{host}}/api/productos/consulta1
+
+### Buscar en todas las categorías con el término "crema"
+# Este endpoint devuelve una lista paginada de productos de todas las categorías que contienen "crema" en su nombre
+POST {{host}}/productos/consulta1
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
 {
-  "categories": ["terminado"],
-  "page": 0,
-  "size": 20
-}
-
-### Buscar materias primas y materiales de empaque que contengan "aceite"
-# Este endpoint devuelve una lista paginada de materias primas y materiales de empaque que contienen "aceite" en su nombre
-POST {{host}}/api/productos/consulta1
-Content-Type: {{contentType}}
-Authorization: Bearer {{auth_token}}
-
-{
-  "search": "aceite",
-  "categories": ["materia prima", "material empaque"],
+  "search": " ",
+  "categories": ["materia prima", "material empaque", "semiterminado", "terminado"],
   "page": 0,
   "size": 10
 }
 
 ### Buscar en todas las categorías con el término "crema"
 # Este endpoint devuelve una lista paginada de productos de todas las categorías que contienen "crema" en su nombre
-POST {{host}}/api/productos/consulta1
+POST {{host}}/productos/consulta1
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
 {
   "search": "",
-  "categories": ["materia prima", "material empaque", "semiterminado", "terminado"],
+  "categories": ["materia prima"],
   "page": 0,
   "size": 10
 }
 
-### Buscar productos semiterminados (página 2)
-# Este endpoint devuelve la segunda página de productos semiterminados
-POST {{host}}/api/productos/consulta1
-Content-Type: {{contentType}}
-Authorization: Bearer {{auth_token}}
 
-{
-  "categories": ["semiterminado"],
-  "page": 0,
-  "size": 10
-}
 
-### Buscar productos sin especificar categorías
-# Este endpoint devuelve una lista paginada de productos sin filtrar por categoría
-# Nota: Esto podría devolver todos los productos o ninguno, dependiendo de la implementación del backend
-POST {{host}}/api/productos/consulta1
-Content-Type: {{contentType}}
-Authorization: Bearer {{auth_token}}
 
-{
-  "search": "producto",
-  "page": 0,
-  "size": 10
-}
