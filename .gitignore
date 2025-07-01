@@ -58,3 +58,5 @@ COMANDOS_CP.md
 entity-summary.txt
 
 /.junie/temp/
+
+*.patch

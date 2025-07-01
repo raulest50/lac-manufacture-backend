@@ -776,6 +776,24 @@ public class BulkUploadService {
         material.setNombre(descripcion);
 
         // Establecer el tipo de unidades
+        // Mapear unidades de medida a códigos de 4 caracteres o menos
+        if (unidadMedida != null) {
+            // Usar abreviaturas conocidas
+            if (unidadMedida.equalsIgnoreCase("UNIDA") || unidadMedida.equalsIgnoreCase("UNIDAD") || unidadMedida.equalsIgnoreCase("UNIDADES")) {
+                unidadMedida = "U";
+            } else if (unidadMedida.equalsIgnoreCase("KILOGRAMO") || unidadMedida.equalsIgnoreCase("KILOGRAMOS")) {
+                unidadMedida = "KG";
+            } else if (unidadMedida.equalsIgnoreCase("LITRO") || unidadMedida.equalsIgnoreCase("LITROS")) {
+                unidadMedida = "L";
+            } else if (unidadMedida.equalsIgnoreCase("GRAMO") || unidadMedida.equalsIgnoreCase("GRAMOS")) {
+                unidadMedida = "G";
+            }
+
+            // Si aún excede 4 caracteres, truncar
+            if (unidadMedida.length() > 4) {
+                unidadMedida = unidadMedida.substring(0, 4);
+            }
+        }
         material.setTipoUnidades(unidadMedida);
 
         // Establecer la cantidad por unidad (por defecto 1)
@@ -805,6 +823,7 @@ public class BulkUploadService {
                 .skippedCount(0)
                 .errors(new ArrayList<>())
                 .skipped(new ArrayList<>())
+                .successful(new ArrayList<>())
                 .build();
 
         try (InputStream is = file.getInputStream();
@@ -838,9 +857,28 @@ public class BulkUploadService {
 
             // Procesar cada fila
             int rowNumber = 1; // Empezamos en 1 porque ya saltamos la fila de encabezados
+            int emptyRowCount = 0; // Contador de filas vacías consecutivas
+
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 rowNumber++;
+
+                // Verificar si la fila está vacía
+                boolean isEmpty = isRowEmpty(row);
+
+                if (isEmpty) {
+                    emptyRowCount++;
+                    // Si hay más de 2 filas vacías consecutivas, detenemos el procesamiento
+                    if (emptyRowCount > 2) {
+                        log.info("Detectadas más de 2 filas vacías consecutivas. Finalizando procesamiento en fila {}", rowNumber);
+                        break;
+                    }
+                    continue; // Saltamos esta fila vacía
+                } else {
+                    // Reiniciar contador de filas vacías si encontramos una fila con datos
+                    emptyRowCount = 0;
+                }
+
                 response.setTotalRecords(response.getTotalRecords() + 1);
 
                 try {
@@ -880,6 +918,14 @@ public class BulkUploadService {
                     transaccionAlmacen.getMovimientosTransaccion().add(movimiento);
 
                     response.setSuccessCount(response.getSuccessCount() + 1);
+
+                    // Registrar el éxito
+                    response.getSuccessful().add(
+                        BulkUploadResponseDTO.SuccessRecord.builder()
+                            .rowNumber(rowNumber)
+                            .details("Producto guardado: " + material.getNombre())
+                            .build()
+                    );
 
                 } catch (Exception e) {
                     response.setFailureCount(response.getFailureCount() + 1);
