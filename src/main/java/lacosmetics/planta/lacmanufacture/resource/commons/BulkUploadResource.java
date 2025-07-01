@@ -3,6 +3,8 @@ package lacosmetics.planta.lacmanufacture.resource.commons;
 import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.BulkUploadResponseDTO;
 import lacosmetics.planta.lacmanufacture.service.commons.BulkUploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,13 +26,20 @@ public class BulkUploadResource {
      * Accepts a CSV or Excel file containing supplier data.
      * 
      * @param file The file containing supplier data
-     * @return Response with status of the upload operation
+     * @return Response with status of the upload operation or a file with detailed report
      */
     @PostMapping("/proveedores")
-    public ResponseEntity<BulkUploadResponseDTO> bulkUploadSuppliers(@RequestParam("file") MultipartFile file) {
-        // The implementation will be added later
+    public ResponseEntity<?> bulkUploadSuppliers(@RequestParam("file") MultipartFile file) {
         BulkUploadResponseDTO response = bulkUploadService.processBulkSupplierUpload(file);
-        return ResponseEntity.ok(response);
+
+        // Siempre devolver el archivo de reporte
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", response.getReportFileName());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(response.getReportFile());
     }
 
     /**
@@ -38,12 +47,19 @@ public class BulkUploadResource {
      * Accepts a CSV or Excel file containing product data.
      * 
      * @param file The file containing product data
-     * @return Response with status of the upload operation
+     * @return Response with status of the upload operation or a file with detailed report
      */
     @PostMapping("/products")
-    public ResponseEntity<BulkUploadResponseDTO> bulkUploadProducts(@RequestParam("file") MultipartFile file) {
-        // The implementation will be added later
+    public ResponseEntity<?> bulkUploadProducts(@RequestParam("file") MultipartFile file) {
         BulkUploadResponseDTO response = bulkUploadService.processBulkProductUpload(file);
-        return ResponseEntity.ok(response);
+
+        // Siempre devolver el archivo de reporte
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", response.getReportFileName());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(response.getReportFile());
     }
 }

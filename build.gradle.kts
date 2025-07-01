@@ -30,7 +30,7 @@ dependencies {
 	// added for endpoint that implements bulk load reading uploaded excel file
 	implementation("org.apache.poi:poi-ooxml:5.4.0")
 
-	runtimeOnly("org.postgresql:postgresql")
+	implementation("org.postgresql:postgresql")
 
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 

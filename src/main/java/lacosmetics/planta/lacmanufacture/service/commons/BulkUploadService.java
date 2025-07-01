@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -140,6 +141,113 @@ public class BulkUploadService {
     }
 
     /**
+     * Genera un archivo Excel con el reporte detallado de la carga masiva.
+     * 
+     * @param response El objeto BulkUploadResponseDTO que contiene los resultados
+     * @param fileName Nombre base para el archivo generado
+     * @return El archivo generado como array de bytes
+     */
+    private byte[] generateReportFile(BulkUploadResponseDTO response, String fileName) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            // Crear una hoja para el reporte
+            Sheet sheet = workbook.createSheet("Reporte de carga");
+
+            // Crear encabezados
+            Row headerRow = sheet.createRow(0);
+            Cell cellHeader1 = headerRow.createCell(0);
+            cellHeader1.setCellValue("Fila en archivo original");
+            Cell cellHeader2 = headerRow.createCell(1);
+            cellHeader2.setCellValue("Estado");
+            Cell cellHeader3 = headerRow.createCell(2);
+            cellHeader3.setCellValue("Mensaje");
+
+            // Estilo para encabezados
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+            cellHeader1.setCellStyle(headerStyle);
+            cellHeader2.setCellStyle(headerStyle);
+            cellHeader3.setCellStyle(headerStyle);
+
+            // Estilos para diferentes estados
+            CellStyle errorStyle = workbook.createCellStyle();
+            Font errorFont = workbook.createFont();
+            errorFont.setColor(IndexedColors.RED.getIndex());
+            errorStyle.setFont(errorFont);
+
+            CellStyle skippedStyle = workbook.createCellStyle();
+            Font skippedFont = workbook.createFont();
+            skippedFont.setColor(IndexedColors.ORANGE.getIndex());
+            skippedStyle.setFont(skippedFont);
+
+            CellStyle successStyle = workbook.createCellStyle();
+            Font successFont = workbook.createFont();
+            successFont.setColor(IndexedColors.GREEN.getIndex());
+            successStyle.setFont(successFont);
+
+            // Agregar los registros
+            int rowNum = 1;
+
+            // Primero los registros exitosos
+            for (BulkUploadResponseDTO.SuccessRecord success : response.getSuccessful()) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(success.getRowNumber());
+
+                Cell statusCell = row.createCell(1);
+                statusCell.setCellValue("ÉXITO");
+                statusCell.setCellStyle(successStyle);
+
+                Cell messageCell = row.createCell(2);
+                messageCell.setCellValue(success.getDetails());
+                messageCell.setCellStyle(successStyle);
+            }
+
+            // Luego los errores
+            for (BulkUploadResponseDTO.ErrorRecord error : response.getErrors()) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(error.getRowNumber());
+
+                Cell statusCell = row.createCell(1);
+                statusCell.setCellValue("ERROR");
+                statusCell.setCellStyle(errorStyle);
+
+                Cell messageCell = row.createCell(2);
+                messageCell.setCellValue(error.getErrorMessage());
+                messageCell.setCellStyle(errorStyle);
+            }
+
+            // Finalmente los registros omitidos
+            for (BulkUploadResponseDTO.ErrorRecord skipped : response.getSkipped()) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(skipped.getRowNumber());
+
+                Cell statusCell = row.createCell(1);
+                statusCell.setCellValue("OMITIDO");
+                statusCell.setCellStyle(skippedStyle);
+
+                Cell messageCell = row.createCell(2);
+                messageCell.setCellValue(skipped.getErrorMessage());
+                messageCell.setCellStyle(skippedStyle);
+            }
+
+            // Ajustar ancho de columnas
+            sheet.autoSizeColumn(0);
+            sheet.autoSizeColumn(1);
+            sheet.autoSizeColumn(2);
+
+            // Convertir el workbook a bytes
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                workbook.write(outputStream);
+                return outputStream.toByteArray();
+            }
+        } catch (IOException e) {
+            log.error("Error al generar archivo de reporte", e);
+            throw new RuntimeException("Error al generar archivo de reporte: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Process a bulk upload of suppliers from a file.
      * Before processing, it cleans up all existing supplier data.
      * 
@@ -153,14 +261,19 @@ public class BulkUploadService {
         cleanAllProveedoresData();
 
         // Procesar el archivo Excel
-        return processExcelSupplierData(file);
+        BulkUploadResponseDTO response = processExcelSupplierData(file);
+
+        // Generar archivo de reporte en todos los casos
+        byte[] reportFile = generateReportFile(response, "reporte_proveedores");
+        response.setReportFile(reportFile);
+        response.setReportFileName("reporte_proveedores_" + System.currentTimeMillis() + ".xlsx");
+
+        return response;
     }
 
     /**
      * Procesa un archivo Excel con datos de proveedores.
      * Lee cada fila del archivo, valida los datos y crea objetos Proveedor.
-     * Ignora proveedores sin tipo de identificación o número de identificación.
-     * Normaliza los números de identificación eliminando puntos y espacios, pero manteniendo guiones.
      * 
      * @param file El archivo Excel con datos de proveedores
      * @return Resultado de la operación con detalles sobre éxitos y fallos
@@ -172,7 +285,10 @@ public class BulkUploadService {
                 .totalRecords(0)
                 .successCount(0)
                 .failureCount(0)
+                .skippedCount(0)
                 .errors(new ArrayList<>())
+                .skipped(new ArrayList<>())
+                .successful(new ArrayList<>())
                 .build();
 
         try (InputStream is = file.getInputStream();
@@ -191,30 +307,51 @@ public class BulkUploadService {
 
             // Procesar cada fila
             int rowNumber = 1; // Empezamos en 1 porque ya saltamos la fila de encabezados
+            int emptyRowCount = 0; // Contador de filas vacías consecutivas
+
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 rowNumber++;
+
+                // Verificar si la fila está vacía
+                boolean isEmpty = isRowEmpty(row);
+
+                if (isEmpty) {
+                    emptyRowCount++;
+                    // Si hay más de 2 filas vacías consecutivas, detenemos el procesamiento
+                    if (emptyRowCount > 2) {
+                        log.info("Detectadas más de 2 filas vacías consecutivas. Finalizando procesamiento en fila {}", rowNumber);
+                        break;
+                    }
+                    continue; // Saltamos esta fila vacía
+                } else {
+                    // Reiniciar contador de filas vacías si encontramos una fila con datos
+                    emptyRowCount = 0;
+                }
+
                 response.setTotalRecords(response.getTotalRecords() + 1);
 
                 try {
                     // Intentar procesar la fila
-                    Proveedor proveedor = processExcelRow(row);
+                    Proveedor proveedor = processExcelRow(row, response, rowNumber);
 
                     // Si el proveedor es null, significa que debe ser ignorado
+                    // (ya se registró en el método processExcelRow)
                     if (proveedor == null) {
-                        response.setFailureCount(response.getFailureCount() + 1);
-                        response.getErrors().add(
-                            BulkUploadResponseDTO.ErrorRecord.builder()
-                                .rowNumber(rowNumber)
-                                .errorMessage("Proveedor ignorado: falta tipo de identificación o número de identificación")
-                                .build()
-                        );
                         continue;
                     }
 
                     // Guardar el proveedor en la base de datos
                     proveedorRepo.save(proveedor);
                     response.setSuccessCount(response.getSuccessCount() + 1);
+
+                    // Registrar el éxito
+                    response.getSuccessful().add(
+                        BulkUploadResponseDTO.SuccessRecord.builder()
+                            .rowNumber(rowNumber)
+                            .details("Proveedor guardado: " + proveedor.getNombre())
+                            .build()
+                    );
 
                 } catch (Exception e) {
                     response.setFailureCount(response.getFailureCount() + 1);
@@ -240,9 +377,11 @@ public class BulkUploadService {
      * Procesa una fila del archivo Excel y crea un objeto Proveedor.
      * 
      * @param row La fila del Excel a procesar
+     * @param response El objeto de respuesta para registrar razones de omisión
+     * @param rowNumber El número de fila actual
      * @return Objeto Proveedor creado a partir de los datos de la fila, o null si debe ser ignorado
      */
-    private Proveedor processExcelRow(Row row) {
+    private Proveedor processExcelRow(Row row, BulkUploadResponseDTO response, int rowNumber) {
         // Obtener los valores de las celdas
         String razonSocial = getCellValueAsString(row.getCell(0));
         String tipoIdentificacionStr = getCellValueAsString(row.getCell(1));
@@ -256,8 +395,36 @@ public class BulkUploadService {
         String correo = getCellValueAsString(row.getCell(9));
 
         // Validar que exista tipo de identificación y número de identificación
-        if (tipoIdentificacionStr == null || tipoIdentificacionStr.trim().isEmpty() ||
-            numeroIdentificacion == null || numeroIdentificacion.trim().isEmpty()) {
+        if (tipoIdentificacionStr == null || tipoIdentificacionStr.trim().isEmpty()) {
+            response.setSkippedCount(response.getSkippedCount() + 1);
+            response.getSkipped().add(
+                BulkUploadResponseDTO.ErrorRecord.builder()
+                    .rowNumber(rowNumber)
+                    .errorMessage("Proveedor omitido: falta tipo de identificación")
+                    .build()
+            );
+            return null; // Ignorar este proveedor
+        }
+
+        if (numeroIdentificacion == null || numeroIdentificacion.trim().isEmpty()) {
+            response.setSkippedCount(response.getSkippedCount() + 1);
+            response.getSkipped().add(
+                BulkUploadResponseDTO.ErrorRecord.builder()
+                    .rowNumber(rowNumber)
+                    .errorMessage("Proveedor omitido: falta número de identificación")
+                    .build()
+            );
+            return null; // Ignorar este proveedor
+        }
+
+        if (razonSocial == null || razonSocial.trim().isEmpty()) {
+            response.setSkippedCount(response.getSkippedCount() + 1);
+            response.getSkipped().add(
+                BulkUploadResponseDTO.ErrorRecord.builder()
+                    .rowNumber(rowNumber)
+                    .errorMessage("Proveedor omitido: falta razón social")
+                    .build()
+            );
             return null; // Ignorar este proveedor
         }
 
@@ -378,6 +545,31 @@ public class BulkUploadService {
     }
 
     /**
+     * Verifica si una fila está vacía (todas sus celdas están vacías o son nulas)
+     * 
+     * @param row La fila a verificar
+     * @return true si la fila está vacía, false en caso contrario
+     */
+    private boolean isRowEmpty(Row row) {
+        if (row == null) {
+            return true;
+        }
+
+        // Verificar si todas las celdas están vacías
+        for (int i = 0; i < 10; i++) { // Verificamos las primeras 10 columnas (ajustar según necesidad)
+            Cell cell = row.getCell(i);
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                String value = getCellValueAsString(cell);
+                if (value != null && !value.trim().isEmpty()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Limpia todos los datos relacionados con productos para permitir una carga masiva.
      * Elimina registros en el siguiente orden para mantener la integridad referencial:
      * 1. Transacciones de almacén y sus movimientos
@@ -472,7 +664,14 @@ public class BulkUploadService {
         cleanAllProductsData();
 
         // Procesar el archivo Excel
-        return processExcelProductData(file);
+        BulkUploadResponseDTO response = processExcelProductData(file);
+
+        // Generar archivo de reporte en todos los casos
+        byte[] reportFile = generateReportFile(response, "reporte_productos");
+        response.setReportFile(reportFile);
+        response.setReportFileName("reporte_productos_" + System.currentTimeMillis() + ".xlsx");
+
+        return response;
     }
 
     /**
@@ -490,9 +689,11 @@ public class BulkUploadService {
      * Procesa una fila del archivo Excel y crea un objeto Material.
      * 
      * @param row La fila del Excel a procesar
+     * @param response El objeto de respuesta para registrar razones de omisión
+     * @param rowNumber El número de fila actual
      * @return Objeto Material creado a partir de los datos de la fila, o null si debe ser ignorado
      */
-    private Material processExcelMaterialRow(Row row) {
+    private Material processExcelMaterialRow(Row row, BulkUploadResponseDTO response, int rowNumber) {
         // Obtener los valores de las celdas
         String codigo = getCellValueAsString(row.getCell(0)); // CODIGO (ignorado)
         String descripcion = getCellValueAsString(row.getCell(1)); // DESCRIPCION
@@ -504,21 +705,56 @@ public class BulkUploadService {
         String nuevoCodigo = getCellValueAsString(row.getCell(7)); // NUEVO CODIGO
         String iva = getCellValueAsString(row.getCell(10)); // IVA
 
-        // Validar que exista un nuevo código y que el stock sea mayor que cero
+        // Validar que exista un nuevo código
         if (nuevoCodigo == null || nuevoCodigo.trim().isEmpty()) {
+            response.setSkippedCount(response.getSkippedCount() + 1);
+            response.getSkipped().add(
+                BulkUploadResponseDTO.ErrorRecord.builder()
+                    .rowNumber(rowNumber)
+                    .errorMessage("Material omitido: falta código de producto")
+                    .build()
+            );
+            return null; // Ignorar este material
+        }
+
+        // Validar que exista una descripción
+        if (descripcion == null || descripcion.trim().isEmpty()) {
+            response.setSkippedCount(response.getSkippedCount() + 1);
+            response.getSkipped().add(
+                BulkUploadResponseDTO.ErrorRecord.builder()
+                    .rowNumber(rowNumber)
+                    .errorMessage("Material omitido: falta descripción del producto")
+                    .build()
+            );
             return null; // Ignorar este material
         }
 
         double stockValue = 0;
         try {
             // Manejar posibles formatos de número (con comas, etc.)
-            String stockNormalized = stock.replace(",", ".");
-            stockValue = Double.parseDouble(stockNormalized);
-        } catch (NumberFormatException | NullPointerException e) {
-            stockValue = 0;
+            if (stock != null && !stock.trim().isEmpty()) {
+                String stockNormalized = stock.replace(",", ".");
+                stockValue = Double.parseDouble(stockNormalized);
+            }
+        } catch (NumberFormatException e) {
+            response.setSkippedCount(response.getSkippedCount() + 1);
+            response.getSkipped().add(
+                BulkUploadResponseDTO.ErrorRecord.builder()
+                    .rowNumber(rowNumber)
+                    .errorMessage("Material omitido: formato de stock inválido - " + stock)
+                    .build()
+            );
+            return null; // Ignorar este material
         }
 
         if (stockValue <= 0) {
+            response.setSkippedCount(response.getSkippedCount() + 1);
+            response.getSkipped().add(
+                BulkUploadResponseDTO.ErrorRecord.builder()
+                    .rowNumber(rowNumber)
+                    .errorMessage("Material omitido: stock debe ser mayor que cero")
+                    .build()
+            );
             return null; // Ignorar este material
         }
 
@@ -566,7 +802,9 @@ public class BulkUploadService {
                 .totalRecords(0)
                 .successCount(0)
                 .failureCount(0)
+                .skippedCount(0)
                 .errors(new ArrayList<>())
+                .skipped(new ArrayList<>())
                 .build();
 
         try (InputStream is = file.getInputStream();
@@ -607,17 +845,11 @@ public class BulkUploadService {
 
                 try {
                     // Procesar la fila
-                    Material material = processExcelMaterialRow(row);
+                    Material material = processExcelMaterialRow(row, response, rowNumber);
 
                     // Si el material es null, significa que debe ser ignorado
+                    // (ya se registró en el método processExcelMaterialRow)
                     if (material == null) {
-                        response.setFailureCount(response.getFailureCount() + 1);
-                        response.getErrors().add(
-                            BulkUploadResponseDTO.ErrorRecord.builder()
-                                .rowNumber(rowNumber)
-                                .errorMessage("Material ignorado: sin ID asignado o stock cero")
-                                .build()
-                        );
                         continue;
                     }
 
