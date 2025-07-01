@@ -84,19 +84,17 @@ public class MovimientosService {
     }
 
     public Optional<ProductoStockDTO> getStockOf2(String producto_id){
-        try {
-            // Intentar convertir a double solo si es necesario para la compatibilidad con el método existente
-            double productoIdDouble = Double.parseDouble(producto_id);
-            List<Movimiento> movs = transaccionAlmacenRepo.findMovimientosByCantidad(productoIdDouble);
-            if(!movs.isEmpty()){
-                double productoStock = movs.stream().mapToDouble(Movimiento::getCantidad).sum();
-                return Optional.of(new ProductoStockDTO(movs.getFirst().getProducto(), productoStock));
-            }
-        } catch (NumberFormatException e) {
-            // Si el ID no es numérico, no podemos usar findMovimientosByCantidad
-            // En este caso, podríamos buscar por el ID directamente si hay un método disponible
+        Optional<Producto> optionalProducto = productoRepo.findByProductoId(producto_id);
+        if(optionalProducto.isEmpty()){
+            return Optional.empty();
         }
-        return Optional.empty();
+
+        List<Movimiento> movimientos = transaccionAlmacenRepo.findByProducto_ProductoId(producto_id);
+        double productoStock = movimientos.stream()
+                .mapToDouble(Movimiento::getCantidad)
+                .sum();
+
+        return Optional.of(new ProductoStockDTO(optionalProducto.get(), productoStock));
     }
 
 
