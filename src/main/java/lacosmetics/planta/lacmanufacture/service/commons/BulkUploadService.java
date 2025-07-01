@@ -801,10 +801,10 @@ public class BulkUploadService {
 
         // Establecer el IVA
         try {
-            double ivaValue = Double.parseDouble(iva) / 100.0; // Convertir de porcentaje a decimal
+            double ivaValue = Double.parseDouble(iva); // Guardar directamente como porcentaje
             material.setIva_percentual(ivaValue);
         } catch (NumberFormatException | NullPointerException e) {
-            material.setIva_percentual(0.19); // Por defecto 19%
+            material.setIva_percentual(19); // Por defecto 19% como entero
         }
 
         // Establecer el costo (por defecto 0)
