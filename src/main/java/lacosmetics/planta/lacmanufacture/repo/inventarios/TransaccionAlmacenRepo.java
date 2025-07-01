@@ -16,6 +16,9 @@ public interface TransaccionAlmacenRepo extends JpaRepository<Movimiento, Intege
 
     List<Movimiento> findMovimientosByCantidad(Double cantidad);
 
+    // Get movimientos filtered by product ID
+    List<Movimiento> findByProducto_ProductoId(String productoId);
+
     // New method
     Page<Movimiento> findByProducto_ProductoIdOrderByFechaMovimientoDesc(String productoId, Pageable pageable);
 
