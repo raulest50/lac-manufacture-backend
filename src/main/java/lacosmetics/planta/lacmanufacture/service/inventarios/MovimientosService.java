@@ -183,10 +183,20 @@ public class MovimientosService {
                     // Crear un nuevo lote para este movimiento
                     Lote lote = new Lote();
                     lote.setBatchNumber(generateBatchNumber(movimiento.getProducto()));
-                    lote.setProductionDate(LocalDate.now());
 
-                    // En una futura implementación, se podría agregar lógica para calcular
-                    // la fecha de vencimiento basada en propiedades del material
+                    // Verificar si el movimiento ya tiene un lote con fecha de fabricación especificada
+                    if (movimiento.getLote() != null && movimiento.getLote().getProductionDate() != null) {
+                        // Si se proporcionó una fecha de fabricación, usarla
+                        lote.setProductionDate(movimiento.getLote().getProductionDate());
+                    }
+                    // Si no se proporcionó fecha de fabricación, se deja como null
+
+                    // Verificar si el movimiento ya tiene un lote con fecha de vencimiento especificada
+                    if (movimiento.getLote() != null && movimiento.getLote().getExpirationDate() != null) {
+                        // Si se proporcionó una fecha de vencimiento, usarla
+                        lote.setExpirationDate(movimiento.getLote().getExpirationDate());
+                    }
+                    // Si no se proporcionó fecha de vencimiento, se deja como null
 
                     // Asociar con la orden de compra
                     lote.setOrdenCompraMateriales(ingresoOCM_dta.getOrdenCompraMateriales());
