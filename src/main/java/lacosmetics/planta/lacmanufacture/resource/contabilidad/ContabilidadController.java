@@ -78,6 +78,7 @@ public class ContabilidadController {
      * @param cuenta La cuenta contable a crear
      * @return La cuenta contable creada
      */
+    /*
     @PostMapping("/cuentas")
     public ResponseEntity<?> crearCuenta(@RequestBody CuentaContable cuenta) {
         log.info("REST request para crear cuenta contable: {}", cuenta.getCodigo());
@@ -94,6 +95,7 @@ public class ContabilidadController {
                     ));
         }
     }
+    */
 
     /**
      * Actualiza una cuenta contable existente.
@@ -102,6 +104,7 @@ public class ContabilidadController {
      * @param cuenta Datos actualizados de la cuenta
      * @return La cuenta contable actualizada
      */
+    /*
     @PutMapping("/cuentas/{codigo}")
     public ResponseEntity<?> actualizarCuenta(
             @PathVariable String codigo,
@@ -129,6 +132,7 @@ public class ContabilidadController {
             }
         }
     }
+    */
 
     //
     // Endpoints para Asientos Contables
@@ -141,6 +145,7 @@ public class ContabilidadController {
      * @param estado Estado del asiento (opcional)
      * @return Lista de asientos contables
      */
+    /*
     @GetMapping("/asientos")
     public ResponseEntity<?> obtenerTodosLosAsientos(
             @RequestParam(required = false) Long periodoId,
@@ -149,6 +154,7 @@ public class ContabilidadController {
 
         return ResponseEntity.ok(asientoContableService.obtenerTodosLosAsientos(periodoId, estado));
     }
+    */
 
     /**
      * Obtiene un asiento contable por su ID.
@@ -156,6 +162,7 @@ public class ContabilidadController {
      * @param id ID del asiento contable
      * @return El asiento contable si existe, error 404 en caso contrario
      */
+    /*
     @GetMapping("/asientos/{id}")
     public ResponseEntity<?> obtenerAsientoPorId(@PathVariable Long id) {
         log.info("REST request para obtener asiento contable con ID: {}", id);
@@ -172,6 +179,7 @@ public class ContabilidadController {
                     ));
         }
     }
+    */
 
     /**
      * Crea un nuevo asiento contable.
@@ -179,6 +187,7 @@ public class ContabilidadController {
      * @param asiento El asiento contable a crear
      * @return El asiento contable creado
      */
+    /*
     @PostMapping("/asientos")
     public ResponseEntity<?> crearAsiento(@RequestBody AsientoContable asiento) {
         log.info("REST request para crear asiento contable");
@@ -195,6 +204,7 @@ public class ContabilidadController {
                     ));
         }
     }
+    */
 
     /**
      * Actualiza un asiento contable existente.
@@ -203,6 +213,7 @@ public class ContabilidadController {
      * @param asiento Datos actualizados del asiento
      * @return El asiento contable actualizado
      */
+    /*
     @PutMapping("/asientos/{id}")
     public ResponseEntity<?> actualizarAsiento(
             @PathVariable Long id,
@@ -230,6 +241,7 @@ public class ContabilidadController {
             }
         }
     }
+    */
 
     /**
      * Cambia el estado de un asiento contable.
@@ -238,6 +250,7 @@ public class ContabilidadController {
      * @param estadoMap Mapa con el nuevo estado
      * @return Información sobre el cambio de estado
      */
+    /*
     @PutMapping("/asientos/{id}/estado")
     public ResponseEntity<?> cambiarEstadoAsiento(
             @PathVariable Long id,
@@ -278,6 +291,7 @@ public class ContabilidadController {
             }
         }
     }
+    */
 
     //
     // Endpoints para Períodos Contables
@@ -326,6 +340,7 @@ public class ContabilidadController {
      * @param periodo El período contable a crear
      * @return El período contable creado
      */
+    /*
     @PostMapping("/periodos")
     public ResponseEntity<?> crearPeriodo(@RequestBody PeriodoContable periodo) {
         log.info("REST request para crear período contable: {}", periodo.getNombre());
@@ -342,6 +357,7 @@ public class ContabilidadController {
                     ));
         }
     }
+    */
 
     /**
      * Actualiza un período contable existente.
@@ -350,6 +366,7 @@ public class ContabilidadController {
      * @param periodo Datos actualizados del período
      * @return El período contable actualizado
      */
+    /*
     @PutMapping("/periodos/{id}")
     public ResponseEntity<?> actualizarPeriodo(
             @PathVariable Long id,
@@ -377,6 +394,7 @@ public class ContabilidadController {
             }
         }
     }
+    */
 
     /**
      * Cambia el estado de un período contable.
@@ -385,6 +403,7 @@ public class ContabilidadController {
      * @param estadoMap Mapa con el nuevo estado
      * @return Información sobre el cambio de estado
      */
+    /*
     @PutMapping("/periodos/{id}/estado")
     public ResponseEntity<?> cambiarEstadoPeriodo(
             @PathVariable Long id,
@@ -425,6 +444,7 @@ public class ContabilidadController {
             }
         }
     }
+    */
 
     //
     // Endpoints para Reportes
@@ -463,6 +483,7 @@ public class ContabilidadController {
      * @param periodoId ID del período contable
      * @return Lista de saldos de cuentas para el balance de comprobación
      */
+    /*
     @GetMapping("/balance-comprobacion")
     public ResponseEntity<?> generarBalanceComprobacion(@RequestParam Long periodoId) {
         log.info("REST request para generar balance de comprobación. Período: {}", periodoId);
@@ -480,6 +501,7 @@ public class ContabilidadController {
                     ));
         }
     }
+    */
 
     /**
      * Genera el balance general para un período específico.
@@ -487,6 +509,7 @@ public class ContabilidadController {
      * @param periodoId ID del período contable
      * @return Mapa con los grupos de cuentas y totales del balance general
      */
+    /*
     @GetMapping("/balance-general")
     public ResponseEntity<?> generarBalanceGeneral(@RequestParam Long periodoId) {
         log.info("REST request para generar balance general. Período: {}", periodoId);
@@ -503,6 +526,7 @@ public class ContabilidadController {
                     ));
         }
     }
+    */
 
     /**
      * Genera el estado de resultados para un período específico.
@@ -510,6 +534,7 @@ public class ContabilidadController {
      * @param periodoId ID del período contable
      * @return Mapa con los grupos de cuentas y totales del estado de resultados
      */
+    /*
     @GetMapping("/estado-resultados")
     public ResponseEntity<?> generarEstadoResultados(@RequestParam Long periodoId) {
         log.info("REST request para generar estado de resultados. Período: {}", periodoId);
@@ -526,4 +551,5 @@ public class ContabilidadController {
                     ));
         }
     }
+    */
 }

@@ -401,6 +401,55 @@ public class ProductoService {
         return productoRepo.findAll(spec, pageable);
     }
 
+    /**
+     * Actualiza un producto existente en la base de datos.
+     * Maneja diferentes tipos de productos (Material, SemiTerminado, Terminado) de forma adecuada.
+     * 
+     * @param producto El producto con los datos actualizados
+     * @return El producto actualizado
+     * @throws IllegalArgumentException Si el producto no existe
+     */
+    @Transactional
+    public Producto updateProducto(Producto producto) {
+        String productoId = producto.getProductoId();
+
+        // Verificar que el producto existe
+        if (!productoRepo.existsById(productoId)) {
+            throw new IllegalArgumentException("Producto no encontrado: " + productoId);
+        }
+
+        // Obtener el producto original para preservar campos que no deben modificarse
+        Producto productoOriginal = productoRepo.findById(productoId)
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + productoId));
+
+        // Actualizar solo los campos editables
+        productoOriginal.setNombre(producto.getNombre());
+        productoOriginal.setCantidadUnidad(producto.getCantidadUnidad());
+        productoOriginal.setObservaciones(producto.getObservaciones());
+        productoOriginal.setIva_percentual(producto.getIva_percentual());
+
+        // Registrar en log los cambios realizados
+        log.info("Actualizando producto {}: nombre={}, cantidadUnidad={}, iva={}%", 
+                 productoId, producto.getNombre(), producto.getCantidadUnidad(), producto.getIva_percentual());
+
+        // Manejar campos específicos según el tipo de producto
+        if (productoOriginal instanceof Material && producto instanceof Material) {
+            Material materialOriginal = (Material) productoOriginal;
+            Material materialNuevo = (Material) producto;
+
+            materialOriginal.setTipoMaterial(materialNuevo.getTipoMaterial());
+            log.info("Actualizando tipo de material: {}", materialNuevo.getTipoMaterial());
+
+            return materialRepo.save(materialOriginal);
+        } else if (productoOriginal instanceof SemiTerminado) {
+            return semiTerminadoRepo.save((SemiTerminado) productoOriginal);
+        } else if (productoOriginal instanceof Terminado) {
+            return terminadoRepo.save((Terminado) productoOriginal);
+        } else {
+            return productoRepo.save(productoOriginal);
+        }
+    }
+
 
 
 

@@ -17,9 +17,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class CuentaContableService {
-    
+
     private final CuentaContableRepo cuentaContableRepo;
-    
+
     /**
      * Obtiene todas las cuentas contables.
      * 
@@ -29,7 +29,7 @@ public class CuentaContableService {
         log.info("Obteniendo todas las cuentas contables");
         return cuentaContableRepo.findAll();
     }
-    
+
     /**
      * Obtiene una cuenta contable por su código.
      * 
@@ -40,7 +40,7 @@ public class CuentaContableService {
         log.info("Buscando cuenta contable con código: {}", codigo);
         return cuentaContableRepo.findById(codigo);
     }
-    
+
     /**
      * Crea una nueva cuenta contable.
      * 
@@ -48,18 +48,20 @@ public class CuentaContableService {
      * @return La cuenta contable creada
      * @throws RuntimeException si ya existe una cuenta con el mismo código
      */
+    /*
     @Transactional
     public CuentaContable crearCuenta(CuentaContable cuenta) {
         log.info("Creando nueva cuenta contable con código: {}", cuenta.getCodigo());
-        
+
         if (cuentaContableRepo.existsById(cuenta.getCodigo())) {
             log.error("Error al crear cuenta: ya existe una cuenta con el código {}", cuenta.getCodigo());
             throw new RuntimeException("Ya existe una cuenta con el código " + cuenta.getCodigo());
         }
-        
+
         return cuentaContableRepo.save(cuenta);
     }
-    
+    */
+
     /**
      * Actualiza una cuenta contable existente.
      * 
@@ -68,18 +70,20 @@ public class CuentaContableService {
      * @return La cuenta contable actualizada
      * @throws RuntimeException si no existe una cuenta con el código especificado
      */
+    /*
     @Transactional
     public CuentaContable actualizarCuenta(String codigo, CuentaContable cuenta) {
         log.info("Actualizando cuenta contable con código: {}", codigo);
-        
+
         if (!cuentaContableRepo.existsById(codigo)) {
             log.error("Error al actualizar cuenta: no existe una cuenta con el código {}", codigo);
             throw new RuntimeException("No existe una cuenta con el código " + codigo);
         }
-        
+
         // Asegurar que el código no cambie
         cuenta.setCodigo(codigo);
-        
+
         return cuentaContableRepo.save(cuenta);
     }
+    */
 }

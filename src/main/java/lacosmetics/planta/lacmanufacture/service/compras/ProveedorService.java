@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -145,5 +146,73 @@ public class ProveedorService {
      */
     private boolean isBlank(String str) {
         return str == null || str.trim().isEmpty();
+    }
+
+    /**
+     * Actualiza un proveedor existente y sus archivos opcionales (RUT y Cámara).
+     * El método es transaccional para que si alguna parte falla, toda la transacción se revierta.
+     *
+     * @param id El ID del proveedor a actualizar
+     * @param proveedor La entidad Proveedor con los datos actualizados
+     * @param rutFile El archivo RUT opcional
+     * @param camaraFile El archivo Cámara opcional
+     * @return La entidad Proveedor actualizada
+     * @throws IOException si falla el almacenamiento de archivos
+     * @throws IllegalArgumentException si el proveedor no existe o hay errores de validación
+     */
+    @Transactional
+    public Proveedor updateProveedorWithFiles(String id, 
+                                            Proveedor proveedor,
+                                            MultipartFile rutFile,
+                                            MultipartFile camaraFile) throws IOException {
+
+        // Validar que el ID en la URL coincida con el ID en el cuerpo de la solicitud
+        if (!id.equals(proveedor.getId())) {
+            throw new IllegalArgumentException("El ID en la URL no coincide con el ID en el cuerpo de la solicitud");
+        }
+
+        // Verificar que el proveedor existe
+        if (!proveedorRepo.existsById(id)) {
+            throw new IllegalArgumentException("No existe un Proveedor con el Id: " + id);
+        }
+
+        // Obtener el proveedor original para preservar campos que no deben modificarse
+        Proveedor proveedorOriginal = proveedorRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado: " + id));
+
+        // Validar archivos si se proporcionan
+        if (rutFile != null && !rutFile.isEmpty() && !rutFile.getContentType().equals("application/pdf")) {
+            throw new IllegalArgumentException("El archivo RUT debe ser un PDF");
+        }
+
+        if (camaraFile != null && !camaraFile.isEmpty() && !camaraFile.getContentType().equals("application/pdf")) {
+            throw new IllegalArgumentException("El archivo Cámara de Comercio debe ser un PDF");
+        }
+
+        // Actualizar solo los campos editables
+        proveedorOriginal.setRegimenTributario(proveedor.getRegimenTributario());
+        proveedorOriginal.setCondicionPago(proveedor.getCondicionPago());
+        proveedorOriginal.setContactos(proveedor.getContactos());
+
+        // Registrar en log los cambios realizados
+        log.info("Actualizando proveedor {}: regimenTributario={}, condicionPago={}", 
+                 id, proveedor.getRegimenTributario(), proveedor.getCondicionPago());
+
+        // Guardar archivos si se proporcionan utilizando el servicio de almacenamiento de archivos
+        if (rutFile != null && !rutFile.isEmpty()) {
+            String rutPath = fileStorageService.storeFileProveedor(id, rutFile, "rut.pdf");
+            proveedorOriginal.setRutUrl(rutPath);
+            log.info("Actualizado archivo RUT para proveedor: {}", id);
+        }
+
+        if (camaraFile != null && !camaraFile.isEmpty()) {
+            String camaraPath = fileStorageService.storeFileProveedor(id, camaraFile, "camara.pdf");
+            proveedorOriginal.setCamaraUrl(camaraPath);
+            log.info("Actualizado archivo Cámara de Comercio para proveedor: {}", id);
+        }
+
+        // Guardar la entidad proveedor; si ocurre alguna excepción (incluido en el guardado de archivos),
+        // toda la transacción se revertirá
+        return proveedorRepo.save(proveedorOriginal);
     }
 }

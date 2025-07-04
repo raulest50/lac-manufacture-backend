@@ -11,6 +11,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.service.ProductoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -23,11 +24,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/productos")
 @RequiredArgsConstructor
+@Slf4j
 public class ProductoResource {
 
     private final ProductoService productoService;
@@ -229,5 +232,44 @@ public class ProductoResource {
         return productoService.consultaProductos(criteria.getSearch(), criteria.getCategories(), page, size);
     }
 
+    /**
+     * Endpoint para actualizar un producto existente.
+     * Permite modificar campos como nombre, tipo de material (para productos tipo Material),
+     * cantidad por unidad, porcentaje de IVA y observaciones.
+     * 
+     * @param productoId ID del producto a actualizar
+     * @param producto Objeto Producto con los datos actualizados
+     * @return El producto actualizado
+     */
+    @PutMapping("/{productoId}")
+    public ResponseEntity<Object> updateProducto(
+            @PathVariable String productoId,
+            @RequestBody Producto producto) {
+
+        // Validar que el ID en la URL coincida con el ID en el cuerpo de la solicitud
+        if (!productoId.equals(producto.getProductoId())) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "El ID en la URL no coincide con el ID en el cuerpo de la solicitud"));
+        }
+
+        try {
+            // Validar valores de IVA permitidos (0%, 5%, 19%)
+            double iva = producto.getIva_percentual();
+            if (iva != 0.0 && iva != 5.0 && iva != 19.0) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Valor de IVA no válido. Valores permitidos: 0%, 5%, 19%"));
+            }
+
+            Producto updatedProducto = productoService.updateProducto(producto);
+            return ResponseEntity.ok(updatedProducto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            log.error("Error al actualizar el producto: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al actualizar el producto: " + e.getMessage()));
+        }
+    }
 
 }
