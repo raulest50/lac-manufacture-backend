@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.service.compras;
 
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchProveedor;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
@@ -23,7 +23,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-@Transactional(rollbackOn = Exception.class)
+@Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor
 public class ProveedorService {
 

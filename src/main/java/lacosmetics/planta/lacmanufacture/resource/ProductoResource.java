@@ -203,7 +203,7 @@ public class ProductoResource {
 
 
     /**
-     * para hacer carga masiva desde arhcivo de excel
+     * para hacer carga masiva desde arhcivo de excel local
      * @param file
      * @return
      */
@@ -245,25 +245,13 @@ public class ProductoResource {
     public ResponseEntity<Object> updateProducto(
             @PathVariable String productoId,
             @RequestBody Producto producto) {
-
-        // Validar que el ID en la URL coincida con el ID en el cuerpo de la solicitud
-        if (!productoId.equals(producto.getProductoId())) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "El ID en la URL no coincide con el ID en el cuerpo de la solicitud"));
-        }
-
         try {
-            // Validar valores de IVA permitidos (0%, 5%, 19%)
-            double iva = producto.getIva_percentual();
-            if (iva != 0.0 && iva != 5.0 && iva != 19.0) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("error", "Valor de IVA no válido. Valores permitidos: 0%, 5%, 19%"));
-            }
-
-            Producto updatedProducto = productoService.updateProducto(producto);
+            // Delegar toda la lógica al método del servicio
+            Producto updatedProducto = productoService.updateProducto(productoId, producto);
             return ResponseEntity.ok(updatedProducto);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            log.error("Error de validación al actualizar el producto: {}", e.getMessage());
+            return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             log.error("Error al actualizar el producto: {}", e.getMessage(), e);

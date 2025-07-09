@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.service;
 
 
 import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@Transactional(rollbackOn = Exception.class)
+@Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor
 public class ProductoService {
 
@@ -405,13 +405,23 @@ public class ProductoService {
      * Actualiza un producto existente en la base de datos.
      * Maneja diferentes tipos de productos (Material, SemiTerminado, Terminado) de forma adecuada.
      * 
-     * @param producto El producto con los datos actualizados
+     * @param productoId ID del producto a actualizar
+     * @param producto Objeto Producto con los datos actualizados
      * @return El producto actualizado
-     * @throws IllegalArgumentException Si el producto no existe
+     * @throws IllegalArgumentException Si el producto no existe o si hay errores de validación
      */
     @Transactional
-    public Producto updateProducto(Producto producto) {
-        String productoId = producto.getProductoId();
+    public Producto updateProducto(String productoId, Producto producto) {
+        // Validar que el ID proporcionado coincide con el ID del producto
+        if (!productoId.equals(producto.getProductoId())) {
+            throw new IllegalArgumentException("El ID en la URL no coincide con el ID en el cuerpo de la solicitud");
+        }
+
+        // Validar valores de IVA permitidos (0%, 5%, 19%)
+        double iva = producto.getIvaPercentual();
+        if (iva != 0.0 && iva != 5.0 && iva != 19.0) {
+            throw new IllegalArgumentException("Valor de IVA no válido. Valores permitidos: 0%, 5%, 19%");
+        }
 
         // Verificar que el producto existe
         if (!productoRepo.existsById(productoId)) {
@@ -422,32 +432,54 @@ public class ProductoService {
         Producto productoOriginal = productoRepo.findById(productoId)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + productoId));
 
+        // Registrar el tipo original del producto
+        String tipoOriginal = productoOriginal.getTipo_producto();
+        log.info("Tipo de producto original: {}", tipoOriginal);
+
         // Actualizar solo los campos editables
         productoOriginal.setNombre(producto.getNombre());
         productoOriginal.setCantidadUnidad(producto.getCantidadUnidad());
         productoOriginal.setObservaciones(producto.getObservaciones());
-        productoOriginal.setIva_percentual(producto.getIva_percentual());
+        productoOriginal.setIvaPercentual(producto.getIvaPercentual());
 
         // Registrar en log los cambios realizados
         log.info("Actualizando producto {}: nombre={}, cantidadUnidad={}, iva={}%", 
-                 productoId, producto.getNombre(), producto.getCantidadUnidad(), producto.getIva_percentual());
+                 productoId, producto.getNombre(), producto.getCantidadUnidad(), producto.getIvaPercentual());
 
-        // Manejar campos específicos según el tipo de producto
-        if (productoOriginal instanceof Material && producto instanceof Material) {
+        // Manejar campos específicos según el tipo ORIGINAL del producto
+        // Ignoramos completamente el tipo enviado por el frontend
+        if (productoOriginal instanceof Material) {
             Material materialOriginal = (Material) productoOriginal;
-            Material materialNuevo = (Material) producto;
 
-            materialOriginal.setTipoMaterial(materialNuevo.getTipoMaterial());
-            log.info("Actualizando tipo de material: {}", materialNuevo.getTipoMaterial());
+            // Solo actualizamos tipoMaterial si el producto enviado también es Material
+            if (producto instanceof Material) {
+                Material materialNuevo = (Material) producto;
+                materialOriginal.setTipoMaterial(materialNuevo.getTipoMaterial());
+                log.info("Actualizando tipo de material: {}", materialNuevo.getTipoMaterial());
+            } else {
+                log.warn("El frontend envió un tipo de producto incorrecto. Se mantiene el tipo original: Material");
+            }
 
             return materialRepo.save(materialOriginal);
         } else if (productoOriginal instanceof SemiTerminado) {
+            log.info("Actualizando producto tipo SemiTerminado");
             return semiTerminadoRepo.save((SemiTerminado) productoOriginal);
         } else if (productoOriginal instanceof Terminado) {
+            log.info("Actualizando producto tipo Terminado");
             return terminadoRepo.save((Terminado) productoOriginal);
         } else {
+            log.info("Actualizando producto tipo genérico");
             return productoRepo.save(productoOriginal);
         }
+    }
+
+    /**
+     * Verifica si existe un producto con el ID especificado
+     * @param productoId ID del producto a verificar
+     * @return true si existe, false en caso contrario
+     */
+    public boolean existsById(String productoId) {
+        return productoRepo.existsById(productoId);
     }
 
 

@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.personal.DocTranDePersonal;
 import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
 import lacosmetics.planta.lacmanufacture.repo.personal.IntegrantePersonalRepo;
@@ -19,7 +19,7 @@ import java.util.Optional;
  */
 @Service
 @Slf4j
-@Transactional(rollbackOn = Exception.class)
+@Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor
 public class IntegrantePersonalService {
 
@@ -49,7 +49,7 @@ public class IntegrantePersonalService {
 
         // Create and associate a document for the new integrante
         DocTranDePersonal documento = DocTranDePersonal.crearDocumentoIngreso(savedIntegrante, usuarioResponsable);
-        
+
         // The document will be persisted through cascade
         /*if (savedIntegrante.getDocumentos() == null) {
             savedIntegrante.setDocumentos(List.of(documento));

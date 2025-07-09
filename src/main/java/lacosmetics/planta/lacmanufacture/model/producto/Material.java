@@ -23,5 +23,12 @@ public class Material extends Producto { // (ROH)
      */
     private int tipoMaterial;
 
+    /**
+     * punto a partir del cual se debe
+     * hacer una OCM para comprar de este material
+     * -1 indica que el stock del producto se ignora
+     * para efecto de este tipo de alertas.
+     */
+    private double puntoReorden;
 
 }

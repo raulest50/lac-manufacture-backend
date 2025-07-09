@@ -48,7 +48,7 @@ public abstract class Producto {
     /**
      * valores vigentes: 0%, 5% y 19%
      */
-    private double iva_percentual;
+    private double ivaPercentual;
 
     @CreationTimestamp
     private LocalDateTime fechaCreacion;
@@ -73,5 +73,7 @@ public abstract class Producto {
             return "Unknown";
         }
     }
+
+    private double stockMinimo;
 
 }

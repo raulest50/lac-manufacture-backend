@@ -44,5 +44,6 @@ public class Acceso {
         ADMINISTRACION_ALERTAS,
         MASTER_CONFIGS,
         CRONOGRAMA,
+        ORGANIGRAMA
     }
 }

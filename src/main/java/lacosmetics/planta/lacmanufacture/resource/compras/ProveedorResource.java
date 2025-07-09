@@ -28,6 +28,7 @@ import java.util.Map;
 public class ProveedorResource {
 
     private final ProveedorService proveedorService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Proveedor> saveProveedor(
@@ -36,22 +37,22 @@ public class ProveedorResource {
             @RequestPart(value = "camaraFile", required = false) MultipartFile camaraFile
     ) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            Proveedor proveedor = mapper.readValue(proveedorJson, Proveedor.class);
+            // Usar el ObjectMapper inyectado con soporte para Java 8 date/time
+            Proveedor proveedor = objectMapper.readValue(proveedorJson, Proveedor.class);
             // Delegate all logic to the service method.
             Proveedor saved = proveedorService.saveProveedorWithFiles(proveedor, rutFile, camaraFile);
             return ResponseEntity.created(URI.create("/proveedor/" + saved.getId())).body(saved);
         } catch (IOException e) {
             // Log error as needed and return error response.
+            log.error("Error al procesar los archivos del proveedor: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(null);
         } catch (Exception e) {
+            log.error("Error inesperado al guardar el proveedor: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(null);
         }
     }
-
-
 
     @GetMapping("/search")
     public ResponseEntity<List<Proveedor>> searchProveedores(@RequestParam("q") String searchText) {
@@ -94,8 +95,8 @@ public class ProveedorResource {
             @RequestPart(value = "camaraFile", required = false) MultipartFile camaraFile
     ) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            Proveedor proveedor = mapper.readValue(proveedorJson, Proveedor.class);
+            // Usar el ObjectMapper inyectado con soporte para Java 8 date/time
+            Proveedor proveedor = objectMapper.readValue(proveedorJson, Proveedor.class);
 
             // Delegar toda la lógica al método del servicio
             Proveedor updated = proveedorService.updateProveedorWithFiles(id, proveedor, rutFile, camaraFile);

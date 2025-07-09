@@ -61,6 +61,9 @@ dependencies {
 
 	// Argon2 password hashing
 	implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+
+	// Jackson module for Java 8 date/time types
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 

@@ -1,6 +1,5 @@
 package lacosmetics.planta.lacmanufacture.resource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
 import lacosmetics.planta.lacmanufacture.service.IntegrantePersonalService;
 import lombok.RequiredArgsConstructor;

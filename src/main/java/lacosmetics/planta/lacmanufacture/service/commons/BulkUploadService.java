@@ -703,7 +703,9 @@ public class BulkUploadService {
         String salida = getCellValueAsString(row.getCell(5)); // SALIDAS (ignorado)
         String stock = getCellValueAsString(row.getCell(6)); // STOCK
         String nuevoCodigo = getCellValueAsString(row.getCell(7)); // NUEVO CODIGO
-        String iva = getCellValueAsString(row.getCell(10)); // IVA
+        String iva = getCellValueAsString(row.getCell(8)); // IVA
+        String puntoReorden = getCellValueAsString(row.getCell(9)); // PUNTO DE REORDEN;
+        String costoUnitario = getCellValueAsString(row.getCell(10)); // COSTO UNITARIO DEL PRODUCTO
 
         // Validar que exista un nuevo código
         if (nuevoCodigo == null || nuevoCodigo.trim().isEmpty()) {
@@ -726,7 +728,7 @@ public class BulkUploadService {
                     .errorMessage("Material omitido: falta descripción del producto")
                     .build()
             );
-            return null; // Ignorar este material
+            return null; // Ignorar este material, la celda de nombre esta vacia
         }
 
         double stockValue = 0;
@@ -744,7 +746,7 @@ public class BulkUploadService {
                     .errorMessage("Material omitido: formato de stock inválido - " + stock)
                     .build()
             );
-            return null; // Ignorar este material
+            return null; // Ignorar este material, Stock no tiene un formato valido
         }
 
         if (stockValue <= 0) {
@@ -753,6 +755,30 @@ public class BulkUploadService {
                 BulkUploadResponseDTO.ErrorRecord.builder()
                     .rowNumber(rowNumber)
                     .errorMessage("Material omitido: stock debe ser mayor que cero")
+                    .build()
+            );
+            return null; // Ignorar este material, No se especifica Stock
+        }
+
+        // Validar el costo unitario
+        int costoValue = 0;
+        try {
+            if (costoUnitario != null && !costoUnitario.trim().isEmpty()) {
+                String costoNormalized = costoUnitario.replace(",", ".");
+                costoValue = (int) Double.parseDouble(costoNormalized);
+            }
+        } catch (NumberFormatException e) {
+            // Si hay error de formato, se maneja como si fuera 0
+            costoValue = 0;
+        }
+
+        // Si el costo es 0 o está vacío, ignorar el material
+        if (costoValue <= 0) {
+            response.setSkippedCount(response.getSkippedCount() + 1);
+            response.getSkipped().add(
+                BulkUploadResponseDTO.ErrorRecord.builder()
+                    .rowNumber(rowNumber)
+                    .errorMessage("Material omitido: costo unitario debe ser mayor que cero")
                     .build()
             );
             return null; // Ignorar este material
@@ -802,13 +828,25 @@ public class BulkUploadService {
         // Establecer el IVA
         try {
             double ivaValue = Double.parseDouble(iva); // Guardar directamente como porcentaje
-            material.setIva_percentual(ivaValue);
+            material.setIvaPercentual(ivaValue);
         } catch (NumberFormatException | NullPointerException e) {
-            material.setIva_percentual(19); // Por defecto 19% como entero
+            material.setIvaPercentual(19); // Por defecto 19% como entero
         }
 
-        // Establecer el costo (por defecto 0)
-        material.setCosto(0);
+        // Establecer el costo
+        material.setCosto(costoValue);
+
+        // Establecer el punto de reorden
+        double puntoReordenValue = -1; // Valor por defecto si está vacío
+        try {
+            if (puntoReorden != null && !puntoReorden.trim().isEmpty()) {
+                String puntoReordenNormalized = puntoReorden.replace(",", ".");
+                puntoReordenValue = Double.parseDouble(puntoReordenNormalized);
+            }
+        } catch (NumberFormatException e) {
+            // Si hay error de formato, se mantiene el valor por defecto (-1)
+        }
+        material.setPuntoReorden(puntoReordenValue);
 
         return material;
     }
@@ -830,7 +868,18 @@ public class BulkUploadService {
              Workbook workbook = new XSSFWorkbook(is)) {
 
             // Obtener la primera hoja del libro
-            Sheet sheet = workbook.getSheetAt(0);
+            Sheet sheet = workbook.getSheet("inventario");
+            if (sheet == null) { // manejo de erres en caso que la hoja no exista
+                log.error("La hoja 'inventarios' no existe en el archivo Excel");
+                response.setFailureCount(1);
+                response.getErrors().add(
+                        BulkUploadResponseDTO.ErrorRecord.builder()
+                                .rowNumber(0)
+                                .errorMessage("Error: La hoja 'inventarios' no existe en el archivo Excel")
+                                .build()
+                );
+                return response;
+            }
 
             // Obtener el iterador de filas
             Iterator<Row> rowIterator = sheet.iterator();
