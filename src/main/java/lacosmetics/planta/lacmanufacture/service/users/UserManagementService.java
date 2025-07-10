@@ -32,6 +32,15 @@ public class UserManagementService {
         return userRepository.findAll();
     }
 
+    /**
+     * Gets all users with a specific estado
+     * @param estado the estado to filter by (1 = active, 2 = inactive)
+     * @return list of users with the specified estado
+     */
+    public List<User> getUsersByEstado(int estado) {
+        return userRepository.findByEstado(estado);
+    }
+
     public User createUser(User user) {
         // Encrypt the password before saving using Argon2 with username as salt
         user.setPassword(PasswordConfig.encodePassword(user.getPassword(), user.getUsername()));

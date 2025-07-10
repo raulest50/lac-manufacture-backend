@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.produccion;
 
 
 import org.springframework.transaction.annotation.Transactional;

@@ -107,4 +107,15 @@ public class UserManagementResource {
         User updated = userManagementService.addAccesoToUserByModulo(userId, modulo, nivel);
         return ResponseEntity.ok(updated);
     }
+
+    /**
+     * Endpoint to get users by estado
+     * @param estado the estado to filter by (1 = active, 2 = inactive)
+     * @return list of users with the specified estado
+     */
+    @GetMapping("/filter")
+    public ResponseEntity<List<User>> getUsersByEstado(@RequestParam int estado) {
+        List<User> users = userManagementService.getUsersByEstado(estado);
+        return ResponseEntity.ok(users);
+    }
 }

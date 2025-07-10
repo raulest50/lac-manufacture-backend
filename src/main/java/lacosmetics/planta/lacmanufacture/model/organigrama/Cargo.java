@@ -1,4 +1,38 @@
 package lacosmetics.planta.lacmanufacture.model.organigrama;
 
+
+import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.users.User;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 public class Cargo {
+
+    // Datos del modelo
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idCargo;
+
+    private String tituloCargo;
+
+    private String descripcionCargo;
+
+    private String departamento;
+
+    private String urlDocManualFunciones;
+
+    @OneToOne
+    private User usuario;
+
+    // datos de XyFLow/React
+
+
+
 }
