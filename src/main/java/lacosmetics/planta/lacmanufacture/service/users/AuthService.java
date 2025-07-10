@@ -51,8 +51,17 @@ public class AuthService {
         try {
             // Verify that the user exists and is active before authenticating
             Optional<User> userOpt = userRepository.findByUsername(username);
-            if (userOpt.isEmpty() || userOpt.get().getEstado() != 1) {
-                log.info("Login attempt for inactive or non-existent user: {}", username);
+            if (userOpt.isEmpty()) {
+                log.info("Login attempt for non-existent user: {}", username);
+                throw new BadCredentialsException("User not found");
+            }
+
+            User user = userOpt.get();
+
+            // Allow login for master even if inactive
+            if (!"master".equalsIgnoreCase(user.getUsername()) && user.getEstado() != 1) {
+                log.info("Login attempt for inactive user: {}", username);
+
                 throw new BadCredentialsException("User is inactive");
             }
 

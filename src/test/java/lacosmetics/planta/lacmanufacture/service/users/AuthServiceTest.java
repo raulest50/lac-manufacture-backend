@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,6 +38,31 @@ class AuthServiceTest {
 
         assertThrows(AuthenticationException.class, () -> service.authenticateUser("user", "pass"));
         verify(authManager, never()).authenticate(any());
+    }
+
+    @Test
+    void authenticateUser_masterInactive_allowsLogin() {
+        UserRepository userRepo = Mockito.mock(UserRepository.class);
+        AuthenticationManager authManager = Mockito.mock(AuthenticationManager.class);
+        JwtTokenProvider tokenProvider = Mockito.mock(JwtTokenProvider.class);
+        PasswordResetTokenRepository tokenRepo = Mockito.mock(PasswordResetTokenRepository.class);
+        EmailService emailService = Mockito.mock(EmailService.class);
+
+        AuthService service = new AuthService(userRepo, authManager, tokenProvider, tokenRepo, emailService);
+
+        User master = new User();
+        master.setEstado(2); // inactive but should still authenticate
+        master.setUsername("master");
+        when(userRepo.findByUsername("master")).thenReturn(Optional.of(master));
+
+        Authentication auth = Mockito.mock(Authentication.class);
+        when(authManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
+        when(tokenProvider.generateToken(auth)).thenReturn("jwt");
+
+        Map<String, String> result = service.authenticateUser("master", "pass");
+
+        assertEquals("jwt", result.get("token"));
+        verify(authManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 
     @Test
