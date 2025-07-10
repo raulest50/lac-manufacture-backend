@@ -11,6 +11,7 @@ import lacosmetics.planta.lacmanufacture.service.commons.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -48,6 +49,21 @@ public class AuthService {
     @Transactional
     public Map<String, String> authenticateUser(String username, String password) {
         try {
+            // Verify that the user exists and is active before authenticating
+            Optional<User> userOpt = userRepository.findByUsername(username);
+            if (userOpt.isEmpty()) {
+                log.info("Login attempt for non-existent user: {}", username);
+                throw new BadCredentialsException("User not found");
+            }
+
+            User user = userOpt.get();
+
+            // Allow login for master even if inactive
+            if (!"master".equalsIgnoreCase(user.getUsername()) && user.getEstado() != 1) {
+                log.info("Login attempt for inactive user: {}", username);
+                throw new BadCredentialsException("User is inactive");
+            }
+
             // Create authentication object
             UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
                     username,
@@ -93,6 +109,12 @@ public class AuthService {
         }
 
         User user = userOpt.get();
+
+        // Only allow reset for active users
+        if (user.getEstado() != 1) {
+            log.info("Password reset requested for inactive user: {}", username);
+            return false;
+        }
 
         // Delete any existing tokens for this user
         passwordResetTokenRepository.deleteByUser(user);
