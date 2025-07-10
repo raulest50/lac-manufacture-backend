@@ -61,6 +61,7 @@ public class AuthService {
             // Allow login for master even if inactive
             if (!"master".equalsIgnoreCase(user.getUsername()) && user.getEstado() != 1) {
                 log.info("Login attempt for inactive user: {}", username);
+
                 throw new BadCredentialsException("User is inactive");
             }
 
