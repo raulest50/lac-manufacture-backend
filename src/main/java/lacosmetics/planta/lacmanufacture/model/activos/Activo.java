@@ -69,7 +69,7 @@ public class Activo {
 
     @ManyToOne
     @JoinColumn(name = "categoria_id")
-    private CategoriaActivo categoria;
+    private CategoriaContableActivo categoria;
 
     @OneToMany(mappedBy = "activo", cascade = CascadeType.ALL)
     private List<DepreciacionActivo> depreciaciones;

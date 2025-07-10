@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoriaActivo {
+public class CategoriaContableActivo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

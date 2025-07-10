@@ -31,7 +31,11 @@ public class Cargo {
     @OneToOne
     private User usuario;
 
-    // datos de XyFLow/React
+    // datos de Node XyFLow/React
+    private double posicionX;          // Posición X en el diagrama
+    private double posicionY;          // Posición Y en el diagrama
+    private int nivel;              // Nivel jerárquico
+    private String jefeInmediato?;     // ID Nodo al que reporta
 
 
 
