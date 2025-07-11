@@ -20,4 +20,10 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompraMateriales, In
 
     Optional<OrdenCompraMateriales> findByOrdenCompraIdAndEstado(Integer ordenCompraId, int estado);
 
+    /**
+     * Verifica si existe al menos una orden de compra con el estado especificado
+     * @param estado el estado a buscar
+     * @return true si existe al menos una orden con ese estado, false en caso contrario
+     */
+    boolean existsByEstado(int estado);
 }
