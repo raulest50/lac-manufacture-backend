@@ -123,6 +123,38 @@ public class EmailService {
     }
 
     /**
+     * Send an email with attachment and CC recipients from a MultipartFile
+     *
+     * @param to         The recipient email address
+     * @param cc         Array of CC email addresses
+     * @param subject    The email subject
+     * @param text       The email body text
+     * @param attachment The MultipartFile attachment
+     * @throws MessagingException If there is an error creating or sending the message
+     * @throws IOException        If there is an error reading the attachment
+     */
+    public void sendEmailWithAttachmentAndCC(String to, String[] cc, String subject, String text, MultipartFile attachment) throws MessagingException, IOException {
+        log.info("Sending email with MultipartFile attachment to: {} with CC {}", to, (Object) cc);
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(to);
+        if (cc != null && cc.length > 0) {
+            helper.setCc(cc);
+        }
+        helper.setSubject(subject);
+        helper.setText(text);
+
+        helper.addAttachment(
+            Objects.requireNonNull(attachment.getOriginalFilename()),
+            new ByteArrayResource(attachment.getBytes())
+        );
+
+        mailSender.send(message);
+        log.info("Email with MultipartFile attachment sent successfully to: {} with CC {}", to, (Object) cc);
+    }
+
+    /**
      * Send an email with multiple recipients
      *
      * @param to      Array of recipient email addresses
