@@ -12,6 +12,9 @@ import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lacosmetics.planta.lacmanufacture.service.commons.EmailService;
+import lacosmetics.planta.lacmanufacture.model.users.Acceso;
+import lacosmetics.planta.lacmanufacture.model.users.User;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,6 +47,8 @@ public class ComprasService {
     private final OrdenCompraRepo ordenCompraRepo;
 
     private final EmailService emailService;
+
+    private final UserRepository userRepository;
 
     /**
      *
@@ -167,6 +172,77 @@ public class ComprasService {
         log.info("Email sent to provider {} with order details for order ID: {}", emailProveedor, orden.getOrdenCompraId());
     }
 
+    /**
+     * Envía un correo electrónico al proveedor con copia a otros destinatarios.
+     * Funciona igual que {@link #enviarCorreoOrdenCompraProveedor(OrdenCompraMateriales, MultipartFile)}
+     * pero permite especificar destinatarios en copia (CC).
+     *
+     * @param orden       La orden de compra a enviar
+     * @param pdfAttachment El archivo PDF adjunto con los detalles de la orden
+     * @param ccEmails    Lista de correos electrónicos que recibirán copia
+     * @throws MessagingException Si hay un error al enviar el correo
+     * @throws IOException        Si hay un error al procesar el archivo adjunto
+     * @throws RuntimeException   Si no se encuentra un email para el proveedor
+     */
+    public void enviarCorreoOrdenCompraProveedor_wCC(OrdenCompraMateriales orden, MultipartFile pdfAttachment, List<String> ccEmails)
+            throws MessagingException, IOException {
+
+        if (pdfAttachment == null || pdfAttachment.isEmpty()) {
+            throw new RuntimeException("No se proporcionó archivo PDF para enviar por email para la orden: " + orden.getOrdenCompraId());
+        }
+
+        // Obtener el proveedor y su información de contacto
+        Proveedor proveedor = orden.getProveedor();
+
+        // Buscar el email del proveedor en la lista de contactos
+        String emailProveedor = null;
+        for (Map<String, Object> contacto : proveedor.getContactos()) {
+            if (contacto.containsKey("email")) {
+                emailProveedor = (String) contacto.get("email");
+                break;
+            }
+        }
+
+        if (emailProveedor == null) {
+            throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
+        }
+
+        String subject = "No Reply - Orden de Compra Exotic Expert #" + orden.getOrdenCompraId();
+        String text = "Estimado proveedor: " + orden.getProveedor().getNombre() + ",\n\n" +
+                "Por medio de la presente le hacemos llegar la orden de compra #" + orden.getOrdenCompraId() +
+                "correspondiente a los productos/servicios detallados en el documento adjunto.\n" +
+                "Le agradeceremos confirmar la recepción de esta orden y, en caso de ser necesario," +
+                "informarnos sobre el tiempo estimado de entrega o cualquier observación relevante.\n\n" +
+                "Quedamos atentos a su confirmación y agradecemos de antemano su atención y colaboración.\n\n" +
+                "Saludos cordiales,\n" +
+                "Exotic Expert - Departamento de Compras";
+
+        emailService.sendEmailWithAttachmentAndCC(
+                emailProveedor,
+                ccEmails.toArray(new String[0]),
+                subject,
+                text,
+                pdfAttachment
+        );
+
+        log.info("Email sent to provider {} with CC {} for order ID: {}", emailProveedor, ccEmails, orden.getOrdenCompraId());
+    }
+
+    /**
+     * Obtiene los correos electrónicos de los usuarios con acceso al módulo PRODUCCION
+     * y nivel 2.
+     *
+     * @return lista de correos electrónicos
+     */
+    public List<String> getEmailsUsuariosProduccionNivel2() {
+        return userRepository.findAll().stream()
+                .filter(u -> u.getEmail() != null && !u.getEmail().isEmpty())
+                .filter(u -> u.getAccesos().stream()
+                        .anyMatch(a -> a.getModuloAcceso() == Acceso.Modulo.PRODUCCION && a.getNivel() == 2))
+                .map(User::getEmail)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public OrdenCompraMateriales updateEstadoOrdenCompra(int ordenCompraId, UpdateEstadoOrdenCompraRequest ue) {
         OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId)
@@ -185,7 +261,12 @@ public class ComprasService {
                     case EMAIL:
                         // Para envío por email, verificar que exista el PDF y enviarlo
                         try {
-                            enviarCorreoOrdenCompraProveedor(orden, ue.getOCMpdf());
+                            List<String> ccEmails = getEmailsUsuariosProduccionNivel2();
+                            if (ccEmails.isEmpty()) {
+                                enviarCorreoOrdenCompraProveedor(orden, ue.getOCMpdf());
+                            } else {
+                                enviarCorreoOrdenCompraProveedor_wCC(orden, ue.getOCMpdf(), ccEmails);
+                            }
                         } catch (MessagingException | IOException e) {
                             // Lanzar una excepción para que la transacción se revierta
                             log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
@@ -211,7 +292,12 @@ public class ComprasService {
                 log.warn("No se especificó tipo de envío para la orden: {}, usando email por defecto", ordenCompraId);
 
                 try {
-                    enviarCorreoOrdenCompraProveedor(orden, ue.getOCMpdf());
+                    List<String> ccEmails = getEmailsUsuariosProduccionNivel2();
+                    if (ccEmails.isEmpty()) {
+                        enviarCorreoOrdenCompraProveedor(orden, ue.getOCMpdf());
+                    } else {
+                        enviarCorreoOrdenCompraProveedor_wCC(orden, ue.getOCMpdf(), ccEmails);
+                    }
                 } catch (MessagingException | IOException e) {
                     // Lanzar una excepción para que la transacción se revierta
                     log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
