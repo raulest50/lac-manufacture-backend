@@ -23,4 +23,8 @@ public class StorageProperties {
 
     private final String PRODUCTOS = "productos";
 
+    /**
+     * Folder para guardar documentos del organigrama
+     */
+    private final String ORGANIGRAMA = "organigrama";
 }

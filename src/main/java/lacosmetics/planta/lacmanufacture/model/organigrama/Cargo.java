@@ -17,8 +17,7 @@ public class Cargo {
 
     // Datos del modelo
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idCargo;
+    private String idCargo;
 
     private String tituloCargo;
 
@@ -35,8 +34,6 @@ public class Cargo {
     private double posicionX;          // Posición X en el diagrama
     private double posicionY;          // Posición Y en el diagrama
     private int nivel;              // Nivel jerárquico
-    private String jefeInmediato?;     // ID Nodo al que reporta
-
-
+    private String jefeInmediato;     // ID Nodo al que reporta
 
 }

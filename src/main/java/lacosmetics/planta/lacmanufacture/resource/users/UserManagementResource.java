@@ -23,6 +23,10 @@ public class UserManagementResource {
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userManagementService.getAllUsers();
+
+        // Limpiar las contraseñas antes de devolver los usuarios
+        users.forEach(user -> user.setPassword(""));
+
         return ResponseEntity.ok(users);
     }
 
