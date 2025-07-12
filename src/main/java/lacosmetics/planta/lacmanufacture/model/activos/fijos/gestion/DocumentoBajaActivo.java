@@ -1,6 +1,7 @@
-package lacosmetics.planta.lacmanufacture.model.activos;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion;
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Representa un documento para dar de baja a un activo.
+ * Representa un documento para dar de baja a un activoFijo.
  */
 @Entity
 @Table(name = "documento_baja_activo")
@@ -29,11 +30,11 @@ public class DocumentoBajaActivo {
     private Long bajaId;
 
     /**
-     * Activo que se da de baja
+     * ActivoFijo que se da de baja
      */
     @ManyToOne
     @JoinColumn(name = "activo_id", nullable = false)
-    private Activo activo;
+    private ActivoFijo activoFijo;
 
     /**
      * Fecha de la baja

@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.*;
 import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.UpdateEstadoOrdenCompraRequest;
+import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
@@ -319,6 +320,67 @@ public class ComprasService {
         return ordenCompraRepo.findByOrdenCompraIdAndEstado(ordenCompraId, estado)
                 .orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with OrdenCompraId: "
                         + ordenCompraId + " and estado = " + estado));
+    }
+
+    /**
+     * Actualiza una orden de compra existente.
+     * 
+     * @param ordenCompraId ID de la orden de compra a actualizar
+     * @param ordenCompraMateriales Objeto con los datos actualizados
+     * @return La orden de compra actualizada
+     * @throws RuntimeException Si la orden no existe o hay algún error en la actualización
+     */
+    @Transactional
+    public OrdenCompraMateriales updateOrdenCompra(int ordenCompraId, OrdenCompraMateriales ordenCompraMateriales) {
+        // Verificar que la orden de compra existe
+        OrdenCompraMateriales ordenExistente = ordenCompraRepo.findById(ordenCompraId)
+                .orElseThrow(() -> new RuntimeException("Orden de compra no encontrada con ID: " + ordenCompraId));
+
+        // Verificar que el proveedor existe
+        Proveedor proveedor = proveedorRepo.findById(ordenCompraMateriales.getProveedor().getId())
+                .orElseThrow(() -> new RuntimeException("Proveedor no encontrado con ID: " + 
+                        ordenCompraMateriales.getProveedor().getId()));
+
+        // Actualizar los campos básicos de la orden
+        ordenExistente.setFechaVencimiento(ordenCompraMateriales.getFechaVencimiento());
+        ordenExistente.setProveedor(proveedor);
+        ordenExistente.setCondicionPago(ordenCompraMateriales.getCondicionPago());
+        ordenExistente.setTiempoEntrega(ordenCompraMateriales.getTiempoEntrega());
+        ordenExistente.setPlazoPago(ordenCompraMateriales.getPlazoPago());
+        ordenExistente.setSubTotal(ordenCompraMateriales.getSubTotal());
+        ordenExistente.setIvaCOP(ordenCompraMateriales.getIvaCOP());
+        ordenExistente.setTotalPagar(ordenCompraMateriales.getTotalPagar());
+
+        // No modificamos el estado ni la fecha de emisión aquí
+        // Si se necesita cambiar el estado, se debe usar updateEstadoOrdenCompra
+
+        // Eliminar todos los items existentes y agregar los nuevos
+        ordenExistente.getItemsOrdenCompra().clear();
+
+        // Agregar los nuevos items
+        for (ItemOrdenCompra item : ordenCompraMateriales.getItemsOrdenCompra()) {
+            // Verificar que el material existe
+            Material material = materialRepo.findById(item.getMaterial().getProductoId())
+                    .orElseThrow(() -> new RuntimeException("Material no encontrado con ID: " + 
+                            item.getMaterial().getProductoId()));
+
+            // Crear un nuevo item y configurarlo
+            ItemOrdenCompra nuevoItem = new ItemOrdenCompra();
+            nuevoItem.setOrdenCompraMateriales(ordenExistente);
+            nuevoItem.setMaterial(material);
+            nuevoItem.setCantidad(item.getCantidad());
+            nuevoItem.setPrecioUnitario(item.getPrecioUnitario());
+            nuevoItem.setIvaCOP(item.getIvaCOP());
+            nuevoItem.setSubTotal(item.getSubTotal());
+            nuevoItem.setCantidadCorrecta(item.getCantidadCorrecta());
+            nuevoItem.setPrecioCorrecto(item.getPrecioCorrecto());
+
+            // Agregar el item a la orden
+            ordenExistente.getItemsOrdenCompra().add(nuevoItem);
+        }
+
+        // Guardar y retornar la orden actualizada
+        return ordenCompraRepo.save(ordenExistente);
     }
 
 }

@@ -1,7 +1,8 @@
-package lacosmetics.planta.lacmanufacture.model.activos;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,14 +35,14 @@ public class IncorporacionActivoLine {
     private IncorporacionActivoHeader incorporacionHeader;
 
     /**
-     * Activo que se está incorporando
+     * ActivoFijo que se está incorporando
      */
     @OneToOne
     @JoinColumn(name = "activo_id")
-    private Activo activo;
+    private ActivoFijo activoFijo;
 
     /**
-     * Descripción del activo
+     * Descripción del activoFijo
      */
     @Column(length = 500)
     private String descripcion;
@@ -52,7 +53,7 @@ public class IncorporacionActivoLine {
     private Integer cantidad;
 
     /**
-     * Valor unitario del activo
+     * Valor unitario del activoFijo
      */
     private BigDecimal valorUnitario;
 
@@ -62,7 +63,7 @@ public class IncorporacionActivoLine {
     private BigDecimal valorTotal;
 
     /**
-     * Ubicación inicial del activo
+     * Ubicación inicial del activoFijo
      */
     private String ubicacionInicial;
 

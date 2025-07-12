@@ -1,6 +1,7 @@
-package lacosmetics.planta.lacmanufacture.model.activos;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion;
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * Representa una categoría de activos según su naturaleza.
+ * Representa una categoría de activoFijos según su naturaleza.
  */
 @Entity
 @Table(name = "categoria_activo")
@@ -29,7 +30,7 @@ public class CategoriaContableActivo {
     private String descripcion;
 
     /**
-     * Vida útil estimada en meses para esta categoría de activos
+     * Vida útil estimada en meses para esta categoría de activoFijos
      */
     private Integer vidaUtilMeses;
 
@@ -39,5 +40,5 @@ public class CategoriaContableActivo {
     private String metodoDespreciacionPredeterminado;
 
     @OneToMany(mappedBy = "categoria")
-    private List<Activo> activos;
+    private List<ActivoFijo> activoFijos;
 }

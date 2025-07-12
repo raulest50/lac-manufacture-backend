@@ -66,7 +66,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void requestPasswordReset_inactiveUser_returnsFalse() {
+    void requestPasswordReset_inactiveUser_returnsFalse() throws jakarta.mail.MessagingException {
         UserRepository userRepo = Mockito.mock(UserRepository.class);
         AuthenticationManager authManager = Mockito.mock(AuthenticationManager.class);
         JwtTokenProvider tokenProvider = Mockito.mock(JwtTokenProvider.class);

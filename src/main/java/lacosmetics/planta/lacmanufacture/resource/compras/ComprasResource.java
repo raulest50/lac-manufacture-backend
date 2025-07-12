@@ -112,6 +112,24 @@ public class ComprasResource {
         }
     }
 
+@PutMapping("/update_orden_compra/{ordenCompraId}")
+    public ResponseEntity<?> updateOrdenCompra(
+            @PathVariable int ordenCompraId,
+            @RequestBody OrdenCompraMateriales ordenCompraMateriales) {
+        try {
+            // Asegurarse de que el ID en el path coincida con el ID en el objeto
+            if (ordenCompraId != ordenCompraMateriales.getOrdenCompraId()) {
+                return ResponseEntity.badRequest().body(Map.of("error", 
+                    "El ID en la URL no coincide con el ID en el objeto de la orden de compra"));
+            }
+
+            OrdenCompraMateriales updated = compraService.updateOrdenCompra(ordenCompraId, ordenCompraMateriales);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
 
 
 }

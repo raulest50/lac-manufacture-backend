@@ -3,10 +3,9 @@ package lacosmetics.planta.lacmanufacture.model.produccion.procesos;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name="procesos_produccion")
@@ -24,5 +23,23 @@ public class ProcesoProduccion {
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Producto producto;
+
+    @Transient
+    private String lugar;
+
+    @Transient
+    private List<String> listaActivos;
+
+    @Transient
+    private String Tablet;
+
+    // modelamiento de tiempos
+    @Transient
+    private double setUpTime; // tiempo de preparacion
+
+    @Transient
+    private double processTime; // tiempo de ejecucion
+
+
 
 }

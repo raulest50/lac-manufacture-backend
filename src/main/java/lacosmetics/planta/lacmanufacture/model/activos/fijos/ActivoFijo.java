@@ -1,6 +1,7 @@
-package lacosmetics.planta.lacmanufacture.model.activos;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos;
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Activo {
+public class ActivoFijo {
 
     // llave primaria
     @Id
@@ -71,18 +72,18 @@ public class Activo {
     @JoinColumn(name = "categoria_id")
     private CategoriaContableActivo categoria;
 
-    @OneToMany(mappedBy = "activo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<DepreciacionActivo> depreciaciones;
 
-    @OneToMany(mappedBy = "activo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<TrasladoActivo> traslados;
 
-    @OneToMany(mappedBy = "activo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<MantenimientoActivo> mantenimientos;
 
-    @OneToOne(mappedBy = "activo", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private IncorporacionActivoLine lineaIncorporacion;
 
-    @OneToMany(mappedBy = "activo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<DocumentoBajaActivo> documentosBaja;
 }

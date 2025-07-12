@@ -1,6 +1,7 @@
-package lacosmetics.planta.lacmanufacture.model.activos;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion;
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +28,7 @@ public class DepreciacionActivo {
     
     @ManyToOne
     @JoinColumn(name = "activo_id", nullable = false)
-    private Activo activo;
+    private ActivoFijo activoFijo;
     
     /**
      * Fecha en que se registra la depreciación
@@ -58,4 +59,10 @@ public class DepreciacionActivo {
     @OneToOne
     @JoinColumn(name = "asiento_contable_id")
     private AsientoContable asientoContable;
+
+    public enum MetodoDepreciacion {
+        SL, // STRAIGHT LINE DEPRECIATION
+        DB, // DECLINING BALANCE DEPRECIATION
+        SYD, // SUM YEAR DIGITS
+    }
 }

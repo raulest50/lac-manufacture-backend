@@ -1,6 +1,7 @@
-package lacosmetics.planta.lacmanufacture.model.activos;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion;
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Registro de mantenimientos realizados o programados para un activo.
+ * Registro de mantenimientos realizados o programados para un activoFijo.
  */
 @Entity
 @Table(name = "mantenimiento_activo")
@@ -27,7 +28,7 @@ public class MantenimientoActivo {
     
     @ManyToOne
     @JoinColumn(name = "activo_id", nullable = false)
-    private Activo activo;
+    private ActivoFijo activoFijo;
     
     /**
      * Fecha y hora del mantenimiento

@@ -1,6 +1,7 @@
-package lacosmetics.planta.lacmanufacture.model.activos;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion;
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
 import java.time.LocalDateTime;
 
 /**
- * Registro de traslados o cambios de ubicación/responsable de un activo.
+ * Registro de traslados o cambios de ubicación/responsable de un activoFijo.
  */
 @Entity
 @Table(name = "traslado_activo")
@@ -26,7 +27,7 @@ public class TrasladoActivo {
     
     @ManyToOne
     @JoinColumn(name = "activo_id", nullable = false)
-    private Activo activo;
+    private ActivoFijo activoFijo;
     
     /**
      * Fecha y hora del traslado
@@ -46,14 +47,14 @@ public class TrasladoActivo {
     private String ubicacionDestino;
     
     /**
-     * Responsable anterior del activo
+     * Responsable anterior del activoFijo
      */
     @ManyToOne
     @JoinColumn(name = "responsable_anterior_id")
     private IntegrantePersonal responsableAnterior;
     
     /**
-     * Nuevo responsable del activo
+     * Nuevo responsable del activoFijo
      */
     @ManyToOne
     @JoinColumn(name = "responsable_nuevo_id", nullable = false)
