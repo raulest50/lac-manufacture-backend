@@ -56,12 +56,11 @@ public class CargoOrganigramaService {
     public Cargo saveCargoWithManualFunciones(Cargo cargo, MultipartFile manualFuncionesFile) throws IOException {
         boolean isUpdate = cargo.getIdCargo() != null && !cargo.getIdCargo().isEmpty();
 
-        // Si es una actualización, obtener el cargo existente para preservar datos que no deben modificarse
+        // Si es una actualización, verificar si existe el cargo pero no lanzar excepción si no existe
+        // En ese caso, simplemente se creará un nuevo cargo con el ID proporcionado
         if (isUpdate) {
             Optional<Cargo> cargoExistente = cargoOrganigramaRepo.findById(cargo.getIdCargo());
-            if (cargoExistente.isEmpty()) {
-                throw new IllegalArgumentException("No existe un Cargo con el ID: " + cargo.getIdCargo());
-            }
+            // Se elimina la validación que lanzaba excepción para permitir crear cargos con ID específico
         }
 
         // Guardar el manual de funciones si se proporciona

@@ -55,23 +55,6 @@ public class ActivoFijo {
     private Integer vidaUtilMeses;
     private String metodoDespreciacion; // "LINEAL", "SUMA_DIGITOS", etc.
 
-    // Relaciones con contabilidad
-    @ManyToOne
-    @JoinColumn(name = "cuenta_activo_codigo")
-    private CuentaContable cuentaActivo;
-
-    @ManyToOne
-    @JoinColumn(name = "cuenta_depreciacion_codigo")
-    private CuentaContable cuentaDepreciacionAcumulada;
-
-    @ManyToOne
-    @JoinColumn(name = "cuenta_gasto_depreciacion_codigo")
-    private CuentaContable cuentaGastoDepreciacion;
-
-    @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private CategoriaContableActivo categoria;
-
     @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<DepreciacionActivo> depreciaciones;
 

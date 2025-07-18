@@ -30,8 +30,11 @@ public class CuentasInitializer {
                     new CuentaContable("1300", "Activos Fijos", TipoCuenta.ACTIVO, SaldoNormal.DEBITO, false),
                     new CuentaContable("1310", "Depreciación Acumulada", TipoCuenta.ACTIVO, SaldoNormal.CREDITO, false),
                     new CuentaContable("2000", "Cuentas por Pagar – Proveedores", TipoCuenta.PASIVO, SaldoNormal.CREDITO, true),
+                    new CuentaContable("3000", "Capital Social/Aportes", TipoCuenta.PATRIMONIO, SaldoNormal.CREDITO, false),
+                    new CuentaContable("4100", "Ingresos por Ajustes de Inventario", TipoCuenta.INGRESO, SaldoNormal.CREDITO, false),
                     new CuentaContable("5100", "Gasto por Depreciación", TipoCuenta.GASTO, SaldoNormal.DEBITO, false),
-                    new CuentaContable("5200", "Gasto por Scrap (Desperdicio)", TipoCuenta.GASTO, SaldoNormal.DEBITO, false)
+                    new CuentaContable("5200", "Gasto por Scrap (Desperdicio)", TipoCuenta.GASTO, SaldoNormal.DEBITO, false),
+                    new CuentaContable("5300", "Pérdidas por Ajustes de Inventario", TipoCuenta.GASTO, SaldoNormal.DEBITO, false)
             );
             cuentaContableRepository.saveAll(cuentaContables);
             System.out.println(">> Tabla de cuentaContables inicializada con valores por defecto");
