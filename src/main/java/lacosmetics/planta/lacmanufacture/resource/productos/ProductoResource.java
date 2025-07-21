@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.resource;
+package lacosmetics.planta.lacmanufacture.resource.productos;
 
 
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
@@ -9,7 +9,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
-import lacosmetics.planta.lacmanufacture.service.ProductoService;
+import lacosmetics.planta.lacmanufacture.service.productos.ProductoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
