@@ -18,7 +18,8 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActivoFijo {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class ActivoFijo {
 
     // llave primaria
     @Id
