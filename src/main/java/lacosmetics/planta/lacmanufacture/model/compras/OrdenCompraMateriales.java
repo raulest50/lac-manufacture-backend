@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.compras;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.commons.Divisas.DIVISAS;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -65,5 +66,9 @@ public class OrdenCompraMateriales {
      * Plain column to store the FacturaCompra ID supplied by the provider.
      */
     private Integer facturaCompraId;
+
+    private DIVISAS divisas;
+
+    private double trm;
 
 }

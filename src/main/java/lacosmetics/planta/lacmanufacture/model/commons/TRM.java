@@ -10,6 +10,9 @@ import java.time.LocalDate;
 /**
  * Modelo para representar la Tasa Representativa del Mercado (TRM)
  * de la Superintendencia Financiera de Colombia
+ *
+ * AUN ESTA PENDIENTE USO
+ *
  */
 @Data
 @NoArgsConstructor

@@ -1,16 +1,18 @@
-package lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos.compras;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.commons.Divisas.DIVISAS;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Representa una orden de compra para activos fijos.
@@ -56,14 +58,6 @@ public class OrdenCompraActivo {
      */
     private String cotizacionUrl;
 
-    /**
-     * lista de cotizaciones con el proposito de reforzar que para
-     * hacer una compra de activos se deberian hacer varias cotizaciones
-     * siempre que sea posible para encontrar el mejor proveedor.
-     */
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "cotizaciones_urls")
-    private String[] cotizacionesUrls;
 
     /**
      * -1: cancelada
@@ -73,4 +67,23 @@ public class OrdenCompraActivo {
      *  3: cerrada con éxito
      */
     private int estado;
+
+    /**
+     * para soportar ordenes de compra en dolares.
+     */
+    private DIVISAS divisa;
+
+    private double trm;
+
+    /**
+     * Referencia a la factura de compra asociada a esta orden
+     */
+    private Integer facturaCompraActivoId;
+
+    /**
+     * Lista de ítems de la orden de compra
+     */
+    @OneToMany(mappedBy = "ordenCompraActivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<ItemOrdenCompraActivo> itemsOrdenCompra = new ArrayList<>();
 }
