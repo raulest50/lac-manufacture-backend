@@ -351,6 +351,10 @@ public class ComprasService {
         ordenExistente.setIvaCOP(ordenCompraMateriales.getIvaCOP());
         ordenExistente.setTotalPagar(ordenCompraMateriales.getTotalPagar());
 
+        // Actualizar los nuevos atributos de divisa y TRM
+        ordenExistente.setDivisas(ordenCompraMateriales.getDivisas());
+        ordenExistente.setTrm(ordenCompraMateriales.getTrm());
+
         // No modificamos el estado ni la fecha de emisión aquí
         // Si se necesita cambiar el estado, se debe usar updateEstadoOrdenCompra
 
