@@ -11,7 +11,7 @@ Authorization: Bearer {{auth_token}}
 
 ### Obtener notificaciones para otro usuario
 # Prueba con un usuario diferente
-GET {{host}}/notificaciones/notifications4user?username=usuario1
+GET {{host}}/notificaciones/notifications4user?username=esteban
 Accept: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
