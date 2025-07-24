@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto.productos.search;
+package lacosmetics.planta.lacmanufacture.model.producto.dto.search;
 
 import lombok.Data;
 import java.util.List;

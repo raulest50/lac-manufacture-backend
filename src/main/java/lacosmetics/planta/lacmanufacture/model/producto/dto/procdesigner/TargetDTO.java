@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto.productos.procdesigner;
+package lacosmetics.planta.lacmanufacture.model.producto.dto.procdesigner;
 
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;

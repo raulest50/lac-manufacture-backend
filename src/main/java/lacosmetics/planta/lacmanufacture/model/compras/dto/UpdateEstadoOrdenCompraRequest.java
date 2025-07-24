@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto.compra.materiales;
+package lacosmetics.planta.lacmanufacture.model.compras.dto;
 
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;

@@ -17,7 +17,6 @@ public class OrdenProduccionDTO {
     private String productoNombre;  // producto.nombre
     private LocalDateTime fechaInicio;
     private int estadoOrden;        // 0: en produccion, 1: terminada
-    private int responsableId;
     private String observaciones;
     private List<OrdenSeguimientoDTO> ordenesSeguimiento;
 }

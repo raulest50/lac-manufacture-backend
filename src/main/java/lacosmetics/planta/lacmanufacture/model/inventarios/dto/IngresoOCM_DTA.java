@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto.compra.materiales;
+package lacosmetics.planta.lacmanufacture.model.inventarios.dto;
 
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;

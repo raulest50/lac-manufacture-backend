@@ -83,16 +83,6 @@ public class ProduccionResource {
 
 
 
-    @GetMapping("/ordenes_produccion/responsable/{responsableId}")
-    public ResponseEntity<Page<OrdenProduccionDTO>> getOrdenesProduccionByResponsable(
-            @PathVariable int responsableId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<OrdenProduccionDTO> ordenes = produccionService.getOrdenesProduccionByResponsable(responsableId, pageable);
-        return ResponseEntity.ok(ordenes);
-    }
 
 
 }

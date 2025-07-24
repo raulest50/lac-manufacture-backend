@@ -1,6 +1,5 @@
-package lacosmetics.planta.lacmanufacture.model.commons;
+package lacosmetics.planta.lacmanufacture.model.commons.divisas;
 
-import jakarta.persistence.Transient;
 import lombok.Data;
 
 

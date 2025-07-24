@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.commons;
+package lacosmetics.planta.lacmanufacture.model.commons.divisas;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.service.commons;
 
-import lacosmetics.planta.lacmanufacture.model.commons.TRM;
+import lacosmetics.planta.lacmanufacture.model.commons.divisas.TRM;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

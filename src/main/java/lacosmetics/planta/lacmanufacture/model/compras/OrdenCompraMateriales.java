@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.compras;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.commons.Divisas.DIVISAS;
+import lacosmetics.planta.lacmanufacture.model.commons.divisas.Divisas.DIVISAS;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

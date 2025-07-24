@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.service;
+package lacosmetics.planta.lacmanufacture.service.rehumanos;
 
 import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.personal.DocTranDePersonal;

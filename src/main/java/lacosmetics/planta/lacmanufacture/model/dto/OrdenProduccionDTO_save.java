@@ -9,6 +9,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OrdenProduccionDTO_save {
     private String productoId;
-    private int responsableId;
     private String observaciones;
 }

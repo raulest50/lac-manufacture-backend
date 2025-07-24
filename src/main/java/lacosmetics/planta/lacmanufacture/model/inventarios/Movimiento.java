@@ -44,7 +44,7 @@ public class Movimiento {
 
     // causa del movimiento
     // VENTA, COMPRA, AVERIA, USO_INTERNO, PROD_INTERNO, OTROS
-    private TipoMovimiento tipo;
+    private TipoMovimiento tipoMovimiento;
 
     /**
      * lugar donde se realiza el movimiento de suma o resta de cantidades.
@@ -84,7 +84,7 @@ public class Movimiento {
     public Movimiento(Insumo insumo){
         cantidad = insumo.getCantidadRequerida();
         producto = insumo.getProducto();
-        tipo = TipoMovimiento.CONSUMO;
+        tipoMovimiento = TipoMovimiento.CONSUMO;
     }
 
     /**
@@ -95,7 +95,7 @@ public class Movimiento {
     Movimiento(ItemOrdenCompra item){
         this.cantidad = item.getCantidad();
         this.producto = item.getMaterial();
-        this.tipo = TipoMovimiento.COMPRA;
+        this.tipoMovimiento = TipoMovimiento.COMPRA;
     }
 
 

@@ -54,7 +54,7 @@ public class ProduccionService {
         Optional<Producto> optionalProducto = productoRepo.findById(ordenProduccionDTO.getProductoId());
         if (optionalProducto.isPresent()) {
             Producto producto = optionalProducto.get();
-            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getResponsableId());
+            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones());
             OrdenProduccion savedOrden = ordenProduccionRepo.save(ordenProduccion);
 
             // Create Movimiento entries for each Insumo
@@ -63,7 +63,7 @@ public class ProduccionService {
                 Movimiento movimientoReal = new Movimiento();
                 movimientoReal.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
                 movimientoReal.setProducto(insumo.getProducto());
-                movimientoReal.setTipo(Movimiento.TipoMovimiento.CONSUMO);
+                movimientoReal.setTipoMovimiento(Movimiento.TipoMovimiento.CONSUMO);
                 //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
                 transaccionAlmacenRepo.save(movimientoReal);
             }
@@ -104,7 +104,6 @@ public class ProduccionService {
         dto.setProductoNombre(orden.getProducto().getNombre());
         dto.setFechaInicio(orden.getFechaInicio());
         dto.setEstadoOrden(orden.getEstadoOrden());
-        dto.setResponsableId(orden.getResponsableId());
         dto.setObservaciones(orden.getObservaciones());
 
         List<OrdenSeguimientoDTO> seguimientoDTOs = orden.getOrdenesSeguimiento().stream()
@@ -222,7 +221,7 @@ public class ProduccionService {
         Movimiento movimientoReal = new Movimiento();
         movimientoReal.setCantidad(ordenProduccion.getProducto().getCantidadUnidad()); // Adjust as per your business logic
         movimientoReal.setProducto(ordenProduccion.getProducto());
-        movimientoReal.setTipo(Movimiento.TipoMovimiento.BACKFLUSH);
+        movimientoReal.setTipoMovimiento(Movimiento.TipoMovimiento.BACKFLUSH);
         //movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
         transaccionAlmacenRepo.save(movimientoReal);
 
@@ -231,14 +230,6 @@ public class ProduccionService {
 
 
 
-    public Page<OrdenProduccionDTO> getOrdenesProduccionByResponsable(int responsableId, Pageable pageable) {
-        Page<OrdenProduccion> page = ordenProduccionRepo.findByResponsableIdAndEstadoOrden(responsableId, 0, pageable);
-        // Initialize and map to DTOs
-        List<OrdenProduccionDTO> dtoList = page.getContent().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
-    }
 
 
 

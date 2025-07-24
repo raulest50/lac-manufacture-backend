@@ -958,7 +958,7 @@ public class BulkUploadService {
                     Movimiento movimiento = new Movimiento();
                     movimiento.setProducto(material);
                     movimiento.setCantidad(Double.parseDouble(getCellValueAsString(row.getCell(6)))); // STOCK
-                    movimiento.setTipo(Movimiento.TipoMovimiento.COMPRA); // Usamos COMPRA como tipo para inicialización
+                    movimiento.setTipoMovimiento(Movimiento.TipoMovimiento.COMPRA); // Usamos COMPRA como tipo para inicialización
                     movimiento.setAlmacen(Movimiento.Almacen.GENERAL);
                     movimiento.setLote(lote);
                     movimiento.setTransaccionAlmacen(transaccionAlmacen);

@@ -15,8 +15,6 @@ import java.util.List;
 
 public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Integer> {
 
-    List<OrdenProduccion> findByResponsableIdAndEstadoOrden(int seccionResponsable, int estadoOrden);
-
     List<OrdenProduccion> findByEstadoOrden(int estadoOrden);
 
 
@@ -45,9 +43,5 @@ public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Inte
     @Modifying
     @Query("UPDATE OrdenProduccion o SET o.estadoOrden = :estadoOrden, o.fechaFinal = CURRENT_TIMESTAMP WHERE o.ordenId = :id")
     void updateEstadoOrdenById(@Param("id") int id, @Param("estadoOrden") int estadoOrden);
-
-    @EntityGraph(attributePaths = {"ordenesSeguimiento", "producto"})
-    Page<OrdenProduccion> findByResponsableIdAndEstadoOrden(int responsableId, int estadoOrden, Pageable pageable);
-
 
 }

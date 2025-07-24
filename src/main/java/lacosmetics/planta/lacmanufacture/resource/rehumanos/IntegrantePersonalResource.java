@@ -1,7 +1,7 @@
-package lacosmetics.planta.lacmanufacture.resource;
+package lacosmetics.planta.lacmanufacture.resource.rehumanos;
 
 import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
-import lacosmetics.planta.lacmanufacture.service.IntegrantePersonalService;
+import lacosmetics.planta.lacmanufacture.service.rehumanos.IntegrantePersonalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

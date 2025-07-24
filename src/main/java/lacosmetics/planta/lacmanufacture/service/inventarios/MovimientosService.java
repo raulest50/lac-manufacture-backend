@@ -7,7 +7,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
-import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;

@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.activos.fijos.compras;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.commons.Divisas.DIVISAS;
+import lacosmetics.planta.lacmanufacture.model.commons.divisas.Divisas.DIVISAS;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -86,4 +86,6 @@ public class OrdenCompraActivo {
     @OneToMany(mappedBy = "ordenCompraActivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ItemOrdenCompraActivo> itemsOrdenCompra = new ArrayList<>();
+
+
 }

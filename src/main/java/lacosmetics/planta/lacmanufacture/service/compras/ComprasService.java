@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.service.compras;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.*;
-import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.UpdateEstadoOrdenCompraRequest;
+import lacosmetics.planta.lacmanufacture.model.compras.dto.UpdateEstadoOrdenCompraRequest;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;

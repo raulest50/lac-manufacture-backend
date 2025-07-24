@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.productos.search.ProductoSearchCriteria;
+import lacosmetics.planta.lacmanufacture.model.producto.dto.search.ProductoSearchCriteria;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;

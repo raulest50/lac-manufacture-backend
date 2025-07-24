@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 
-import lacosmetics.planta.lacmanufacture.model.dto.compra.materiales.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.inventarios.MovimientosService;

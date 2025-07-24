@@ -35,8 +35,6 @@ public class OrdenProduccion {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    private int responsableId;
-
     //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     //@JoinColumn(name = "orden_prod_id")
     @OneToMany(mappedBy = "ordenProduccion", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -49,15 +47,17 @@ public class OrdenProduccion {
     private String observaciones;
 
     @CreationTimestamp
-    private LocalDateTime fechaInicio;
+    private LocalDateTime fechaCreacion;
 
+    private LocalDateTime fechaLanzamiento;
+
+    private LocalDateTime fechaInicio;
 
     private LocalDateTime fechaFinal;
 
-    public OrdenProduccion(Producto producto, String observaciones, int responsableId) {
+    public OrdenProduccion(Producto producto, String observaciones) {
         this.producto = producto;
         this.observaciones = observaciones;
-        this.responsableId = responsableId;
         this.estadoOrden = 0;
 
         List<OrdenSeguimiento> ordenesSeguimiento = new ArrayList<>();
