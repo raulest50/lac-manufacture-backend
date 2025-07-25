@@ -40,9 +40,11 @@ public class ItemOrdenCompraActivo {
     
     // Precio unitario sin IVA
     private double precioUnitario;
-    
+
+    private double ivaPercentage;
+
     // Valor del IVA por unidad
-    private double iva;
+    private double ivaValue;
     
     // Subtotal (precio unitario * cantidad)
     private double subTotal;
@@ -51,7 +53,7 @@ public class ItemOrdenCompraActivo {
      * Calcula el precio unitario final incluyendo IVA
      */
     public double getPrecioUnitarioFinal() {
-        return precioUnitario + iva;
+        return precioUnitario + ivaValue;
     }
 
 

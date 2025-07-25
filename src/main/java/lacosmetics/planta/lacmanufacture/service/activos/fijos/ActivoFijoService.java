@@ -49,6 +49,23 @@ public class ActivoFijoService {
     public OrdenCompraActivo saveOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo, MultipartFile cotizacionFile) throws IOException {
         log.info("Guardando orden de compra de activos fijos");
 
+        // Validar que el ID de la orden no exista ya
+        if (ordenCompraActivo.getOrdenCompraActivoId() != 0 && 
+            ordenCompraActivoRepo.existsById(ordenCompraActivo.getOrdenCompraActivoId())) {
+            throw new IllegalArgumentException("Ya existe una orden de compra con el ID: " + 
+                                              ordenCompraActivo.getOrdenCompraActivoId());
+        }
+
+        // Validar que los IDs de los ítems no existan ya
+        if (ordenCompraActivo.getItemsOrdenCompra() != null && !ordenCompraActivo.getItemsOrdenCompra().isEmpty()) {
+            for (var item : ordenCompraActivo.getItemsOrdenCompra()) {
+                if (item.getItemOrdenId() != 0 && itemOrdenCompraActivoRepo.existsById(item.getItemOrdenId())) {
+                    throw new IllegalArgumentException("Ya existe un ítem de orden de compra con el ID: " + 
+                                                      item.getItemOrdenId());
+                }
+            }
+        }
+
         // Validaciones básicas
         if (ordenCompraActivo.getProveedor() == null) {
             throw new IllegalArgumentException("La orden de compra debe tener un proveedor asignado");
@@ -80,7 +97,7 @@ public class ActivoFijoService {
 
                 // Acumular totales
                 subtotal += item.getSubTotal();
-                ivaTotal += item.getIva() * item.getCantidad();
+                ivaTotal += item.getIvaValue() * item.getCantidad();
             }
 
             // Actualizar totales de la orden
@@ -270,7 +287,7 @@ public class ActivoFijoService {
 
                 // Acumular totales
                 subtotal += item.getSubTotal();
-                ivaTotal += item.getIva() * item.getCantidad();
+                ivaTotal += item.getIvaValue() * item.getCantidad();
             }
 
             // Actualizar totales de la orden
