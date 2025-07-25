@@ -170,4 +170,81 @@ public class ActivoFijoService {
     public List<ItemOrdenCompraActivo> getItemsByOrdenCompraId(int ordenCompraActivoId) {
         return itemOrdenCompraActivoRepo.findByOrdenCompraActivo_OrdenCompraActivoId(ordenCompraActivoId);
     }
+
+    /**
+     * Actualiza una orden de compra de activos fijos existente.
+     * Verifica primero si la orden existe antes de intentar actualizarla.
+     *
+     * @param ordenCompraActivo la orden de compra con los datos actualizados
+     * @return la orden de compra actualizada
+     * @throws RuntimeException si la orden no existe o no se puede actualizar
+     */
+    @Transactional
+    public OrdenCompraActivo updateOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo) {
+        log.info("Actualizando orden de compra de activos fijos con ID: {}", ordenCompraActivo.getOrdenCompraActivoId());
+
+        // Verificar que la orden exista
+        OrdenCompraActivo existingOrden = ordenCompraActivoRepo.findById(ordenCompraActivo.getOrdenCompraActivoId())
+                .orElseThrow(() -> new RuntimeException("Orden de compra no encontrada con ID: " + 
+                        ordenCompraActivo.getOrdenCompraActivoId()));
+
+        // Verificar si la orden está en un estado que permite modificación
+        if (existingOrden.getEstado() == -1) {
+            throw new RuntimeException("No se puede modificar una orden cancelada");
+        }
+
+        if (existingOrden.getEstado() > 1) {
+            throw new RuntimeException("No se puede modificar una orden que ya está en proceso de envío o recepción");
+        }
+
+        // Validaciones básicas
+        if (ordenCompraActivo.getProveedor() == null) {
+            throw new IllegalArgumentException("La orden de compra debe tener un proveedor asignado");
+        }
+
+        if (ordenCompraActivo.getFechaVencimiento() == null) {
+            throw new IllegalArgumentException("La fecha de vencimiento es requerida");
+        }
+
+        // Mantener la fecha de emisión original
+        ordenCompraActivo.setFechaEmision(existingOrden.getFechaEmision());
+
+        // Procesar los ítems de la orden
+        if (ordenCompraActivo.getItemsOrdenCompra() != null && !ordenCompraActivo.getItemsOrdenCompra().isEmpty()) {
+            double subtotal = 0;
+            double ivaTotal = 0;
+
+            for (var item : ordenCompraActivo.getItemsOrdenCompra()) {
+                // Establecer la relación bidireccional
+                item.setOrdenCompraActivo(ordenCompraActivo);
+
+                // Calcular subtotal del ítem si no está establecido
+                if (item.getSubTotal() == 0) {
+                    item.setSubTotal(item.getPrecioUnitario() * item.getCantidad());
+                }
+
+                // Acumular totales
+                subtotal += item.getSubTotal();
+                ivaTotal += item.getIva() * item.getCantidad();
+            }
+
+            // Actualizar totales de la orden
+            ordenCompraActivo.setSubTotal(subtotal);
+            ordenCompraActivo.setIva(ivaTotal);
+            ordenCompraActivo.setTotalPagar(subtotal + ivaTotal);
+        } else {
+            // Calcular totales si no hay ítems pero están establecidos manualmente
+            if (ordenCompraActivo.getTotalPagar() == 0) {
+                double subtotal = ordenCompraActivo.getSubTotal();
+                double iva = ordenCompraActivo.getIva();
+                ordenCompraActivo.setTotalPagar(subtotal + iva);
+            }
+        }
+
+        // Eliminar los ítems existentes asociados a esta orden
+        itemOrdenCompraActivoRepo.deleteByOrdenCompraActivo_OrdenCompraActivoId(ordenCompraActivo.getOrdenCompraActivoId());
+
+        // Guardar la orden actualizada
+        return ordenCompraActivoRepo.save(ordenCompraActivo);
+    }
 }

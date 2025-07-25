@@ -32,7 +32,7 @@ public class ActivoFijoResource {
      * @param ordenCompraActivo la orden de compra a guardar
      * @return la orden de compra guardada con su ID asignado
      */
-    @PostMapping("/ordenes-compra")
+    @PostMapping("/save_ocaf")
     public ResponseEntity<OrdenCompraActivo> saveOrdenCompraActivo(@RequestBody OrdenCompraActivo ordenCompraActivo) {
         log.info("REST request para guardar orden de compra de activos fijos");
         try {
@@ -55,7 +55,7 @@ public class ActivoFijoResource {
      * @param size tamaño de página
      * @return página de órdenes de compra que cumplen con los criterios
      */
-    @GetMapping("/ordenes-compra/search")
+    @GetMapping("/ocaf/search")
     public ResponseEntity<Page<OrdenCompraActivo>> searchOrdenesCompra(
             @RequestParam String date1,
             @RequestParam String date2,
@@ -76,7 +76,7 @@ public class ActivoFijoResource {
      * @param estado estado de la orden (opcional, por defecto 0)
      * @return la orden de compra si existe
      */
-    @GetMapping("/ordenes-compra/{ordenCompraActivoId}")
+    @GetMapping("/ocaf/{ordenCompraActivoId}")
     public ResponseEntity<OrdenCompraActivo> getOrdenCompraById(
             @PathVariable Integer ordenCompraActivoId,
             @RequestParam(defaultValue = "0") int estado) {
@@ -97,7 +97,7 @@ public class ActivoFijoResource {
      * @param ordenCompraActivoId ID de la orden de compra a cancelar
      * @return la orden de compra actualizada
      */
-    @PutMapping("/ordenes-compra/{ordenCompraActivoId}/cancel")
+    @PutMapping("/ocaf/{ordenCompraActivoId}/cancel")
     public ResponseEntity<?> cancelOrdenCompra(@PathVariable int ordenCompraActivoId) {
         log.info("REST request para cancelar orden de compra con ID: {}", ordenCompraActivoId);
         try {
@@ -115,7 +115,7 @@ public class ActivoFijoResource {
      * @param ordenCompraActivoId ID de la orden de compra
      * @return lista de ítems de la orden
      */
-    @GetMapping("/ordenes-compra/{ordenCompraActivoId}/items")
+    @GetMapping("/ocaf/{ordenCompraActivoId}/items")
     public ResponseEntity<?> getItemsByOrdenCompraId(@PathVariable int ordenCompraActivoId) {
         log.info("REST request para obtener ítems de orden de compra con ID: {}", ordenCompraActivoId);
         try {
@@ -126,4 +126,40 @@ public class ActivoFijoResource {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    /**
+     * Endpoint para actualizar una orden de compra de activos fijos existente.
+     *
+     * @param ordenCompraActivoId ID de la orden de compra a actualizar
+     * @param ordenCompraActivo datos actualizados de la orden de compra
+     * @return la orden de compra actualizada
+     */
+    @PutMapping("/ocaf/{ordenCompraActivoId}/update")
+    public ResponseEntity<?> updateOrdenCompraActivo(
+            @PathVariable int ordenCompraActivoId,
+            @RequestBody OrdenCompraActivo ordenCompraActivo) {
+
+        log.info("REST request para actualizar orden de compra de activos fijos con ID: {}", ordenCompraActivoId);
+
+        try {
+            // Verificar que el ID en la URL coincida con el ID en el cuerpo
+            if (ordenCompraActivo.getOrdenCompraActivoId() != 0 && 
+                ordenCompraActivo.getOrdenCompraActivoId() != ordenCompraActivoId) {
+                return ResponseEntity.badRequest().body(
+                    Map.of("error", "El ID de la orden en la URL no coincide con el ID en el cuerpo de la solicitud")
+                );
+            }
+
+            // Establecer el ID desde la URL
+            ordenCompraActivo.setOrdenCompraActivoId(ordenCompraActivoId);
+
+            // Llamar al servicio para actualizar
+            OrdenCompraActivo updated = activoFijoService.updateOrdenCompraActivo(ordenCompraActivo);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            log.error("Error al actualizar orden de compra de activos fijos", e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }

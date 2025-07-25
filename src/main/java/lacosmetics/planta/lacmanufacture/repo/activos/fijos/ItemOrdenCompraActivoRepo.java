@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Repository
 public interface ItemOrdenCompraActivoRepo extends JpaRepository<ItemOrdenCompraActivo, Integer> {
-    
+
     /**
      * Busca todos los ítems asociados a una orden de compra específica.
      * 
@@ -20,7 +20,7 @@ public interface ItemOrdenCompraActivoRepo extends JpaRepository<ItemOrdenCompra
      * @return lista de ítems de la orden
      */
     List<ItemOrdenCompraActivo> findByOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo);
-    
+
     /**
      * Busca todos los ítems asociados a una orden de compra por su ID.
      * 
@@ -28,4 +28,11 @@ public interface ItemOrdenCompraActivoRepo extends JpaRepository<ItemOrdenCompra
      * @return lista de ítems de la orden
      */
     List<ItemOrdenCompraActivo> findByOrdenCompraActivo_OrdenCompraActivoId(int ordenCompraActivoId);
+
+    /**
+     * Elimina todos los ítems asociados a una orden de compra por su ID.
+     * 
+     * @param ordenCompraActivoId ID de la orden de compra
+     */
+    void deleteByOrdenCompraActivo_OrdenCompraActivoId(Integer ordenCompraActivoId);
 }
