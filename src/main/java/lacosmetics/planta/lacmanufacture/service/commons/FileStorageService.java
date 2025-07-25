@@ -63,4 +63,33 @@ public class FileStorageService {
         Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
         return destinationPath.toAbsolutePath().toString();
     }
+
+    /**
+     * Stores a quotation file for an OrdenCompraActivo.
+     * Files are saved under {baseUploadDir}/activosFijos/Cotizaciones/{ordenCompraActivoId}/.
+     *
+     * @param ordenCompraActivoId the id of the orden compra activo.
+     * @param file the quotation file to store.
+     * @return the absolute path of the stored file.
+     * @throws IOException if an I/O error occurs.
+     */
+    public String storeCotizacionFile(int ordenCompraActivoId, MultipartFile file) throws IOException {
+        // Build the directory path: baseUploadDir/activosFijos/Cotizaciones/{ordenCompraActivoId}
+        String baseDir = storageProperties.getUPLOAD_DIR();
+        String activosFijosDir = storageProperties.getACTIVOS_FIJOS();
+        String cotizacionesDir = storageProperties.getCOTIZACIONES();
+        Path folderPath = Paths.get(baseDir, activosFijosDir, cotizacionesDir, String.valueOf(ordenCompraActivoId));
+        Files.createDirectories(folderPath); // Ensure the directory exists
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".") 
+            ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+            : ".pdf";
+        String fileName = "cotizacion" + extension;
+
+        Path destinationPath = folderPath.resolve(fileName);
+        // Use Files.copy instead of transferTo for more robust behavior across environments
+        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        return destinationPath.toAbsolutePath().toString();
+    }
 }

@@ -5,12 +5,16 @@ import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.ItemOrdenCo
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.OrdenCompraActivo;
 import lacosmetics.planta.lacmanufacture.repo.activos.fijos.ItemOrdenCompraActivoRepo;
 import lacosmetics.planta.lacmanufacture.repo.activos.fijos.OrdenCompraActivoRepo;
+import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,15 +35,18 @@ public class ActivoFijoService {
 
     private final OrdenCompraActivoRepo ordenCompraActivoRepo;
     private final ItemOrdenCompraActivoRepo itemOrdenCompraActivoRepo;
+    private final FileStorageService fileStorageService;
 
     /**
-     * Guarda una nueva orden de compra de activos fijos.
+     * Guarda una nueva orden de compra de activos fijos con un archivo de cotización opcional.
      *
      * @param ordenCompraActivo la orden de compra a guardar
+     * @param cotizacionFile archivo de cotización opcional
      * @return la orden de compra guardada con su ID asignado
+     * @throws IOException si ocurre un error al guardar el archivo
      */
     @Transactional
-    public OrdenCompraActivo saveOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo) {
+    public OrdenCompraActivo saveOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo, MultipartFile cotizacionFile) throws IOException {
         log.info("Guardando orden de compra de activos fijos");
 
         // Validaciones básicas
@@ -89,7 +96,38 @@ public class ActivoFijoService {
             }
         }
 
-        return ordenCompraActivoRepo.save(ordenCompraActivo);
+        // Set cotizacionUrl to empty string by default
+        ordenCompraActivo.setCotizacionUrl("");
+
+        // Save the entity first to get the ID
+        OrdenCompraActivo savedOrden = ordenCompraActivoRepo.save(ordenCompraActivo);
+
+        // If a quotation file is provided, store it and update the URL
+        if (cotizacionFile != null && !cotizacionFile.isEmpty()) {
+            String cotizacionPath = fileStorageService.storeCotizacionFile(savedOrden.getOrdenCompraActivoId(), cotizacionFile);
+            savedOrden.setCotizacionUrl(cotizacionPath);
+            // Save again to update the URL
+            savedOrden = ordenCompraActivoRepo.save(savedOrden);
+        }
+
+        return savedOrden;
+    }
+
+    /**
+     * Guarda una nueva orden de compra de activos fijos.
+     * Este método mantiene la compatibilidad con el código existente.
+     *
+     * @param ordenCompraActivo la orden de compra a guardar
+     * @return la orden de compra guardada con su ID asignado
+     */
+    @Transactional
+    public OrdenCompraActivo saveOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo) {
+        try {
+            return saveOrdenCompraActivo(ordenCompraActivo, null);
+        } catch (IOException e) {
+            // This should never happen since we're not passing a file
+            throw new RuntimeException("Unexpected error saving orden compra activo", e);
+        }
     }
 
     /**
@@ -172,15 +210,17 @@ public class ActivoFijoService {
     }
 
     /**
-     * Actualiza una orden de compra de activos fijos existente.
+     * Actualiza una orden de compra de activos fijos existente con un archivo de cotización opcional.
      * Verifica primero si la orden existe antes de intentar actualizarla.
      *
      * @param ordenCompraActivo la orden de compra con los datos actualizados
+     * @param cotizacionFile archivo de cotización opcional
      * @return la orden de compra actualizada
      * @throws RuntimeException si la orden no existe o no se puede actualizar
+     * @throws IOException si ocurre un error al guardar el archivo
      */
     @Transactional
-    public OrdenCompraActivo updateOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo) {
+    public OrdenCompraActivo updateOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo, MultipartFile cotizacionFile) throws IOException {
         log.info("Actualizando orden de compra de activos fijos con ID: {}", ordenCompraActivo.getOrdenCompraActivoId());
 
         // Verificar que la orden exista
@@ -208,6 +248,11 @@ public class ActivoFijoService {
 
         // Mantener la fecha de emisión original
         ordenCompraActivo.setFechaEmision(existingOrden.getFechaEmision());
+
+        // Mantener la URL de cotización original si no se proporciona un nuevo archivo
+        if (cotizacionFile == null || cotizacionFile.isEmpty()) {
+            ordenCompraActivo.setCotizacionUrl(existingOrden.getCotizacionUrl());
+        }
 
         // Procesar los ítems de la orden
         if (ordenCompraActivo.getItemsOrdenCompra() != null && !ordenCompraActivo.getItemsOrdenCompra().isEmpty()) {
@@ -245,6 +290,33 @@ public class ActivoFijoService {
         itemOrdenCompraActivoRepo.deleteByOrdenCompraActivo_OrdenCompraActivoId(ordenCompraActivo.getOrdenCompraActivoId());
 
         // Guardar la orden actualizada
-        return ordenCompraActivoRepo.save(ordenCompraActivo);
+        OrdenCompraActivo updatedOrden = ordenCompraActivoRepo.save(ordenCompraActivo);
+
+        // Si se proporciona un nuevo archivo de cotización, guardarlo y actualizar la URL
+        if (cotizacionFile != null && !cotizacionFile.isEmpty()) {
+            String cotizacionPath = fileStorageService.storeCotizacionFile(updatedOrden.getOrdenCompraActivoId(), cotizacionFile);
+            updatedOrden.setCotizacionUrl(cotizacionPath);
+            updatedOrden = ordenCompraActivoRepo.save(updatedOrden);
+        }
+
+        return updatedOrden;
+    }
+
+    /**
+     * Actualiza una orden de compra de activos fijos existente.
+     * Este método mantiene la compatibilidad con el código existente.
+     *
+     * @param ordenCompraActivo la orden de compra con los datos actualizados
+     * @return la orden de compra actualizada
+     * @throws RuntimeException si la orden no existe o no se puede actualizar
+     */
+    @Transactional
+    public OrdenCompraActivo updateOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo) {
+        try {
+            return updateOrdenCompraActivo(ordenCompraActivo, null);
+        } catch (IOException e) {
+            // This should never happen since we're not passing a file
+            throw new RuntimeException("Unexpected error updating orden compra activo", e);
+        }
     }
 }

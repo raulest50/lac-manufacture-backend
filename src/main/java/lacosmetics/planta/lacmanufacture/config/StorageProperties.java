@@ -27,4 +27,14 @@ public class StorageProperties {
      * Folder para guardar documentos del organigrama
      */
     private final String ORGANIGRAMA = "organigrama";
+
+    /**
+     * Folder para guardar archivos relacionados con activos fijos
+     */
+    private final String ACTIVOS_FIJOS = "activosFijos";
+
+    /**
+     * Folder para guardar cotizaciones de activos fijos
+     */
+    private final String COTIZACIONES = "Cotizaciones";
 }

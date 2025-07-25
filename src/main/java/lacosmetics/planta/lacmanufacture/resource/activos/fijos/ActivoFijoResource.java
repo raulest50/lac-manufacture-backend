@@ -1,14 +1,18 @@
 package lacosmetics.planta.lacmanufacture.resource.activos.fijos;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.ItemOrdenCompraActivo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.OrdenCompraActivo;
 import lacosmetics.planta.lacmanufacture.service.activos.fijos.ActivoFijoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -25,20 +29,33 @@ import java.util.Map;
 public class ActivoFijoResource {
 
     private final ActivoFijoService activoFijoService;
+    private final ObjectMapper objectMapper;
 
     /**
      * Endpoint para guardar una nueva orden de compra de activos fijos.
      *
-     * @param ordenCompraActivo la orden de compra a guardar
+     * @param ordenCompraActivoJson JSON con los datos de la orden de compra
+     * @param cotizacionFile archivo de cotización opcional
      * @return la orden de compra guardada con su ID asignado
      */
-    @PostMapping("/save_ocaf")
-    public ResponseEntity<OrdenCompraActivo> saveOrdenCompraActivo(@RequestBody OrdenCompraActivo ordenCompraActivo) {
+    @PostMapping(value = "/save_ocaf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<OrdenCompraActivo> saveOrdenCompraActivo(
+            @RequestPart("ordenCompraActivo") String ordenCompraActivoJson,
+            @RequestPart(value = "cotizacionFile", required = false) MultipartFile cotizacionFile
+    ) {
         log.info("REST request para guardar orden de compra de activos fijos");
         try {
-            OrdenCompraActivo savedOrden = activoFijoService.saveOrdenCompraActivo(ordenCompraActivo);
+            // Convert JSON string to OrdenCompraActivo object
+            OrdenCompraActivo ordenCompraActivo = objectMapper.readValue(ordenCompraActivoJson, OrdenCompraActivo.class);
+
+            // Save the orden compra activo with the optional file
+            OrdenCompraActivo savedOrden = activoFijoService.saveOrdenCompraActivo(ordenCompraActivo, cotizacionFile);
+
             return ResponseEntity.created(URI.create("/api/activos-fijos/ordenes-compra/" + savedOrden.getOrdenCompraActivoId()))
                     .body(savedOrden);
+        } catch (IOException e) {
+            log.error("Error al procesar el archivo de cotización: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al procesar el archivo de cotización", e);
         } catch (IllegalArgumentException e) {
             log.error("Error al guardar orden de compra de activos fijos", e);
             throw e;
@@ -131,17 +148,22 @@ public class ActivoFijoResource {
      * Endpoint para actualizar una orden de compra de activos fijos existente.
      *
      * @param ordenCompraActivoId ID de la orden de compra a actualizar
-     * @param ordenCompraActivo datos actualizados de la orden de compra
+     * @param ordenCompraActivoJson JSON con los datos actualizados de la orden de compra
+     * @param cotizacionFile archivo de cotización opcional
      * @return la orden de compra actualizada
      */
-    @PutMapping("/ocaf/{ordenCompraActivoId}/update")
+    @PutMapping(value = "/ocaf/{ordenCompraActivoId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateOrdenCompraActivo(
             @PathVariable int ordenCompraActivoId,
-            @RequestBody OrdenCompraActivo ordenCompraActivo) {
+            @RequestPart("ordenCompraActivo") String ordenCompraActivoJson,
+            @RequestPart(value = "cotizacionFile", required = false) MultipartFile cotizacionFile) {
 
         log.info("REST request para actualizar orden de compra de activos fijos con ID: {}", ordenCompraActivoId);
 
         try {
+            // Convert JSON string to OrdenCompraActivo object
+            OrdenCompraActivo ordenCompraActivo = objectMapper.readValue(ordenCompraActivoJson, OrdenCompraActivo.class);
+
             // Verificar que el ID en la URL coincida con el ID en el cuerpo
             if (ordenCompraActivo.getOrdenCompraActivoId() != 0 && 
                 ordenCompraActivo.getOrdenCompraActivoId() != ordenCompraActivoId) {
@@ -153,9 +175,12 @@ public class ActivoFijoResource {
             // Establecer el ID desde la URL
             ordenCompraActivo.setOrdenCompraActivoId(ordenCompraActivoId);
 
-            // Llamar al servicio para actualizar
-            OrdenCompraActivo updated = activoFijoService.updateOrdenCompraActivo(ordenCompraActivo);
+            // Llamar al servicio para actualizar con el archivo opcional
+            OrdenCompraActivo updated = activoFijoService.updateOrdenCompraActivo(ordenCompraActivo, cotizacionFile);
             return ResponseEntity.ok(updated);
+        } catch (IOException e) {
+            log.error("Error al procesar el archivo de cotización: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of("error", "Error al procesar el archivo de cotización: " + e.getMessage()));
         } catch (RuntimeException e) {
             log.error("Error al actualizar orden de compra de activos fijos", e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
