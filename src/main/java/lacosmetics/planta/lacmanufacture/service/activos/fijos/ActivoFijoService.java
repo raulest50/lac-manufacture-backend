@@ -1,10 +1,17 @@
 package lacosmetics.planta.lacmanufacture.service.activos.fijos;
 
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.ItemOrdenCompraActivo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.OrdenCompraActivo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.UpdateEstadoOrdenCompraAFRequest;
+import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
+import lacosmetics.planta.lacmanufacture.model.users.Acceso;
+import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.activos.fijos.ItemOrdenCompraActivoRepo;
 import lacosmetics.planta.lacmanufacture.repo.activos.fijos.OrdenCompraActivoRepo;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
+import lacosmetics.planta.lacmanufacture.service.commons.EmailService;
 import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +44,8 @@ public class ActivoFijoService {
     private final OrdenCompraActivoRepo ordenCompraActivoRepo;
     private final ItemOrdenCompraActivoRepo itemOrdenCompraActivoRepo;
     private final FileStorageService fileStorageService;
+    private final EmailService emailService;
+    private final UserRepository userRepository;
 
     /**
      * Guarda una nueva orden de compra de activos fijos con un archivo de cotización opcional.
@@ -335,5 +345,211 @@ public class ActivoFijoService {
             // This should never happen since we're not passing a file
             throw new RuntimeException("Unexpected error updating orden compra activo", e);
         }
+    }
+    /**
+     * Envía un correo electrónico al proveedor con la orden de compra de activo fijo adjunta.
+     * 
+     * @param orden La orden de compra a enviar
+     * @param pdfAttachment El archivo PDF adjunto con los detalles de la orden
+     * @throws MessagingException Si hay un error al enviar el correo
+     * @throws IOException Si hay un error al procesar el archivo adjunto
+     * @throws RuntimeException Si no se encuentra un email para el proveedor
+     */
+    public void enviarCorreoOrdenCompraActivoProveedor(OrdenCompraActivo orden, MultipartFile pdfAttachment) 
+            throws MessagingException, IOException {
+
+        if (pdfAttachment == null || pdfAttachment.isEmpty()) {
+            throw new RuntimeException("No se proporcionó archivo PDF para enviar por email para la orden: " + orden.getOrdenCompraActivoId());
+        }
+
+        // Obtener el proveedor y su información de contacto
+        Proveedor proveedor = orden.getProveedor();
+
+        // Buscar el email del proveedor en la lista de contactos
+        String emailProveedor = null;
+        for (Map<String, Object> contacto : proveedor.getContactos()) {
+            if (contacto.containsKey("email")) {
+                emailProveedor = (String) contacto.get("email");
+                break;
+            }
+        }
+
+        if (emailProveedor == null) {
+            throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
+        }
+
+        // Preparar el asunto y cuerpo del correo
+        String subject = "No Reply - Orden de Compra de Activo Fijo Exotic Expert #" + orden.getOrdenCompraActivoId();
+        String text = "Estimado proveedor: " + orden.getProveedor().getNombre() + ",\n\n" +
+                "Por medio de la presente le hacemos llegar la orden de compra de activo fijo #" + orden.getOrdenCompraActivoId() +
+                "correspondiente a los productos/servicios detallados en el documento adjunto.\n" +
+                "Le agradeceremos confirmar la recepción de esta orden y, en caso de ser necesario," +
+                "informarnos sobre el tiempo estimado de entrega o cualquier observación relevante.\n\n" +
+                "Quedamos atentos a su confirmación y agradecemos de antemano su atención y colaboración.\n\n" +
+                "Saludos cordiales,\n" +
+                "Exotic Expert - Departamento de Compras";
+
+        // Enviar el correo con el PDF adjunto
+        emailService.sendEmailWithAttachment(
+                emailProveedor,
+                subject,
+                text,
+                pdfAttachment
+        );
+
+        log.info("Email sent to provider {} with order details for order ID: {}", emailProveedor, orden.getOrdenCompraActivoId());
+    }
+
+    /**
+     * Envía un correo electrónico al proveedor con copia a otros destinatarios.
+     * Funciona igual que {@link #enviarCorreoOrdenCompraActivoProveedor(OrdenCompraActivo, MultipartFile)}
+     * pero permite especificar destinatarios en copia (CC).
+     *
+     * @param orden       La orden de compra a enviar
+     * @param pdfAttachment El archivo PDF adjunto con los detalles de la orden
+     * @param ccEmails    Lista de correos electrónicos que recibirán copia
+     * @throws MessagingException Si hay un error al enviar el correo
+     * @throws IOException        Si hay un error al procesar el archivo adjunto
+     * @throws RuntimeException   Si no se encuentra un email para el proveedor
+     */
+    public void enviarCorreoOrdenCompraActivoProveedor_wCC(OrdenCompraActivo orden, MultipartFile pdfAttachment, List<String> ccEmails)
+            throws MessagingException, IOException {
+
+        if (pdfAttachment == null || pdfAttachment.isEmpty()) {
+            throw new RuntimeException("No se proporcionó archivo PDF para enviar por email para la orden: " + orden.getOrdenCompraActivoId());
+        }
+
+        // Obtener el proveedor y su información de contacto
+        Proveedor proveedor = orden.getProveedor();
+
+        // Buscar el email del proveedor en la lista de contactos
+        String emailProveedor = null;
+        for (Map<String, Object> contacto : proveedor.getContactos()) {
+            if (contacto.containsKey("email")) {
+                emailProveedor = (String) contacto.get("email");
+                break;
+            }
+        }
+
+        if (emailProveedor == null) {
+            throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
+        }
+
+        String subject = "No Reply - Orden de Compra de Activo Fijo Exotic Expert #" + orden.getOrdenCompraActivoId();
+        String text = "Estimado proveedor: " + orden.getProveedor().getNombre() + ",\n\n" +
+                "Por medio de la presente le hacemos llegar la orden de compra de activo fijo #" + orden.getOrdenCompraActivoId() +
+                "correspondiente a los productos/servicios detallados en el documento adjunto.\n" +
+                "Le agradeceremos confirmar la recepción de esta orden y, en caso de ser necesario," +
+                "informarnos sobre el tiempo estimado de entrega o cualquier observación relevante.\n\n" +
+                "Quedamos atentos a su confirmación y agradecemos de antemano su atención y colaboración.\n\n" +
+                "Saludos cordiales,\n" +
+                "Exotic Expert - Departamento de Compras";
+
+        emailService.sendEmailWithAttachmentAndCC(
+                emailProveedor,
+                ccEmails.toArray(new String[0]),
+                subject,
+                text,
+                pdfAttachment
+        );
+
+        log.info("Email sent to provider {} with CC {} for order ID: {}", emailProveedor, ccEmails, orden.getOrdenCompraActivoId());
+    }
+
+    /**
+     * Obtiene los correos electrónicos de los usuarios con acceso al módulo PRODUCCION
+     * y nivel 2.
+     *
+     * @return lista de correos electrónicos
+     */
+    public List<String> getEmailsUsuariosProduccionNivel2() {
+        return userRepository.findAll().stream()
+                .filter(u -> u.getEmail() != null && !u.getEmail().isEmpty())
+                .filter(u -> u.getAccesos().stream()
+                        .anyMatch(a -> a.getModuloAcceso() == Acceso.Modulo.PRODUCCION && a.getNivel() == 2))
+                .map(User::getEmail)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Actualiza el estado de una orden de compra de activos fijos.
+     * Si el nuevo estado es 2 (pendiente recepción) y el estado actual es 1 (pendiente envío a proveedor),
+     * se envía un correo electrónico al proveedor según el tipo de envío seleccionado.
+     *
+     * @param ordenCompraActivoId ID de la orden de compra a actualizar
+     * @param request Objeto con la información de actualización
+     * @return La orden de compra actualizada
+     * @throws RuntimeException Si la orden no existe o hay algún error en la actualización
+     */
+    @Transactional
+    public OrdenCompraActivo updateEstadoOrdenCompraActivo(int ordenCompraActivoId, UpdateEstadoOrdenCompraAFRequest request) {
+        OrdenCompraActivo orden = ordenCompraActivoRepo.findById(ordenCompraActivoId)
+                .orElseThrow(() -> new RuntimeException("Orden de compra de activo fijo no encontrada con id: " + ordenCompraActivoId));
+
+        // Si el nuevo estado es 2 y estamos cambiando desde estado 1, manejar según el tipo de envío
+        if (request.getNewEstado() == 2 && orden.getEstado() == 1) {
+            // Verificar el tipo de envío seleccionado
+            if (request.getTipoEnvio() != null) {
+                switch (request.getTipoEnvio()) {
+                    case MANUAL:
+                        // Para envío manual, solo se actualiza el estado sin procesar el PDF
+                        log.info("Orden de compra de activo fijo {} actualizada manualmente a estado 2", ordenCompraActivoId);
+                        break;
+
+                    case EMAIL:
+                        // Para envío por email, verificar que exista el PDF y enviarlo
+                        try {
+                            List<String> ccEmails = getEmailsUsuariosProduccionNivel2();
+                            if (ccEmails.isEmpty()) {
+                                enviarCorreoOrdenCompraActivoProveedor(orden, request.getOCAFpdf());
+                            } else {
+                                enviarCorreoOrdenCompraActivoProveedor_wCC(orden, request.getOCAFpdf(), ccEmails);
+                            }
+                        } catch (MessagingException | IOException e) {
+                            // Lanzar una excepción para que la transacción se revierta
+                            log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
+                            throw new RuntimeException("Error al enviar correo al proveedor: " + e.getMessage(), e);
+                        } catch (RuntimeException e) {
+                            // Propagar la excepción para que la transacción se revierta
+                            log.error(e.getMessage());
+                            throw e;
+                        }
+                        break;
+
+                    case WHATSAPP:
+                        // TODO: Implementar envío por WhatsApp en el futuro
+                        log.info("Envío por WhatsApp seleccionado para orden {}, esta funcionalidad será implementada próximamente", ordenCompraActivoId);
+                        throw new UnsupportedOperationException("El envío por WhatsApp aún no está implementado");
+
+                    default:
+                        log.warn("Tipo de envío no reconocido para la orden: {}", ordenCompraActivoId);
+                        throw new RuntimeException("Tipo de envío no reconocido para la orden: " + ordenCompraActivoId);
+                }
+            } else {
+                // Si no se especificó tipo de envío, usar el comportamiento predeterminado (email)
+                log.warn("No se especificó tipo de envío para la orden: {}, usando email por defecto", ordenCompraActivoId);
+
+                try {
+                    List<String> ccEmails = getEmailsUsuariosProduccionNivel2();
+                    if (ccEmails.isEmpty()) {
+                        enviarCorreoOrdenCompraActivoProveedor(orden, request.getOCAFpdf());
+                    } else {
+                        enviarCorreoOrdenCompraActivoProveedor_wCC(orden, request.getOCAFpdf(), ccEmails);
+                    }
+                } catch (MessagingException | IOException e) {
+                    // Lanzar una excepción para que la transacción se revierta
+                    log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
+                    throw new RuntimeException("Error al enviar correo al proveedor: " + e.getMessage(), e);
+                } catch (RuntimeException e) {
+                    // Propagar la excepción para que la transacción se revierta
+                    log.error(e.getMessage());
+                    throw e;
+                }
+            }
+        }
+
+        // Actualizar el estado solo después de que todo el proceso haya sido exitoso
+        orden.setEstado(request.getNewEstado());
+        return ordenCompraActivoRepo.save(orden);
     }
 }

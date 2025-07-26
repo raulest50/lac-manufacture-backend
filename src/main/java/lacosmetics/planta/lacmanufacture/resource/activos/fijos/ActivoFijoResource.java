@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.resource.activos.fijos;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.ItemOrdenCompraActivo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.OrdenCompraActivo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.UpdateEstadoOrdenCompraAFRequest;
 import lacosmetics.planta.lacmanufacture.service.activos.fijos.ActivoFijoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -187,4 +188,36 @@ public class ActivoFijoResource {
         }
     }
 
+    /**
+     * Endpoint para actualizar el estado de una orden de compra de activos fijos.
+     * Permite realizar operaciones como liberación, cancelación y envío a proveedor.
+     * Si el estado es 2 (enviar a proveedor), también puede enviar la orden por email
+     * al proveedor con copia a usuarios con acceso nivel 2 al módulo de producción.
+     *
+     * @param ordenCompraActivoId ID de la orden de compra a actualizar
+     * @param request objeto con la información de actualización
+     * @param pdfAttachment archivo PDF opcional para adjuntar al email
+     * @return la orden de compra actualizada
+     */
+    @PutMapping(value = "/ocaf/{ordenCompraActivoId}/updateEstado", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateEstadoOrdenCompraActivo(
+            @PathVariable int ordenCompraActivoId,
+            @RequestPart("request") UpdateEstadoOrdenCompraAFRequest request,
+            @RequestPart(value = "OCAFpdf", required = false) MultipartFile pdfAttachment
+    ) {
+        log.info("REST request para actualizar estado de orden de compra de activos fijos con ID: {}", ordenCompraActivoId);
+        try {
+            // Si se proporciona un archivo, asignarlo al request
+            if (pdfAttachment != null) {
+                request.setOCAFpdf(pdfAttachment);
+            }
+
+            OrdenCompraActivo updated = activoFijoService.updateEstadoOrdenCompraActivo(ordenCompraActivoId, request);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            // Devolver un error con el mensaje específico
+            log.error("Error al actualizar estado de orden de compra de activos fijos", e);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
