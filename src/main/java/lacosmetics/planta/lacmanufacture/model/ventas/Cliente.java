@@ -32,4 +32,7 @@ public class Cliente {
 
     @CreationTimestamp
     private LocalDateTime fechaRegistro;
+
+    private String urlRut;
+    private String urlCamComer;
 }

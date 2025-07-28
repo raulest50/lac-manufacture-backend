@@ -37,4 +37,9 @@ public class StorageProperties {
      * Folder para guardar cotizaciones de activos fijos
      */
     private final String COTIZACIONES = "Cotizaciones";
+
+    /**
+     * Folder para guardar documentos de clientes
+     */
+    private final String CLIENTES = "clientes";
 }

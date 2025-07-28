@@ -20,6 +20,29 @@ public class FileStorageService {
     }
 
     /**
+     * Stores a file for a cliente.
+     * Files are saved under {baseUploadDir}/clientes/{clienteId}/.
+     *
+     * @param clienteId the id of the cliente.
+     * @param file      the file to store.
+     * @param fileName  the name to give the stored file (e.g. "rut.pdf" or "camara.pdf").
+     * @return the absolute path of the stored file.
+     * @throws IOException if an I/O error occurs.
+     */
+    public String storeFileCliente(int clienteId, MultipartFile file, String fileName) throws IOException {
+        // Build the directory path for clientes: baseUploadDir/clientes/{clienteId}
+        String baseDir = storageProperties.getUPLOAD_DIR();
+        String clientesDir = storageProperties.getCLIENTES();
+        Path folderPath = Paths.get(baseDir, clientesDir, String.valueOf(clienteId));
+        Files.createDirectories(folderPath); // Ensure the directory exists
+
+        Path destinationPath = folderPath.resolve(fileName);
+        // Use Files.copy instead of transferTo for more robust behavior across environments
+        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        return destinationPath.toAbsolutePath().toString();
+    }
+
+    /**
      * Stores a file for a proveedor.
      * Files are saved under {baseUploadDir}/proveedores/{proveedorId}/.
      *
