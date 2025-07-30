@@ -18,8 +18,24 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class ActivoFijo {
+public class ActivoFijo {
+
+    // Enum para representar los tipos de activos
+    public enum TipoActivo {
+        PRODUCCION,
+        MOBILIARIO,
+        EQUIPO
+    }
+
+    // Enum para unidades de capacidad (movido desde ActivoProduccion)
+    public enum UnidadesCapacidad {
+        L, // litros
+        KG, // kilogramo
+        TON, // tonelada
+        M3, // metro cubico
+        W, // potencia watts
+        HP, // horse power
+    }
 
     // llave primaria
     @Id
@@ -55,6 +71,15 @@ public abstract class ActivoFijo {
     private BigDecimal valorResidual;
     private Integer vidaUtilMeses;
     private String metodoDespreciacion; // "LINEAL", "SUMA_DIGITOS", etc.
+
+    // Campo para identificar el tipo de activo
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoActivo tipoActivo;
+
+    // Campos específicos para activos de producción
+    private UnidadesCapacidad unidadesCapacidad;
+    private Double capacidad;
 
     @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<DepreciacionActivo> depreciaciones;

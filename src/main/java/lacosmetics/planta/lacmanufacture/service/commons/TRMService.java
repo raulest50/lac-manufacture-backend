@@ -1,95 +1,142 @@
 package lacosmetics.planta.lacmanufacture.service.commons;
 
+import com.socrata.api.Soda2Consumer;
+import com.socrata.exceptions.SodaError;
+import com.socrata.model.soql.OrderByClause;
+import com.socrata.model.soql.SortOrder;
+import com.socrata.model.soql.SoqlQuery;
+import com.socrata.builders.SoqlQueryBuilder;
+import jakarta.annotation.PostConstruct;
 import lacosmetics.planta.lacmanufacture.model.commons.divisas.TRM;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Servicio para consultar la Tasa Representativa del Mercado (TRM)
- * de la Superintendencia Financiera de Colombia
- */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class TRMService {
 
-    private static final String TRM_API_URL = "https://www.datos.gov.co/resource/32sa-8pi3.json";
-    private final RestTemplate restTemplate;
+    private static final String DOMAIN     = "www.datos.gov.co";
+    private static final String DATASET_ID = "32sa-8pi3";
+
+    private final Soda2Consumer consumer;
+    private final AtomicReference<TRM> cache = new AtomicReference<>();
 
     /**
-     * Obtiene la TRM actual desde la API de datos abiertos de Colombia
-     * @return Objeto TRM con la información actual
+     * Constructor que inicializa el consumer SODA de forma anónima (sin token)
      */
-    public TRM getTRMActual() {
-        log.info("Consultando TRM actual");
+    public TRMService() {
+        // Inicialización anónima (sin app token)
+        this.consumer = Soda2Consumer.newConsumer(DOMAIN);
+        log.warn("Requests made without an app_token will be subject to strict throttling limits.");
+    }
+
+    /** Carga inicial de la TRM en caché al arrancar la app */
+    @PostConstruct
+    public void init() {
+        refreshCache();
+    }
+
+    /** Refresca la caché todos los días a la medianoche */
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void refreshCache() {
         try {
-            ResponseEntity<Map[]> response = restTemplate.getForEntity(TRM_API_URL + "?$limit=1&$order=vigenciadesde%20DESC", Map[].class);
-            
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().length > 0) {
-                Map<String, Object> trmData = response.getBody()[0];
-                
-                TRM trm = new TRM();
-                trm.setFecha(LocalDate.parse((String) trmData.get("vigenciadesde"), DateTimeFormatter.ISO_DATE_TIME));
-                trm.setValor(new BigDecimal((String) trmData.get("valor")));
-                trm.setUnidad((String) trmData.get("unidad"));
-                trm.setVigenciaDesde((String) trmData.get("vigenciadesde"));
-                trm.setVigenciaHasta((String) trmData.get("vigenciahasta"));
-                
-                log.info("TRM actual obtenida correctamente: {}", trm);
-                return trm;
-            } else {
-                log.error("Error al consultar TRM: respuesta vacía o con error");
-                throw new RuntimeException("No se pudo obtener la TRM actual");
-            }
-        } catch (Exception e) {
-            log.error("Error al consultar TRM", e);
-            throw new RuntimeException("Error al consultar TRM: " + e.getMessage(), e);
+            TRM latest = fetchLatest();
+            cache.set(latest);
+            log.info("✅ Caché de TRM actualizada: {}", latest);
+        } catch (Exception ex) {
+            log.error("❌ Error refrescando caché TRM", ex);
         }
     }
 
-    /**
-     * Obtiene la TRM para una fecha específica
-     * @param fecha Fecha para la cual se requiere la TRM
-     * @return Objeto TRM con la información para la fecha especificada
-     */
+    /** Devuelve la TRM actual desde caché (o al vuelo si está vacía) */
+    public TRM getTRMActual() {
+        TRM trm = cache.get();
+        if (trm == null) {
+            log.info("Cache vacía, obteniendo TRM al vuelo");
+            trm = fetchLatest();
+            cache.set(trm);
+        }
+        return trm;
+    }
+
+    /** Devuelve la TRM para una fecha específica */
     public TRM getTRMPorFecha(LocalDate fecha) {
         log.info("Consultando TRM para la fecha: {}", fecha);
-        String fechaStr = fecha.format(DateTimeFormatter.ISO_DATE);
-        
+        String fechaStr = fecha.toString();  // yyyy-MM-dd
+        // SoQL: vigenciadesde ≤ fecha AND vigenciahasta ≥ fecha
+        String where = String.format(
+                "vigenciadesde <= '%1$s' AND vigenciahasta >= '%1$s'",
+                fechaStr
+        );
+
+        SoqlQuery query = new SoqlQueryBuilder()
+                .setWhereClause(where)
+                .setLimit(1)
+                .build();
+
         try {
-            String query = "?$where=vigenciadesde%20%3C=%20'" + fechaStr + 
-                           "T00:00:00.000'%20AND%20vigenciahasta%20%3E=%20'" + 
-                           fechaStr + "T00:00:00.000'";
-            
-            ResponseEntity<Map[]> response = restTemplate.getForEntity(TRM_API_URL + query, Map[].class);
-            
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().length > 0) {
-                Map<String, Object> trmData = response.getBody()[0];
-                
-                TRM trm = new TRM();
-                trm.setFecha(fecha);
-                trm.setValor(new BigDecimal((String) trmData.get("valor")));
-                trm.setUnidad((String) trmData.get("unidad"));
-                trm.setVigenciaDesde((String) trmData.get("vigenciadesde"));
-                trm.setVigenciaHasta((String) trmData.get("vigenciahasta"));
-                
-                log.info("TRM para fecha {} obtenida correctamente: {}", fecha, trm);
-                return trm;
-            } else {
-                log.error("Error al consultar TRM para fecha {}: respuesta vacía o con error", fecha);
-                throw new RuntimeException("No se pudo obtener la TRM para la fecha " + fecha);
+            @SuppressWarnings("unchecked")
+            List<Object> rawResult = consumer.query(DATASET_ID, query, Soda2Consumer.HASH_RETURN_TYPE);
+
+            // Convert the raw result to the expected type
+            List<Map<String, Object>> rows = (List<Map<String, Object>>) (List<?>) rawResult;
+
+            if (rows.isEmpty()) {
+                throw new RuntimeException("No se encontró TRM para la fecha " + fecha);
             }
-        } catch (Exception e) {
-            log.error("Error al consultar TRM para fecha {}", fecha, e);
-            throw new RuntimeException("Error al consultar TRM para fecha " + fecha + ": " + e.getMessage(), e);
+            // Mapeamos el primer registro
+            return mapToTrm(rows.get(0), fecha);
+        } catch (SodaError | InterruptedException e) {
+            log.error("Error consultando TRM para la fecha {}: {}", fecha, e.getMessage(), e);
+            throw new RuntimeException("Error consultando TRM para la fecha " + fecha, e);
         }
+    }
+
+    /** Llamada real a Socrata para obtener el registro más reciente */
+    private TRM fetchLatest() {
+        SoqlQuery query = new SoqlQueryBuilder()
+                .setLimit(1)
+                .addOrderByPhrase(new OrderByClause(SortOrder.Descending, "vigenciadesde"))
+                .build();
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object> rawResult = consumer.query(DATASET_ID, query, Soda2Consumer.HASH_RETURN_TYPE);
+
+            // Convert the raw result to the expected type
+            List<Map<String, Object>> rows = (List<Map<String, Object>>) (List<?>) rawResult;
+
+            if (rows.isEmpty()) {
+                throw new RuntimeException("Error obteniendo TRM más reciente");
+            }
+            // Extraemos la fecha desde el campo vigenciadesde
+            Map<String,Object> row = rows.get(0);
+            String vigStr = (String) row.get("vigenciadesde");             // e.g. "2025-07-30T00:00:00.000"
+            LocalDate fecha = LocalDate.parse(vigStr.substring(0, 10));    // yyyy-MM-dd
+
+            return mapToTrm(row, fecha);
+        } catch (SodaError | InterruptedException e) {
+            log.error("Error obteniendo TRM más reciente: {}", e.getMessage(), e);
+            throw new RuntimeException("Error obteniendo TRM más reciente", e);
+        }
+    }
+
+    /** Convierte un Map SOQL → instancia de TRM */
+    private TRM mapToTrm(Map<String,Object> row, LocalDate fechaParsed) {
+        TRM trm = new TRM();
+        trm.setFecha(fechaParsed);
+        trm.setValor(new BigDecimal((String) row.get("valor")));
+        trm.setUnidad((String) row.get("unidad"));
+        trm.setVigenciaDesde((String) row.get("vigenciadesde"));
+        trm.setVigenciaHasta((String) row.get("vigenciahasta"));
+        return trm;
     }
 }
