@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.activos.fijos;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.*;
+import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -80,6 +81,13 @@ public class ActivoFijo {
     // Campos específicos para activos de producción
     private UnidadesCapacidad unidadesCapacidad;
     private Double capacidad;
+
+    @Column(name = "ubicacion")
+    private String ubicacion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsable_id")
+    private IntegrantePersonal responsable;
 
     @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<DepreciacionActivo> depreciaciones;

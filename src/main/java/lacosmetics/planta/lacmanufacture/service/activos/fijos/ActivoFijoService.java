@@ -1,555 +1,243 @@
 package lacosmetics.planta.lacmanufacture.service.activos.fijos;
 
-import jakarta.mail.MessagingException;
-import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.ItemOrdenCompraActivo;
-import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.OrdenCompraActivo;
-import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.UpdateEstadoOrdenCompraAFRequest;
-import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
-import lacosmetics.planta.lacmanufacture.model.users.Acceso;
-import lacosmetics.planta.lacmanufacture.model.users.User;
-import lacosmetics.planta.lacmanufacture.repo.activos.fijos.ItemOrdenCompraActivoRepo;
-import lacosmetics.planta.lacmanufacture.repo.activos.fijos.OrdenCompraActivoRepo;
-import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
-import lacosmetics.planta.lacmanufacture.service.commons.EmailService;
-import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
+import lacosmetics.planta.lacmanufacture.dto.activos.fijos.DTO_SearchActivoFijo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
+import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
+import lacosmetics.planta.lacmanufacture.repo.activos.fijos.ActivoFijoRepo;
+import lacosmetics.planta.lacmanufacture.repo.personal.IntegrantePersonalRepo;
+import org.springframework.data.jpa.domain.Specification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Servicio para la gestión de activos fijos.
- * Proporciona métodos para administrar órdenes de compra, incorporaciones,
- * depreciaciones y otros aspectos relacionados con los activos fijos.
+ * Proporciona métodos para administrar incorporaciones, depreciaciones
+ * y otros aspectos relacionados con los activos fijos.
+ * 
+ * Nota: La gestión de órdenes de compra de activos fijos ha sido movida a {@link OCAFService}
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ActivoFijoService {
 
-    private final OrdenCompraActivoRepo ordenCompraActivoRepo;
-    private final ItemOrdenCompraActivoRepo itemOrdenCompraActivoRepo;
-    private final FileStorageService fileStorageService;
-    private final EmailService emailService;
-    private final UserRepository userRepository;
+    private final ActivoFijoRepo activoFijoRepo;
+    private final IntegrantePersonalRepo integrantePersonalRepo;
 
     /**
-     * Guarda una nueva orden de compra de activos fijos con un archivo de cotización opcional.
-     *
-     * @param ordenCompraActivo la orden de compra a guardar
-     * @param cotizacionFile archivo de cotización opcional
-     * @return la orden de compra guardada con su ID asignado
-     * @throws IOException si ocurre un error al guardar el archivo
-     */
-    @Transactional
-    public OrdenCompraActivo saveOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo, MultipartFile cotizacionFile) throws IOException {
-        log.info("Guardando orden de compra de activos fijos");
-
-        // Validar que el ID de la orden no exista ya
-        if (ordenCompraActivo.getOrdenCompraActivoId() != 0 && 
-            ordenCompraActivoRepo.existsById(ordenCompraActivo.getOrdenCompraActivoId())) {
-            throw new IllegalArgumentException("Ya existe una orden de compra con el ID: " + 
-                                              ordenCompraActivo.getOrdenCompraActivoId());
-        }
-
-        // Validar que los IDs de los ítems no existan ya
-        if (ordenCompraActivo.getItemsOrdenCompra() != null && !ordenCompraActivo.getItemsOrdenCompra().isEmpty()) {
-            for (var item : ordenCompraActivo.getItemsOrdenCompra()) {
-                if (item.getItemOrdenId() != 0 && itemOrdenCompraActivoRepo.existsById(item.getItemOrdenId())) {
-                    throw new IllegalArgumentException("Ya existe un ítem de orden de compra con el ID: " + 
-                                                      item.getItemOrdenId());
-                }
-            }
-        }
-
-        // Validaciones básicas
-        if (ordenCompraActivo.getProveedor() == null) {
-            throw new IllegalArgumentException("La orden de compra debe tener un proveedor asignado");
-        }
-
-        if (ordenCompraActivo.getFechaVencimiento() == null) {
-            throw new IllegalArgumentException("La fecha de vencimiento es requerida");
-        }
-
-        // Establecer valores por defecto si no están presentes
-        if (ordenCompraActivo.getEstado() == 0) {
-            // Estado 0: pendiente liberación (por defecto)
-            ordenCompraActivo.setEstado(0);
-        }
-
-        // Procesar los ítems de la orden
-        if (ordenCompraActivo.getItemsOrdenCompra() != null && !ordenCompraActivo.getItemsOrdenCompra().isEmpty()) {
-            double subtotal = 0;
-            double ivaTotal = 0;
-
-            for (var item : ordenCompraActivo.getItemsOrdenCompra()) {
-                // Establecer la relación bidireccional
-                item.setOrdenCompraActivo(ordenCompraActivo);
-
-                // Calcular subtotal del ítem si no está establecido
-                if (item.getSubTotal() == 0) {
-                    item.setSubTotal(item.getPrecioUnitario() * item.getCantidad());
-                }
-
-                // Acumular totales
-                subtotal += item.getSubTotal();
-                ivaTotal += item.getIvaValue() * item.getCantidad();
-            }
-
-            // Actualizar totales de la orden
-            ordenCompraActivo.setSubTotal(subtotal);
-            ordenCompraActivo.setIva(ivaTotal);
-            ordenCompraActivo.setTotalPagar(subtotal + ivaTotal);
-        } else {
-            // Calcular totales si no hay ítems pero están establecidos manualmente
-            if (ordenCompraActivo.getTotalPagar() == 0) {
-                double subtotal = ordenCompraActivo.getSubTotal();
-                double iva = ordenCompraActivo.getIva();
-                ordenCompraActivo.setTotalPagar(subtotal + iva);
-            }
-        }
-
-        // Set cotizacionUrl to empty string by default
-        ordenCompraActivo.setCotizacionUrl("");
-
-        // Save the entity first to get the ID
-        OrdenCompraActivo savedOrden = ordenCompraActivoRepo.save(ordenCompraActivo);
-
-        // If a quotation file is provided, store it and update the URL
-        if (cotizacionFile != null && !cotizacionFile.isEmpty()) {
-            String cotizacionPath = fileStorageService.storeCotizacionFile(savedOrden.getOrdenCompraActivoId(), cotizacionFile);
-            savedOrden.setCotizacionUrl(cotizacionPath);
-            // Save again to update the URL
-            savedOrden = ordenCompraActivoRepo.save(savedOrden);
-        }
-
-        return savedOrden;
-    }
-
-    /**
-     * Guarda una nueva orden de compra de activos fijos.
-     * Este método mantiene la compatibilidad con el código existente.
-     *
-     * @param ordenCompraActivo la orden de compra a guardar
-     * @return la orden de compra guardada con su ID asignado
-     */
-    @Transactional
-    public OrdenCompraActivo saveOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo) {
-        try {
-            return saveOrdenCompraActivo(ordenCompraActivo, null);
-        } catch (IOException e) {
-            // This should never happen since we're not passing a file
-            throw new RuntimeException("Unexpected error saving orden compra activo", e);
-        }
-    }
-
-    /**
-     * Busca órdenes de compra por rango de fechas y estados.
-     *
-     * @param date1 fecha inicial en formato yyyy-MM-dd
-     * @param date2 fecha final en formato yyyy-MM-dd
-     * @param estados cadena de estados separados por coma (ej: "0,1,2")
-     * @param page número de página (0-indexed)
-     * @param size tamaño de página
-     * @return página de órdenes de compra que cumplen con los criterios
-     */
-    public Page<OrdenCompraActivo> getOrdenesCompraByDateAndEstado(
-            String date1, String date2, String estados, int page, int size) {
-
-        // Convertir fechas de String a LocalDateTime
-        LocalDateTime startDate = LocalDate.parse(date1).atTime(LocalTime.MIN);
-        LocalDateTime endDate = LocalDate.parse(date2).atTime(LocalTime.MAX);
-
-        // Convertir estados de String a List<Integer>
-        List<Integer> estadosList = Arrays.stream(estados.split(","))
-                .map(Integer::parseInt)
-                .collect(Collectors.toList());
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        return ordenCompraActivoRepo.findByFechaEmisionBetweenAndEstadoIn(
-                startDate, endDate, estadosList, pageable);
-    }
-
-    /**
-     * Obtiene una orden de compra por su ID y estado.
-     *
-     * @param ordenCompraActivoId ID de la orden de compra
-     * @param estado estado de la orden
-     * @return la orden de compra si existe
-     * @throws RuntimeException si no se encuentra la orden
-     */
-    public OrdenCompraActivo getOrdenCompraByIdAndEstado(Integer ordenCompraActivoId, int estado) {
-        return ordenCompraActivoRepo.findByOrdenCompraActivoIdAndEstado(ordenCompraActivoId, estado)
-                .orElseThrow(() -> new RuntimeException("Orden de compra no encontrada con ID: " + 
-                        ordenCompraActivoId + " y estado: " + estado));
-    }
-
-    /**
-     * Cancela una orden de compra de activos fijos.
-     *
-     * @param ordenCompraActivoId ID de la orden de compra a cancelar
-     * @return la orden de compra actualizada
-     * @throws RuntimeException si no se encuentra la orden
-     */
-    @Transactional
-    public OrdenCompraActivo cancelOrdenCompraActivo(int ordenCompraActivoId) {
-        OrdenCompraActivo ordenCompra = ordenCompraActivoRepo.findById(ordenCompraActivoId)
-                .orElseThrow(() -> new RuntimeException("Orden de compra no encontrada con ID: " + ordenCompraActivoId));
-
-        // Verificar si la orden ya está cancelada
-        if (ordenCompra.getEstado() == -1) {
-            throw new RuntimeException("La orden de compra ya está cancelada");
-        }
-
-        // Verificar si la orden está en un estado que permite cancelación
-        if (ordenCompra.getEstado() > 1) {
-            throw new RuntimeException("No se puede cancelar una orden que ya está en proceso de envío o recepción");
-        }
-
-        // Cancelar la orden
-        ordenCompra.setEstado(-1);
-        return ordenCompraActivoRepo.save(ordenCompra);
-    }
-
-    /**
-     * Obtiene los ítems de una orden de compra específica.
-     *
-     * @param ordenCompraActivoId ID de la orden de compra
-     * @return lista de ítems de la orden
-     */
-    public List<ItemOrdenCompraActivo> getItemsByOrdenCompraId(int ordenCompraActivoId) {
-        return itemOrdenCompraActivoRepo.findByOrdenCompraActivo_OrdenCompraActivoId(ordenCompraActivoId);
-    }
-
-    /**
-     * Actualiza una orden de compra de activos fijos existente con un archivo de cotización opcional.
-     * Verifica primero si la orden existe antes de intentar actualizarla.
-     *
-     * @param ordenCompraActivo la orden de compra con los datos actualizados
-     * @param cotizacionFile archivo de cotización opcional
-     * @return la orden de compra actualizada
-     * @throws RuntimeException si la orden no existe o no se puede actualizar
-     * @throws IOException si ocurre un error al guardar el archivo
-     */
-    @Transactional
-    public OrdenCompraActivo updateOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo, MultipartFile cotizacionFile) throws IOException {
-        log.info("Actualizando orden de compra de activos fijos con ID: {}", ordenCompraActivo.getOrdenCompraActivoId());
-
-        // Verificar que la orden exista
-        OrdenCompraActivo existingOrden = ordenCompraActivoRepo.findById(ordenCompraActivo.getOrdenCompraActivoId())
-                .orElseThrow(() -> new RuntimeException("Orden de compra no encontrada con ID: " + 
-                        ordenCompraActivo.getOrdenCompraActivoId()));
-
-        // Verificar si la orden está en un estado que permite modificación
-        if (existingOrden.getEstado() == -1) {
-            throw new RuntimeException("No se puede modificar una orden cancelada");
-        }
-
-        if (existingOrden.getEstado() > 1) {
-            throw new RuntimeException("No se puede modificar una orden que ya está en proceso de envío o recepción");
-        }
-
-        // Validaciones básicas
-        if (ordenCompraActivo.getProveedor() == null) {
-            throw new IllegalArgumentException("La orden de compra debe tener un proveedor asignado");
-        }
-
-        if (ordenCompraActivo.getFechaVencimiento() == null) {
-            throw new IllegalArgumentException("La fecha de vencimiento es requerida");
-        }
-
-        // Mantener la fecha de emisión original
-        ordenCompraActivo.setFechaEmision(existingOrden.getFechaEmision());
-
-        // Mantener la URL de cotización original si no se proporciona un nuevo archivo
-        if (cotizacionFile == null || cotizacionFile.isEmpty()) {
-            ordenCompraActivo.setCotizacionUrl(existingOrden.getCotizacionUrl());
-        }
-
-        // Procesar los ítems de la orden
-        if (ordenCompraActivo.getItemsOrdenCompra() != null && !ordenCompraActivo.getItemsOrdenCompra().isEmpty()) {
-            double subtotal = 0;
-            double ivaTotal = 0;
-
-            for (var item : ordenCompraActivo.getItemsOrdenCompra()) {
-                // Establecer la relación bidireccional
-                item.setOrdenCompraActivo(ordenCompraActivo);
-
-                // Calcular subtotal del ítem si no está establecido
-                if (item.getSubTotal() == 0) {
-                    item.setSubTotal(item.getPrecioUnitario() * item.getCantidad());
-                }
-
-                // Acumular totales
-                subtotal += item.getSubTotal();
-                ivaTotal += item.getIvaValue() * item.getCantidad();
-            }
-
-            // Actualizar totales de la orden
-            ordenCompraActivo.setSubTotal(subtotal);
-            ordenCompraActivo.setIva(ivaTotal);
-            ordenCompraActivo.setTotalPagar(subtotal + ivaTotal);
-        } else {
-            // Calcular totales si no hay ítems pero están establecidos manualmente
-            if (ordenCompraActivo.getTotalPagar() == 0) {
-                double subtotal = ordenCompraActivo.getSubTotal();
-                double iva = ordenCompraActivo.getIva();
-                ordenCompraActivo.setTotalPagar(subtotal + iva);
-            }
-        }
-
-        // Eliminar los ítems existentes asociados a esta orden
-        itemOrdenCompraActivoRepo.deleteByOrdenCompraActivo_OrdenCompraActivoId(ordenCompraActivo.getOrdenCompraActivoId());
-
-        // Guardar la orden actualizada
-        OrdenCompraActivo updatedOrden = ordenCompraActivoRepo.save(ordenCompraActivo);
-
-        // Si se proporciona un nuevo archivo de cotización, guardarlo y actualizar la URL
-        if (cotizacionFile != null && !cotizacionFile.isEmpty()) {
-            String cotizacionPath = fileStorageService.storeCotizacionFile(updatedOrden.getOrdenCompraActivoId(), cotizacionFile);
-            updatedOrden.setCotizacionUrl(cotizacionPath);
-            updatedOrden = ordenCompraActivoRepo.save(updatedOrden);
-        }
-
-        return updatedOrden;
-    }
-
-    /**
-     * Actualiza una orden de compra de activos fijos existente.
-     * Este método mantiene la compatibilidad con el código existente.
-     *
-     * @param ordenCompraActivo la orden de compra con los datos actualizados
-     * @return la orden de compra actualizada
-     * @throws RuntimeException si la orden no existe o no se puede actualizar
-     */
-    @Transactional
-    public OrdenCompraActivo updateOrdenCompraActivo(OrdenCompraActivo ordenCompraActivo) {
-        try {
-            return updateOrdenCompraActivo(ordenCompraActivo, null);
-        } catch (IOException e) {
-            // This should never happen since we're not passing a file
-            throw new RuntimeException("Unexpected error updating orden compra activo", e);
-        }
-    }
-    /**
-     * Envía un correo electrónico al proveedor con la orden de compra de activo fijo adjunta.
+     * Obtiene todos los activos fijos paginados.
      * 
-     * @param orden La orden de compra a enviar
-     * @param pdfAttachment El archivo PDF adjunto con los detalles de la orden
-     * @throws MessagingException Si hay un error al enviar el correo
-     * @throws IOException Si hay un error al procesar el archivo adjunto
-     * @throws RuntimeException Si no se encuentra un email para el proveedor
+     * @param pageable Configuración de paginación
+     * @return Página de activos fijos
      */
-    public void enviarCorreoOrdenCompraActivoProveedor(OrdenCompraActivo orden, MultipartFile pdfAttachment) 
-            throws MessagingException, IOException {
-
-        if (pdfAttachment == null || pdfAttachment.isEmpty()) {
-            throw new RuntimeException("No se proporcionó archivo PDF para enviar por email para la orden: " + orden.getOrdenCompraActivoId());
-        }
-
-        // Obtener el proveedor y su información de contacto
-        Proveedor proveedor = orden.getProveedor();
-
-        // Buscar el email del proveedor en la lista de contactos
-        String emailProveedor = null;
-        for (Map<String, Object> contacto : proveedor.getContactos()) {
-            if (contacto.containsKey("email")) {
-                emailProveedor = (String) contacto.get("email");
-                break;
-            }
-        }
-
-        if (emailProveedor == null) {
-            throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
-        }
-
-        // Preparar el asunto y cuerpo del correo
-        String subject = "No Reply - Orden de Compra de Activo Fijo Exotic Expert #" + orden.getOrdenCompraActivoId();
-        String text = "Estimado proveedor: " + orden.getProveedor().getNombre() + ",\n\n" +
-                "Por medio de la presente le hacemos llegar la orden de compra de activo fijo #" + orden.getOrdenCompraActivoId() +
-                "correspondiente a los productos/servicios detallados en el documento adjunto.\n" +
-                "Le agradeceremos confirmar la recepción de esta orden y, en caso de ser necesario," +
-                "informarnos sobre el tiempo estimado de entrega o cualquier observación relevante.\n\n" +
-                "Quedamos atentos a su confirmación y agradecemos de antemano su atención y colaboración.\n\n" +
-                "Saludos cordiales,\n" +
-                "Exotic Expert - Departamento de Compras";
-
-        // Enviar el correo con el PDF adjunto
-        emailService.sendEmailWithAttachment(
-                emailProveedor,
-                subject,
-                text,
-                pdfAttachment
-        );
-
-        log.info("Email sent to provider {} with order details for order ID: {}", emailProveedor, orden.getOrdenCompraActivoId());
+    public Page<ActivoFijo> findAll(Pageable pageable) {
+        return activoFijoRepo.findAll(pageable);
     }
 
     /**
-     * Envía un correo electrónico al proveedor con copia a otros destinatarios.
-     * Funciona igual que {@link #enviarCorreoOrdenCompraActivoProveedor(OrdenCompraActivo, MultipartFile)}
-     * pero permite especificar destinatarios en copia (CC).
-     *
-     * @param orden       La orden de compra a enviar
-     * @param pdfAttachment El archivo PDF adjunto con los detalles de la orden
-     * @param ccEmails    Lista de correos electrónicos que recibirán copia
-     * @throws MessagingException Si hay un error al enviar el correo
-     * @throws IOException        Si hay un error al procesar el archivo adjunto
-     * @throws RuntimeException   Si no se encuentra un email para el proveedor
+     * Obtiene un activo fijo por su ID.
+     * 
+     * @param id ID del activo fijo
+     * @return Activo fijo si existe
      */
-    public void enviarCorreoOrdenCompraActivoProveedor_wCC(OrdenCompraActivo orden, MultipartFile pdfAttachment, List<String> ccEmails)
-            throws MessagingException, IOException {
-
-        if (pdfAttachment == null || pdfAttachment.isEmpty()) {
-            throw new RuntimeException("No se proporcionó archivo PDF para enviar por email para la orden: " + orden.getOrdenCompraActivoId());
-        }
-
-        // Obtener el proveedor y su información de contacto
-        Proveedor proveedor = orden.getProveedor();
-
-        // Buscar el email del proveedor en la lista de contactos
-        String emailProveedor = null;
-        for (Map<String, Object> contacto : proveedor.getContactos()) {
-            if (contacto.containsKey("email")) {
-                emailProveedor = (String) contacto.get("email");
-                break;
-            }
-        }
-
-        if (emailProveedor == null) {
-            throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
-        }
-
-        String subject = "No Reply - Orden de Compra de Activo Fijo Exotic Expert #" + orden.getOrdenCompraActivoId();
-        String text = "Estimado proveedor: " + orden.getProveedor().getNombre() + ",\n\n" +
-                "Por medio de la presente le hacemos llegar la orden de compra de activo fijo #" + orden.getOrdenCompraActivoId() +
-                "correspondiente a los productos/servicios detallados en el documento adjunto.\n" +
-                "Le agradeceremos confirmar la recepción de esta orden y, en caso de ser necesario," +
-                "informarnos sobre el tiempo estimado de entrega o cualquier observación relevante.\n\n" +
-                "Quedamos atentos a su confirmación y agradecemos de antemano su atención y colaboración.\n\n" +
-                "Saludos cordiales,\n" +
-                "Exotic Expert - Departamento de Compras";
-
-        emailService.sendEmailWithAttachmentAndCC(
-                emailProveedor,
-                ccEmails.toArray(new String[0]),
-                subject,
-                text,
-                pdfAttachment
-        );
-
-        log.info("Email sent to provider {} with CC {} for order ID: {}", emailProveedor, ccEmails, orden.getOrdenCompraActivoId());
+    public Optional<ActivoFijo> findById(String id) {
+        return activoFijoRepo.findById(id);
     }
 
     /**
-     * Obtiene los correos electrónicos de los usuarios con acceso al módulo PRODUCCION
-     * y nivel 2.
-     *
-     * @return lista de correos electrónicos
-     */
-    public List<String> getEmailsUsuariosProduccionNivel2() {
-        return userRepository.findAll().stream()
-                .filter(u -> u.getEmail() != null && !u.getEmail().isEmpty())
-                .filter(u -> u.getAccesos().stream()
-                        .anyMatch(a -> a.getModuloAcceso() == Acceso.Modulo.PRODUCCION && a.getNivel() == 2))
-                .map(User::getEmail)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Actualiza el estado de una orden de compra de activos fijos.
-     * Si el nuevo estado es 2 (pendiente recepción) y el estado actual es 1 (pendiente envío a proveedor),
-     * se envía un correo electrónico al proveedor según el tipo de envío seleccionado.
-     *
-     * @param ordenCompraActivoId ID de la orden de compra a actualizar
-     * @param request Objeto con la información de actualización
-     * @return La orden de compra actualizada
-     * @throws RuntimeException Si la orden no existe o hay algún error en la actualización
+     * Guarda un activo fijo.
+     * 
+     * @param activoFijo Activo fijo a guardar
+     * @return Activo fijo guardado
      */
     @Transactional
-    public OrdenCompraActivo updateEstadoOrdenCompraActivo(int ordenCompraActivoId, UpdateEstadoOrdenCompraAFRequest request) {
-        OrdenCompraActivo orden = ordenCompraActivoRepo.findById(ordenCompraActivoId)
-                .orElseThrow(() -> new RuntimeException("Orden de compra de activo fijo no encontrada con id: " + ordenCompraActivoId));
+    public ActivoFijo save(ActivoFijo activoFijo) {
+        if (activoFijo.getFechaCodificacion() == null) {
+            activoFijo.setFechaCodificacion(LocalDateTime.now());
+        }
+        return activoFijoRepo.save(activoFijo);
+    }
 
-        // Si el nuevo estado es 2 y estamos cambiando desde estado 1, manejar según el tipo de envío
-        if (request.getNewEstado() == 2 && orden.getEstado() == 1) {
-            // Verificar el tipo de envío seleccionado
-            if (request.getTipoEnvio() != null) {
-                switch (request.getTipoEnvio()) {
-                    case MANUAL:
-                        // Para envío manual, solo se actualiza el estado sin procesar el PDF
-                        log.info("Orden de compra de activo fijo {} actualizada manualmente a estado 2", ordenCompraActivoId);
+    /**
+     * Elimina un activo fijo.
+     * 
+     * @param id ID del activo fijo a eliminar
+     */
+    @Transactional
+    public void deleteById(String id) {
+        activoFijoRepo.deleteById(id);
+    }
+
+    /**
+     * Busca activos fijos por ubicación.
+     * 
+     * @param ubicacion Ubicación a buscar
+     * @return Lista de activos fijos en la ubicación especificada
+     */
+    public List<ActivoFijo> findByUbicacion(String ubicacion) {
+        return activoFijoRepo.findByUbicacion(ubicacion);
+    }
+
+    /**
+     * Busca activos fijos por responsable.
+     * 
+     * @param responsableId ID del responsable
+     * @return Lista de activos fijos asignados al responsable
+     */
+    public List<ActivoFijo> findByResponsable(long responsableId) {
+        return activoFijoRepo.findByResponsableId(responsableId);
+    }
+
+    /**
+     * Busca activos fijos por tipo.
+     * 
+     * @param tipoActivo Tipo de activo
+     * @return Lista de activos fijos del tipo especificado
+     */
+    public List<ActivoFijo> findByTipoActivo(ActivoFijo.TipoActivo tipoActivo) {
+        return activoFijoRepo.findByTipoActivo(tipoActivo);
+    }
+
+    /**
+     * Asigna un responsable a un activo fijo.
+     * 
+     * @param activoId ID del activo fijo
+     * @param responsableId ID del responsable
+     * @return Activo fijo actualizado
+     */
+    @Transactional
+    public Optional<ActivoFijo> asignarResponsable(String activoId, long responsableId) {
+        Optional<ActivoFijo> activoOpt = activoFijoRepo.findById(activoId);
+        Optional<IntegrantePersonal> responsableOpt = integrantePersonalRepo.findById(responsableId);
+
+        if (activoOpt.isPresent() && responsableOpt.isPresent()) {
+            ActivoFijo activo = activoOpt.get();
+            activo.setResponsable(responsableOpt.get());
+            return Optional.of(activoFijoRepo.save(activo));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Actualiza la ubicación de un activo fijo.
+     * 
+     * @param activoId ID del activo fijo
+     * @param ubicacion Nueva ubicación
+     * @return Activo fijo actualizado
+     */
+    @Transactional
+    public Optional<ActivoFijo> actualizarUbicacion(String activoId, String ubicacion) {
+        Optional<ActivoFijo> activoOpt = activoFijoRepo.findById(activoId);
+
+        if (activoOpt.isPresent()) {
+            ActivoFijo activo = activoOpt.get();
+            activo.setUbicacion(ubicacion);
+            return Optional.of(activoFijoRepo.save(activo));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Busca activos fijos según los criterios especificados en el DTO de búsqueda.
+     * 
+     * @param searchDTO DTO con los criterios de búsqueda
+     * @param pageable Configuración de paginación
+     * @return Página de activos fijos que cumplen con los criterios
+     */
+    public Page<ActivoFijo> search(DTO_SearchActivoFijo searchDTO, Pageable pageable) {
+        Specification<ActivoFijo> spec = createSpecification(searchDTO);
+        return activoFijoRepo.findAll(spec, pageable);
+    }
+
+    /**
+     * Crea una especificación JPA basada en los criterios de búsqueda.
+     * 
+     * @param searchDTO DTO con los criterios de búsqueda
+     * @return Especificación JPA para la búsqueda
+     */
+    private Specification<ActivoFijo> createSpecification(DTO_SearchActivoFijo searchDTO) {
+        return (root, query, criteriaBuilder) -> {
+            // Inicializar con predicado verdadero (no filtra nada)
+            var predicate = criteriaBuilder.conjunction();
+
+            // Filtrar por tipo de activo si se especifica
+            if (searchDTO.getTipoActivo() != null) {
+                predicate = criteriaBuilder.and(predicate, 
+                    criteriaBuilder.equal(root.get("tipoActivo"), searchDTO.getTipoActivo()));
+            }
+
+            // Filtrar por estado activo si se solicita
+            if (searchDTO.getSoloActivos() != null && searchDTO.getSoloActivos()) {
+                predicate = criteriaBuilder.and(predicate, 
+                    criteriaBuilder.equal(root.get("estado"), 0)); // 0: activo según el modelo
+            }
+
+            // Aplicar criterio de búsqueda específico
+            if (searchDTO.getTipoBusqueda() != null && searchDTO.getValorBusqueda() != null 
+                    && !searchDTO.getValorBusqueda().isEmpty()) {
+
+                switch (searchDTO.getTipoBusqueda()) {
+                    case POR_ID:
+                        predicate = criteriaBuilder.and(predicate, 
+                            criteriaBuilder.equal(root.get("id"), searchDTO.getValorBusqueda()));
                         break;
 
-                    case EMAIL:
-                        // Para envío por email, verificar que exista el PDF y enviarlo
+                    case POR_NOMBRE:
+                        predicate = criteriaBuilder.and(predicate, 
+                            criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("nombre")), 
+                                "%" + searchDTO.getValorBusqueda().toLowerCase() + "%"));
+                        break;
+
+                    case POR_UBICACION:
+                        predicate = criteriaBuilder.and(predicate, 
+                            criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("ubicacion")), 
+                                "%" + searchDTO.getValorBusqueda().toLowerCase() + "%"));
+                        break;
+
+                    case POR_RESPONSABLE:
                         try {
-                            List<String> ccEmails = getEmailsUsuariosProduccionNivel2();
-                            if (ccEmails.isEmpty()) {
-                                enviarCorreoOrdenCompraActivoProveedor(orden, request.getOCAFpdf());
-                            } else {
-                                enviarCorreoOrdenCompraActivoProveedor_wCC(orden, request.getOCAFpdf(), ccEmails);
-                            }
-                        } catch (MessagingException | IOException e) {
-                            // Lanzar una excepción para que la transacción se revierta
-                            log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
-                            throw new RuntimeException("Error al enviar correo al proveedor: " + e.getMessage(), e);
-                        } catch (RuntimeException e) {
-                            // Propagar la excepción para que la transacción se revierta
-                            log.error(e.getMessage());
-                            throw e;
+                            long responsableId = Long.parseLong(searchDTO.getValorBusqueda());
+                            predicate = criteriaBuilder.and(predicate, 
+                                criteriaBuilder.equal(root.get("responsable").get("id"), responsableId));
+                        } catch (NumberFormatException e) {
+                            log.warn("Valor de búsqueda para responsable no es un número válido: {}", 
+                                searchDTO.getValorBusqueda());
                         }
                         break;
 
-                    case WHATSAPP:
-                        // TODO: Implementar envío por WhatsApp en el futuro
-                        log.info("Envío por WhatsApp seleccionado para orden {}, esta funcionalidad será implementada próximamente", ordenCompraActivoId);
-                        throw new UnsupportedOperationException("El envío por WhatsApp aún no está implementado");
+                    case POR_MARCA:
+                        predicate = criteriaBuilder.and(predicate, 
+                            criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("brand")), 
+                                "%" + searchDTO.getValorBusqueda().toLowerCase() + "%"));
+                        break;
 
-                    default:
-                        log.warn("Tipo de envío no reconocido para la orden: {}", ordenCompraActivoId);
-                        throw new RuntimeException("Tipo de envío no reconocido para la orden: " + ordenCompraActivoId);
-                }
-            } else {
-                // Si no se especificó tipo de envío, usar el comportamiento predeterminado (email)
-                log.warn("No se especificó tipo de envío para la orden: {}, usando email por defecto", ordenCompraActivoId);
-
-                try {
-                    List<String> ccEmails = getEmailsUsuariosProduccionNivel2();
-                    if (ccEmails.isEmpty()) {
-                        enviarCorreoOrdenCompraActivoProveedor(orden, request.getOCAFpdf());
-                    } else {
-                        enviarCorreoOrdenCompraActivoProveedor_wCC(orden, request.getOCAFpdf(), ccEmails);
-                    }
-                } catch (MessagingException | IOException e) {
-                    // Lanzar una excepción para que la transacción se revierta
-                    log.error("Error al enviar correo al proveedor: {}", e.getMessage(), e);
-                    throw new RuntimeException("Error al enviar correo al proveedor: " + e.getMessage(), e);
-                } catch (RuntimeException e) {
-                    // Propagar la excepción para que la transacción se revierta
-                    log.error(e.getMessage());
-                    throw e;
+                    case POR_CAPACIDAD:
+                        try {
+                            double capacidad = Double.parseDouble(searchDTO.getValorBusqueda());
+                            predicate = criteriaBuilder.and(predicate, 
+                                criteriaBuilder.equal(root.get("capacidad"), capacidad));
+                        } catch (NumberFormatException e) {
+                            log.warn("Valor de búsqueda para capacidad no es un número válido: {}", 
+                                searchDTO.getValorBusqueda());
+                        }
+                        break;
                 }
             }
-        }
 
-        // Actualizar el estado solo después de que todo el proceso haya sido exitoso
-        orden.setEstado(request.getNewEstado());
-        return ordenCompraActivoRepo.save(orden);
+            return predicate;
+        };
     }
 }

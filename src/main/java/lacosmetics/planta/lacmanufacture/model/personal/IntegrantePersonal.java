@@ -1,6 +1,7 @@
 package lacosmetics.planta.lacmanufacture.model.personal;
 
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.users.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,15 +35,15 @@ public class IntegrantePersonal {
 
     @Column(nullable = false)
     private String direccion;
-    
+
     private String email;
-    
+
     private String cargo;
-    
+
     private Departamento departamento;
-    
+
     private String centroDeCosto;
-    
+
     private String centroDeProduccion;
 
     /**
@@ -52,6 +53,9 @@ public class IntegrantePersonal {
 
     private Estado estado;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
+    private User usuario;
 
     /*@OneToMany(cascade = CascadeType.ALL, mappedBy = "idIntegrante")
     private List<DocTranDePersonal> documentos;*/
