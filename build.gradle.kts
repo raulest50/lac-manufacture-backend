@@ -27,8 +27,6 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.session:spring-session-core")
 
-	// se agrego para consumir trm de datos.gov
-	implementation("com.socrata:soda-api-java:0.10.10")
 
 	// added for endpoint that implements bulk load reading uploaded excel file
 	implementation("org.apache.poi:poi-ooxml:5.4.0")
@@ -69,12 +67,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
 
-	// JAXB API y Runtime
-	implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0")
-	implementation("org.glassfish.jaxb:jaxb-runtime:4.0.2")
-
-	// Jackson JAXB annotations (para compatibilidad con Jakarta EE)
-	implementation("com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations")
+        // Dependencias JAXB eliminadas: ya no se consultan datos externos para la TRM
 	
 }
 
