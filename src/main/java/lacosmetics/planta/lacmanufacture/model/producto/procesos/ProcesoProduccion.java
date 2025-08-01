@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.produccion.procesos;
+package lacosmetics.planta.lacmanufacture.model.producto.procesos;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
@@ -7,7 +7,10 @@ import lombok.*;
 import java.util.List;
 
 @Entity
+@Table(name = "proceso_produccion")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProcesoProduccion {
 
     @Id
@@ -15,8 +18,15 @@ public class ProcesoProduccion {
     @Column(name = "proceso_id", unique = true, nullable = false)
     private int procesoId;
 
+    @Column(nullable = false)
     private String nombre;
 
+    @ManyToMany
+    @JoinTable(
+        name = "proceso_activo",
+        joinColumns = @JoinColumn(name = "proceso_id"),
+        inverseJoinColumns = @JoinColumn(name = "activo_id")
+    )
     private List<ActivoFijo> listaActivosFijosRequeridos;
 
     // modelamiento de tiempos
