@@ -2,10 +2,22 @@ package lacosmetics.planta.lacmanufacture.service.activos.fijos;
 
 import lacosmetics.planta.lacmanufacture.dto.activos.fijos.DTO_SearchActivoFijo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.FacturaCompraActivo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.ItemOrdenCompraActivo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.OrdenCompraActivo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.IncorporacionActivoHeader;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.IncorporacionActivoLine;
 import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
 import lacosmetics.planta.lacmanufacture.repo.activos.fijos.ActivoFijoRepo;
+import lacosmetics.planta.lacmanufacture.repo.activos.fijos.compras.FacturaCompraActivoRepo;
+import lacosmetics.planta.lacmanufacture.repo.activos.fijos.gestion.IncorporacionActivoHeaderRepo;
+import lacosmetics.planta.lacmanufacture.repo.activos.fijos.gestion.IncorporacionActivoLineRepo;
 import lacosmetics.planta.lacmanufacture.repo.personal.IntegrantePersonalRepo;
+import lacosmetics.planta.lacmanufacture.dto.activos.fijos.IncorporacionActivoDto;
+import lacosmetics.planta.lacmanufacture.dto.activos.fijos.GrupoActivosDto;
+import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,6 +43,10 @@ public class ActivoFijoService {
 
     private final ActivoFijoRepo activoFijoRepo;
     private final IntegrantePersonalRepo integrantePersonalRepo;
+    private final IncorporacionActivoHeaderRepo incorporacionActivoHeaderRepo;
+    private final IncorporacionActivoLineRepo incorporacionActivoLineRepo;
+    private final FacturaCompraActivoRepo facturaCompraActivoRepo;
+    private final FileStorageService fileStorageService;
 
     /**
      * Obtiene todos los activos fijos paginados.
@@ -239,5 +255,69 @@ public class ActivoFijoService {
 
             return predicate;
         };
+    }
+
+    /**
+     * Procesa la incorporación de activos fijos a partir del DTO recibido.
+     */
+    @Transactional
+    public IncorporacionActivoHeader procesarIncorporacion(IncorporacionActivoDto dto,
+                                                           OrdenCompraActivo ordenCompraActivo,
+                                                           MultipartFile documentoSoporte) throws java.io.IOException {
+        IncorporacionActivoHeader header = new IncorporacionActivoHeader();
+        header.setEstado(1);
+        header.setObservaciones(dto.getObservaciones());
+
+        FacturaCompraActivo factura = new FacturaCompraActivo();
+        if (ordenCompraActivo != null) {
+            factura.setOrdenCompraActivo(ordenCompraActivo);
+            factura.setProveedor(ordenCompraActivo.getProveedor());
+            factura.setSubTotal(ordenCompraActivo.getSubTotal());
+            factura.setIva(ordenCompraActivo.getIva());
+            factura.setTotalPagar(ordenCompraActivo.getTotalPagar());
+            factura.setCondicionPago(ordenCompraActivo.getCondicionPago());
+            factura.setPlazoPago(ordenCompraActivo.getPlazoPago());
+        }
+
+        factura = facturaCompraActivoRepo.save(factura);
+
+        if (documentoSoporte != null && !documentoSoporte.isEmpty()) {
+            String path = fileStorageService.storeFacturaActivoFile(factura.getFacturaCompraActivoId(), documentoSoporte);
+            factura.setUrlFactura(path);
+            factura = facturaCompraActivoRepo.save(factura);
+        }
+
+        header.setFacturaCompraActivo(factura);
+
+        // Procesar grupos y activos
+        if (dto.getGruposActivos() != null) {
+            for (GrupoActivosDto grupo : dto.getGruposActivos()) {
+                ItemOrdenCompraActivo item = grupo.getItemOrdenCompra();
+                if (grupo.getActivos() != null) {
+                    for (ActivoFijo af : grupo.getActivos()) {
+                        if (af.getFechaCodificacion() == null) {
+                            af.setFechaCodificacion(LocalDateTime.now());
+                        }
+                        ActivoFijo saved = activoFijoRepo.save(af);
+                        IncorporacionActivoLine line = new IncorporacionActivoLine();
+                        line.setIncorporacionHeader(header);
+                        line.setActivoFijo(saved);
+                        line.setDescripcion(saved.getNombre());
+                        line.setCantidad(1);
+                        if (item != null) {
+                            java.math.BigDecimal valor = java.math.BigDecimal.valueOf(item.getPrecioUnitario());
+                            line.setValorUnitario(valor);
+                            line.setValorTotal(valor);
+                        }
+                        line.setUbicacionInicial(saved.getUbicacion());
+                        line.setVidaUtilMeses(saved.getVidaUtilMeses());
+                        line.setMetodoDepreciacion(saved.getMetodoDespreciacion());
+                        header.getLineasIncorporacion().add(line);
+                    }
+                }
+            }
+        }
+
+        return incorporacionActivoHeaderRepo.save(header);
     }
 }

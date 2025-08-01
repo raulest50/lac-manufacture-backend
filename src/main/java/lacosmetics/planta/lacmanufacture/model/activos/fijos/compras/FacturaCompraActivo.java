@@ -39,6 +39,11 @@ public class FacturaCompraActivo {
      */
     private String numeroFacturaProveedor;
 
+    /**
+     * Ruta al archivo de la factura
+     */
+    private String urlFactura;
+
     @CreationTimestamp
     private LocalDateTime fechaCompra;
 
