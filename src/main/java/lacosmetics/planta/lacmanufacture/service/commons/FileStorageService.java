@@ -115,4 +115,30 @@ public class FileStorageService {
         Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
         return destinationPath.toAbsolutePath().toString();
     }
+
+    /**
+     * Stores an invoice file for a FacturaCompraActivo.
+     * Files are saved under {baseUploadDir}/activosFijos/Facturas/{facturaId}/.
+     *
+     * @param facturaId id of the factura
+     * @param file the invoice file to store
+     * @return the absolute path of the stored file
+     * @throws IOException if an I/O error occurs
+     */
+    public String storeFacturaActivoFile(int facturaId, MultipartFile file) throws IOException {
+        String baseDir = storageProperties.getUPLOAD_DIR();
+        String activosFijosDir = storageProperties.getACTIVOS_FIJOS();
+        String facturasDir = storageProperties.getFACTURAS_AF();
+        Path folderPath = Paths.get(baseDir, activosFijosDir, facturasDir, String.valueOf(facturaId));
+        Files.createDirectories(folderPath);
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".")
+            ? originalFilename.substring(originalFilename.lastIndexOf('.'))
+            : ".pdf";
+        String fileName = "factura" + extension;
+        Path destinationPath = folderPath.resolve(fileName);
+        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        return destinationPath.toAbsolutePath().toString();
+    }
 }

@@ -39,6 +39,11 @@ public class StorageProperties {
     private final String COTIZACIONES = "Cotizaciones";
 
     /**
+     * Folder para guardar facturas de activos fijos
+     */
+    private final String FACTURAS_AF = "Facturas";
+
+    /**
      * Folder para guardar documentos de clientes
      */
     private final String CLIENTES = "clientes";

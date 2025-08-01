@@ -2,13 +2,17 @@ package lacosmetics.planta.lacmanufacture.resource.activos.fijos;
 
 import lacosmetics.planta.lacmanufacture.dto.activos.fijos.DTO_SearchActivoFijo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
+import lacosmetics.planta.lacmanufacture.dto.activos.fijos.IncorporacionActivoDto;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.OrdenCompraActivo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import lacosmetics.planta.lacmanufacture.service.activos.fijos.ActivoFijoService;
 
@@ -62,6 +66,18 @@ public class ActivoFijoResource {
     @PostMapping
     public ResponseEntity<ActivoFijo> create(@RequestBody ActivoFijo activoFijo) {
         return ResponseEntity.status(HttpStatus.CREATED).body(activoFijoService.save(activoFijo));
+    }
+
+    /**
+     * Endpoint para procesar una incorporación de activos fijos con soporte de MultipartFile.
+     */
+    @PostMapping(value = "/incorporar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> incorporarActivos(
+            @RequestPart("incorporacionDto") IncorporacionActivoDto dto,
+            @RequestPart(value = "ordenCompraActivo", required = false) OrdenCompraActivo ordenCompraActivo,
+            @RequestPart(value = "documentoSoporte", required = false) MultipartFile documentoSoporte) throws Exception {
+        var header = activoFijoService.procesarIncorporacion(dto, ordenCompraActivo, documentoSoporte);
+        return ResponseEntity.ok(java.util.Map.of("incorporacionId", header.getIncorporacionId()));
     }
 
     /**
