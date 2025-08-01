@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.producto;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
-import lacosmetics.planta.lacmanufacture.model.produccion.procesos.ProcesoProduccion;
+import lacosmetics.planta.lacmanufacture.model.produccion.procesos.ProcesoProduccionCompleto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +27,7 @@ public class Terminado extends Producto{
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "proceso_prod_id")
-    private ProcesoProduccion procesoProduccion;
+    private ProcesoProduccionCompleto procesoProduccionCompleto;
 
     @ManyToOne
     @JoinColumn(name = "familia_id")

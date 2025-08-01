@@ -64,34 +64,39 @@ public class ActivoFijo {
     private int estado;
 
     private LocalDateTime fechaCodificacion;
-
     private LocalDateTime fechaBaja;
 
-    // Campos para integración contable
+    // *** ATRIBUTOS PARA MODELAMIENTO CONTABLE - DEPRECIACION, PATRIMONIO, ETC.
     private BigDecimal valorAdquisicion;
     private BigDecimal valorResidual;
     private Integer vidaUtilMeses;
     private String metodoDespreciacion; // "LINEAL", "SUMA_DIGITOS", etc.
+    @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
+    private List<DepreciacionActivo> depreciaciones;
+
 
     // Campo para identificar el tipo de activo
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoActivo tipoActivo;
 
-    // Campos específicos para activos de producción
+    // *** ATRIBUTOS ESPECIFICOS PARA ACTIVOS PRODUCCION
     private UnidadesCapacidad unidadesCapacidad;
     private Double capacidad;
 
     @Column(name = "ubicacion")
     private String ubicacion;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "responsable_id")
-    private IntegrantePersonal responsable;
+    /**
+     * para modelar la disponibilidad del activo de produccion
+     * 0: libre y listo para ser usado en un ProcesoProduccion
+     * 1: ocupado por un proceso de produccion
+     * -2: fuera de operacion, requiere mantenimiento
+     * 1: en mantenimiento
+     */
+    private int estadoOpercional;
 
-    @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
-    private List<DepreciacionActivo> depreciaciones;
-
+    // *** ATRIBUTOS PARA GESTION DOCUMENTAL
     @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<TrasladoActivo> traslados;
 
@@ -103,4 +108,10 @@ public class ActivoFijo {
 
     @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
     private List<DocumentoBajaActivo> documentosBaja;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsable_id")
+    private IntegrantePersonal responsable;
+
+
 }

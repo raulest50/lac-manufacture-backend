@@ -46,13 +46,28 @@ public class OrdenProduccion {
 
     private String observaciones;
 
+    /**
+     * instante en el que se crea la orden de produccion en el sistema.
+     * debe ser asignada automaticamente por el backend
+     */
     @CreationTimestamp
     private LocalDateTime fechaCreacion;
 
+    /**
+     * instante a partir del cual se planea autorizar el inicio de la Orden de Produccion.
+     * nunca puede ser un instante pasado. El backend debe consultar el instante actual de
+     * tiempo para validar esto y no permitir registrar si se viola este principio.
+     */
     private LocalDateTime fechaLanzamiento;
 
+    /**
+     * instante en el que realmente se inicia, o almenos que se reporta
+     */
     private LocalDateTime fechaInicio;
 
+    /**
+     * instante en el que realmente se termina, o almenos que se reporta
+     */
     private LocalDateTime fechaFinal;
 
     public OrdenProduccion(Producto producto, String observaciones) {
