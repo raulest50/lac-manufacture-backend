@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.model.producto;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
-import lacosmetics.planta.lacmanufacture.model.produccion.procesos.ProcesoProduccionCompleto;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
