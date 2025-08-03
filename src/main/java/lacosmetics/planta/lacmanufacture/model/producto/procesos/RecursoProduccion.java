@@ -23,6 +23,8 @@ public class RecursoProduccion {
 
     private String nombre; // Ej: "Marmitas", "Mezcladoras"
 
+    private String descripcion;
+
     @OneToMany(mappedBy = "tipoRecurso")
     @JsonManagedReference(value = "recurso-activo")
     private List<ActivoFijo> activosFijos;

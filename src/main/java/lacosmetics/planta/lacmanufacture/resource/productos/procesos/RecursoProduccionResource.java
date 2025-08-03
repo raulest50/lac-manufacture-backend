@@ -1,13 +1,18 @@
 package lacosmetics.planta.lacmanufacture.resource.productos.procesos;
 
+import lacosmetics.planta.lacmanufacture.model.producto.dto.procdef.ReProdModDto;
+import lacosmetics.planta.lacmanufacture.model.producto.dto.search.DTO_SearchRecursoProduccion;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
 import lacosmetics.planta.lacmanufacture.service.productos.procesos.RecursoProduccionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/recursos-produccion")
@@ -30,5 +35,42 @@ public class RecursoProduccionResource {
         return ResponseEntity
                 .created(URI.create("/api/recursos-produccion/" + result.getId()))
                 .body(result);
+    }
+
+    /**
+     * Endpoint para buscar recursos de producción según criterios.
+     * Permite búsqueda por ID o por nombre (coincidencia parcial).
+     * 
+     * @param searchDTO DTO con los criterios de búsqueda
+     * @return Página de recursos de producción que cumplen con los criterios
+     */
+    @PostMapping("/search")
+    public ResponseEntity<Page<RecursoProduccion>> searchRecursosProduccion(
+            @RequestBody DTO_SearchRecursoProduccion searchDTO) {
+        log.info("REST request para buscar recursos de producción con criterios: {}", searchDTO);
+        Page<RecursoProduccion> result = recursoProduccionService.searchRecursosProduccion(searchDTO);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Endpoint para actualizar un recurso de producción existente.
+     * Valida que el recurso original exista y coincida con el almacenado.
+     * No permite cambiar el ID del recurso.
+     * 
+     * @param modDto DTO con el recurso original y el actualizado
+     * @return El recurso de producción actualizado
+     */
+    @PutMapping("/update")
+    public ResponseEntity<?> updateRecursoProduccion(@RequestBody ReProdModDto modDto) {
+        log.info("REST request para actualizar un recurso de producción");
+        try {
+            RecursoProduccion result = recursoProduccionService.updateRecursoProduccion(modDto);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            log.error("Error al actualizar recurso de producción: {}", e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 }
