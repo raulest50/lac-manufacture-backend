@@ -176,6 +176,38 @@ public class ActivoFijoService {
     }
 
     /**
+     * Busca activos fijos disponibles para asignar a recursos de producción.
+     * Filtra por tipo PRODUCCION, estado activo y no asignados a ningún recurso.
+     * 
+     * @param nombreBusqueda Término de búsqueda para filtrar por nombre (opcional)
+     * @param pageable Configuración de paginación
+     * @return Página de activos fijos disponibles para asignar
+     */
+    @Transactional(readOnly = true)
+    public Page<ActivoFijo> findActivosFijosDisponiblesParaProduccion(String nombreBusqueda, Pageable pageable) {
+        Specification<ActivoFijo> spec = (root, query, cb) -> {
+            // Predicado inicial: tipo PRODUCCION y estado activo
+            var predicate = cb.and(
+                cb.equal(root.get("tipoActivo"), ActivoFijo.TipoActivo.PRODUCCION),
+                cb.equal(root.get("estado"), 0)
+            );
+
+            // Añadir predicado: tipoRecurso es nulo (no asignado)
+            predicate = cb.and(predicate, cb.isNull(root.get("tipoRecurso")));
+
+            // Si hay nombre de búsqueda, añadir predicado de coincidencia parcial
+            if (nombreBusqueda != null && !nombreBusqueda.isEmpty()) {
+                predicate = cb.and(predicate, 
+                    cb.like(cb.lower(root.get("nombre")), "%" + nombreBusqueda.toLowerCase() + "%"));
+            }
+
+            return predicate;
+        };
+
+        return activoFijoRepo.findAll(spec, pageable);
+    }
+
+    /**
      * Crea una especificación JPA basada en los criterios de búsqueda.
      * 
      * @param searchDTO DTO con los criterios de búsqueda

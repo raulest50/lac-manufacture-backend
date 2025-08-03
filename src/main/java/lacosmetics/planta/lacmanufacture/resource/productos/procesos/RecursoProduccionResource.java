@@ -1,8 +1,11 @@
 package lacosmetics.planta.lacmanufacture.resource.productos.procesos;
 
+import lacosmetics.planta.lacmanufacture.dto.activos.fijos.DTO_SearchActivoFijoDisponible;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.procdef.ReProdModDto;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.search.DTO_SearchRecursoProduccion;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
+import lacosmetics.planta.lacmanufacture.service.activos.fijos.ActivoFijoService;
 import lacosmetics.planta.lacmanufacture.service.productos.procesos.RecursoProduccionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import java.util.Map;
 public class RecursoProduccionResource {
 
     private final RecursoProduccionService recursoProduccionService;
+    private final ActivoFijoService activoFijoService;
 
     /**
      * Endpoint para crear un nuevo recurso de producción.
@@ -72,5 +76,27 @@ public class RecursoProduccionResource {
                     .status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage()));
         }
+    }
+
+    /**
+     * Endpoint para buscar activos fijos disponibles para asignar a recursos de producción.
+     * Filtra por tipo PRODUCCION, estado activo y no asignados a ningún recurso.
+     * 
+     * @param searchDTO DTO con los criterios de búsqueda
+     * @return Página de activos fijos disponibles
+     */
+    @PostMapping("/activos-fijos-disponibles")
+    public ResponseEntity<Page<ActivoFijo>> findActivosFijosDisponibles(
+            @RequestBody DTO_SearchActivoFijoDisponible searchDTO) {
+        log.info("REST request para buscar activos fijos disponibles para recursos de producción");
+
+        int page = searchDTO.getPage() != null ? searchDTO.getPage() : 0;
+        int size = searchDTO.getSize() != null ? searchDTO.getSize() : 10;
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+
+        Page<ActivoFijo> result = activoFijoService.findActivosFijosDisponiblesParaProduccion(
+                searchDTO.getNombreBusqueda(), pageable);
+
+        return ResponseEntity.ok(result);
     }
 }
