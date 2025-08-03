@@ -23,11 +23,11 @@ public class ProcesoProduccion {
 
     @ManyToMany
     @JoinTable(
-        name = "proceso_activo",
-        joinColumns = @JoinColumn(name = "proceso_id"),
-        inverseJoinColumns = @JoinColumn(name = "activo_id")
+            name = "proceso_recurso",
+            joinColumns = @JoinColumn(name = "proceso_id"),
+            inverseJoinColumns = @JoinColumn(name = "recurso_id")
     )
-    private List<ActivoFijo> listaActivosFijosRequeridos;
+    private List<RecursoProduccion> recursosRequeridos;
 
     // modelamiento de tiempos
     private double setUpTime; // tiempo de preparacion

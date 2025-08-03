@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.produccion;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
@@ -9,6 +10,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="ordenes_seguimiento")
@@ -35,15 +38,18 @@ public class OrdenSeguimiento {
 
     private LocalDateTime fechaFinalizacion;
 
-    //@ManyToOne
-    //@JoinColumn(name = "orden_prod_id")
-    //@JsonBackReference
-    //@Getter(AccessLevel.NONE)
-    //@Setter(AccessLevel.NONE)
+
     @ManyToOne
     @JoinColumn(name = "orden_prod_id")
     @JsonBackReference
     private OrdenProduccion ordenProduccion;
+
+
+
+    @OneToMany(mappedBy = "ordenSeguimiento", cascade = CascadeType.ALL)
+    @JsonManagedReference(value = "seguimiento-recurso")
+    private List<RecursoAsignadoOrden> recursosAsignados = new ArrayList<>();
+
 
 
     /**

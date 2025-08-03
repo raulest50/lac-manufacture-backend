@@ -27,6 +27,7 @@ public class Terminado extends Producto{
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "proceso_prod_id")
+    @com.fasterxml.jackson.annotation.JsonManagedReference(value = "terminado-proceso")
     private ProcesoProduccionCompleto procesoProduccionCompleto;
 
     @ManyToOne

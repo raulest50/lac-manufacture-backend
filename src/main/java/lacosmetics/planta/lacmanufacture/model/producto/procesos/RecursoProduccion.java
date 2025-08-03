@@ -1,0 +1,39 @@
+package lacosmetics.planta.lacmanufacture.model.producto.procesos;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class RecursoProduccion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nombre; // Ej: "Marmitas", "Mezcladoras"
+
+    @OneToMany(mappedBy = "tipoRecurso")
+    @JsonManagedReference(value = "recurso-activo")
+    private List<ActivoFijo> activosFijos;
+
+    // Atributos para planificación de capacidad
+    private Double capacidadTotal; // Suma de capacidades de todos los activos
+    private Integer cantidadDisponible; // Número de activos disponibles
+
+    // *** ATRIBUTOS EXPERIMENTALES
+    private Double capacidadPorHora; // Unidades procesables por hora
+    private Integer turnos; // Número de turnos operativos
+    private Double horasPorTurno; // Horas efectivas por turno
+
+}

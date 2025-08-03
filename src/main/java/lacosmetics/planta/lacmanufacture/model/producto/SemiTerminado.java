@@ -25,6 +25,7 @@ public class SemiTerminado extends Producto{
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "proceso_prod_id")
+    @com.fasterxml.jackson.annotation.JsonManagedReference(value = "semi-proceso")
     private ProcesoProduccionCompleto procesoProduccionCompleto;
 
 }

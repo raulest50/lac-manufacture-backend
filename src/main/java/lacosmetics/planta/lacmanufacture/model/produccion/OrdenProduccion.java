@@ -3,10 +3,12 @@ package lacosmetics.planta.lacmanufacture.model.produccion;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
+import lacosmetics.planta.lacmanufacture.model.produccion.PlanificacionProduccion;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +36,13 @@ public class OrdenProduccion {
     @ManyToOne
     @JoinColumn(name = "producto_id")
     private Producto producto;
+
+    // Agregar a OrdenProduccion
+    @OneToOne
+    @JoinColumn(name = "proceso_completo_id")
+    @com.fasterxml.jackson.annotation.JsonManagedReference(value = "orden-proceso")
+    private ProcesoProduccionCompleto procesoProduccionCompleto;
+
 
     //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     //@JoinColumn(name = "orden_prod_id")
@@ -70,6 +79,11 @@ public class OrdenProduccion {
      */
     private LocalDateTime fechaFinal;
 
+    @OneToOne
+    @JoinColumn(name = "planificacion_id")
+    @JsonManagedReference(value = "orden-planificacion")
+    private PlanificacionProduccion planificacionProduccion;
+
     public OrdenProduccion(Producto producto, String observaciones) {
         this.producto = producto;
         this.observaciones = observaciones;
@@ -93,6 +107,5 @@ public class OrdenProduccion {
         }
         this.ordenesSeguimiento = ordenesSeguimiento;
     }
-
 
 }

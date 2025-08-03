@@ -3,11 +3,13 @@ package lacosmetics.planta.lacmanufacture.model.activos.fijos;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.*;
 import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.CuentaContable;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -87,6 +89,12 @@ public class ActivoFijo {
     @Column(name = "ubicacion")
     private String ubicacion;
 
+    // En la clase ActivoFijo
+    @ManyToOne
+    @JoinColumn(name = "tipo_recurso_id")
+    @JsonBackReference(value = "recurso-activo")
+    private RecursoProduccion tipoRecurso;
+
     /**
      * para modelar la disponibilidad del activo de produccion
      * 0: libre y listo para ser usado en un ProcesoProduccion
@@ -112,6 +120,13 @@ public class ActivoFijo {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responsable_id")
     private IntegrantePersonal responsable;
+
+
+    // *** ATRIBUTOS EXPERIMENTALES
+    private Double tiempoCicloEstandar; // Tiempo estándar para procesar una unidad
+    private Double tiempoSetupEstandar; // Tiempo estándar para configuración
+    private Double eficienciaOperativa; // Porcentaje de eficiencia (0-100)
+    private Double disponibilidadPorTurno; // Horas disponibles por turno (ej: 7.5)
 
 
 }

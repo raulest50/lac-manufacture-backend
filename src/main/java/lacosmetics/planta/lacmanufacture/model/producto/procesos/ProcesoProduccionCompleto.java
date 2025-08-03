@@ -1,8 +1,11 @@
 package lacosmetics.planta.lacmanufacture.model.producto.procesos;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo.ProcesoProduccionNode;
 import lombok.*;
 
 import java.util.List;
@@ -28,5 +31,7 @@ public class ProcesoProduccionCompleto {
     @JoinColumn(name = "proceso_completo_id")
     private List<ProcesoProduccionNode> procesosProduccion;
 
-
+    @OneToOne(mappedBy = "procesoProduccionCompleto")
+    @JsonBackReference(value = "orden-proceso")
+    private OrdenProduccion ordenProduccion;
 }
