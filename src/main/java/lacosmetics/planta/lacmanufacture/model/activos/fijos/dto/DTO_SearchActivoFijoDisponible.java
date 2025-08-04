@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.dto.activos.fijos;
+package lacosmetics.planta.lacmanufacture.model.activos.fijos.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

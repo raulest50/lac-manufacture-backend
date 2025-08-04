@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.resource.productos.procesos;
 
-import lacosmetics.planta.lacmanufacture.dto.activos.fijos.DTO_SearchActivoFijoDisponible;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.DTO_SearchActivoFijoDisponible;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.procdef.ReProdModDto;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.search.DTO_SearchRecursoProduccion;

@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.service.activos.fijos;
 
-import lacosmetics.planta.lacmanufacture.dto.activos.fijos.DTO_SearchActivoFijo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.DTO_SearchActivoFijo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.FacturaCompraActivo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.ItemOrdenCompraActivo;
@@ -13,8 +13,8 @@ import lacosmetics.planta.lacmanufacture.repo.activos.fijos.compras.FacturaCompr
 import lacosmetics.planta.lacmanufacture.repo.activos.fijos.gestion.IncorporacionActivoHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.activos.fijos.gestion.IncorporacionActivoLineRepo;
 import lacosmetics.planta.lacmanufacture.repo.personal.IntegrantePersonalRepo;
-import lacosmetics.planta.lacmanufacture.dto.activos.fijos.IncorporacionActivoDto;
-import lacosmetics.planta.lacmanufacture.dto.activos.fijos.GrupoActivosDto;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.IncorporacionActivoDto;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.GrupoActivosDto;
 import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
@@ -196,7 +196,7 @@ public class ActivoFijoService {
             predicate = cb.and(predicate, cb.isNull(root.get("tipoRecurso")));
 
             // Si hay nombre de búsqueda, añadir predicado de coincidencia parcial
-            if (nombreBusqueda != null && !nombreBusqueda.isEmpty()) {
+            if (nombreBusqueda != null && !nombreBusqueda.trim().isEmpty()) {
                 predicate = cb.and(predicate, 
                     cb.like(cb.lower(root.get("nombre")), "%" + nombreBusqueda.toLowerCase() + "%"));
             }
@@ -232,7 +232,7 @@ public class ActivoFijoService {
 
             // Aplicar criterio de búsqueda específico
             if (searchDTO.getTipoBusqueda() != null && searchDTO.getValorBusqueda() != null 
-                    && !searchDTO.getValorBusqueda().isEmpty()) {
+                    && !searchDTO.getValorBusqueda().trim().isEmpty()) {
 
                 switch (searchDTO.getTipoBusqueda()) {
                     case POR_ID:

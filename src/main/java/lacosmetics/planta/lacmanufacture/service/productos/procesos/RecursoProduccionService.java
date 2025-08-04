@@ -79,7 +79,7 @@ public class RecursoProduccionService {
             }
         } else if (searchDTO.getTipoBusqueda() == DTO_SearchRecursoProduccion.TipoBusqueda.POR_NOMBRE) {
             // Búsqueda por nombre (coincidencia parcial)
-            String nombreBusqueda = searchDTO.getValorBusqueda() != null ? 
+            String nombreBusqueda = searchDTO.getValorBusqueda() != null && !searchDTO.getValorBusqueda().trim().isEmpty() ? 
                     searchDTO.getValorBusqueda().toLowerCase() : "";
 
             Specification<RecursoProduccion> spec = (root, query, cb) -> 

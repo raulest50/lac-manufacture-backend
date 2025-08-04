@@ -1,8 +1,8 @@
 package lacosmetics.planta.lacmanufacture.resource.activos.fijos;
 
-import lacosmetics.planta.lacmanufacture.dto.activos.fijos.DTO_SearchActivoFijo;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.DTO_SearchActivoFijo;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
-import lacosmetics.planta.lacmanufacture.dto.activos.fijos.IncorporacionActivoDto;
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.IncorporacionActivoDto;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.OrdenCompraActivo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
