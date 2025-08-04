@@ -21,6 +21,14 @@ public class ProcesoProduccion {
     @Column(nullable = false)
     private String nombre;
 
+    /**
+     * Atributo para segnmentar
+     * que proceso se pueden o no ver en la ui
+     * del front end basado en el nivel de acceso
+     * asignado al usuario. se trata de un quickfix
+     */
+    private int nivelAcceso;
+
     @ManyToMany
     @JoinTable(
             name = "proceso_recurso",
