@@ -218,8 +218,20 @@ public class ActivoFijoService {
             // Inicializar con predicado verdadero (no filtra nada)
             var predicate = criteriaBuilder.conjunction();
 
-            // Filtrar por tipo de activo si se especifica
-            if (searchDTO.getTipoActivo() != null) {
+            // Filtrar por tipo de activo según el nuevo enum TipoActivoBusqueda
+            if (searchDTO.getTipoActivoBusqueda() != null) {
+                if (searchDTO.getTipoActivoBusqueda() != DTO_SearchActivoFijo.TipoActivoBusqueda.TODOS) {
+                    // Convertir el valor del enum TipoActivoBusqueda al enum TipoActivo correspondiente
+                    ActivoFijo.TipoActivo tipoActivo = ActivoFijo.TipoActivo.valueOf(
+                        searchDTO.getTipoActivoBusqueda().name());
+
+                    predicate = criteriaBuilder.and(predicate, 
+                        criteriaBuilder.equal(root.get("tipoActivo"), tipoActivo));
+                }
+                // Si es TODOS, no aplicamos ningún filtro por tipo
+            } 
+            // Mantener compatibilidad con el campo tipoActivo (deprecated)
+            else if (searchDTO.getTipoActivo() != null) {
                 predicate = criteriaBuilder.and(predicate, 
                     criteriaBuilder.equal(root.get("tipoActivo"), searchDTO.getTipoActivo()));
             }

@@ -112,6 +112,7 @@ public class ActivoFijo {
     private List<MantenimientoActivo> mantenimientos;
 
     @OneToOne(mappedBy = "activoFijo", cascade = CascadeType.ALL)
+    @JsonBackReference(value = "activo-incorporacion")
     private IncorporacionActivoLine lineaIncorporacion;
 
     @OneToMany(mappedBy = "activoFijo", cascade = CascadeType.ALL)
