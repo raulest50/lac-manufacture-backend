@@ -3,6 +3,7 @@
     import com.fasterxml.jackson.annotation.JsonBackReference;
     import com.fasterxml.jackson.annotation.JsonManagedReference;
     import jakarta.persistence.*;
+    import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
     import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
     import lacosmetics.planta.lacmanufacture.model.users.User;
     import lombok.AllArgsConstructor;
@@ -45,6 +46,19 @@
         @JsonBackReference
         private User user;
 
+        /**
+         * Estado contable de la transacción
+         */
+        @Enumerated(EnumType.STRING)
+        private EstadoContable estadoContable = EstadoContable.PENDIENTE;
+
+        /**
+         * Referencia al asiento contable asociado a esta transacción
+         */
+        @OneToOne
+        @JoinColumn(name = "asiento_contable_id")
+        private AsientoContable asientoContable;
+
         private TipoEntidadCausante tipoEntidadCausante;
 
         /**
@@ -64,6 +78,7 @@
             this.tipoEntidadCausante = TipoEntidadCausante.OCM;
             this.idEntidadCausante = ingresoOCM_dta.getOrdenCompraMateriales().getOrdenCompraId();
             this.observaciones = ingresoOCM_dta.getObservaciones();
+            this.estadoContable = EstadoContable.PENDIENTE; // Por defecto, pendiente de contabilización
             // El usuario se asignará en el servicio
         }
 
@@ -72,6 +87,15 @@
             OP, // orden de produccion
             OTA, // orden de tranferencia de almacen
             OAA, // orden de ajuste de almacen
+        }
+
+        /**
+         * Estados posibles para la contabilización de una transacción
+         */
+        public enum EstadoContable {
+            PENDIENTE,      // No ha sido contabilizada
+            CONTABILIZADA,  // Ya tiene asiento contable
+            NO_APLICA       // No requiere contabilización
         }
 
     }

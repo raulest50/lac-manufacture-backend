@@ -3,7 +3,9 @@ package lacosmetics.planta.lacmanufacture.service.produccion;
 
 import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
@@ -12,6 +14,8 @@ import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
+import lacosmetics.planta.lacmanufacture.service.contabilidad.ContabilidadService;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
@@ -25,6 +29,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,6 +44,8 @@ public class ProduccionService {
     private final OrdenProduccionRepo ordenProduccionRepo;
     private final TerminadoRepo terminadoRepo;
     private final TransaccionAlmacenRepo movmientoRepo;
+    private final TransaccionAlmacenHeaderRepo transaccionAlmacenHeaderRepo;
+    private final ContabilidadService contabilidadService;
 
     private final ProductoRepo productoRepo;
 
@@ -209,6 +216,7 @@ public class ProduccionService {
 
     /**
      * Update the estadoOrden of an OrdenProduccion and register Movimiento.
+     * For completed production orders, also creates an accounting entry.
      */
     @Transactional
     public OrdenProduccionDTO updateEstadoOrdenProduccion(int ordenId, int estadoOrden) {
@@ -222,8 +230,42 @@ public class ProduccionService {
         movimientoReal.setCantidad(ordenProduccion.getProducto().getCantidadUnidad()); // Adjust as per your business logic
         movimientoReal.setProducto(ordenProduccion.getProducto());
         movimientoReal.setTipoMovimiento(Movimiento.TipoMovimiento.BACKFLUSH);
-        //movimiento.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
-        transaccionAlmacenRepo.save(movimientoReal);
+        movimientoReal.setAlmacen(Movimiento.Almacen.GENERAL);
+
+        // Create a transaction for this movement
+        TransaccionAlmacen transaccion = new TransaccionAlmacen();
+        transaccion.setTipoEntidadCausante(TransaccionAlmacen.TipoEntidadCausante.OP);
+        transaccion.setIdEntidadCausante(ordenId);
+        transaccion.setObservaciones("Producción finalizada para Orden ID: " + ordenId);
+
+        // Add the movement to the transaction
+        List<Movimiento> movimientos = new ArrayList<>();
+        movimientos.add(movimientoReal);
+        transaccion.setMovimientosTransaccion(movimientos);
+        movimientoReal.setTransaccionAlmacen(transaccion);
+
+        // Save the transaction
+        transaccionAlmacenHeaderRepo.save(transaccion);
+
+        // Create accounting entry for BACKFLUSH
+        try {
+            // Calculate the total amount based on the product cost
+            BigDecimal montoTotal = BigDecimal.valueOf(ordenProduccion.getProducto().getCosto() * 
+                                                      ordenProduccion.getProducto().getCantidadUnidad());
+
+            // Register the accounting entry
+            AsientoContable asiento = contabilidadService.registrarAsientoBackflush(transaccion, ordenProduccion, montoTotal);
+
+            // Update the transaction with the accounting entry reference
+            transaccion.setAsientoContable(asiento);
+            transaccion.setEstadoContable(TransaccionAlmacen.EstadoContable.CONTABILIZADA);
+            transaccionAlmacenHeaderRepo.save(transaccion);
+
+            log.info("Asiento contable registrado con ID: " + asiento.getId() + " para la OP: " + ordenId);
+        } catch (Exception e) {
+            log.error("Error al registrar asiento contable para OP " + ordenId + ": " + e.getMessage(), e);
+            // We don't interrupt the main flow if accounting fails
+        }
 
         return convertToDto(ordenProduccion);
     }

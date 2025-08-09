@@ -217,20 +217,33 @@ public class MovimientosService {
             oc.setEstado(3);
             ordenCompraRepo.save(oc);
 
-            // Calcular el monto total para el asiento contable
-            BigDecimal montoTotal = BigDecimal.ZERO;
-            for (ItemOrdenCompra itemOrdenCompra : oc.getItemsOrdenCompra()) {
-                BigDecimal valorItem = BigDecimal.valueOf(itemOrdenCompra.getPrecioUnitario() * itemOrdenCompra.getCantidad());
-                montoTotal = montoTotal.add(valorItem);
-            }
+            // Para transacciones de tipo OCM (ingreso de materiales por orden de compra)
+            // NO crear asiento automático, se hará manualmente desde el módulo de pagos
+            if (ingresoOCM.getTipoEntidadCausante() == TransaccionAlmacen.TipoEntidadCausante.OCM) {
+                ingresoOCM.setEstadoContable(TransaccionAlmacen.EstadoContable.PENDIENTE);
+                log.info("Transacción de tipo OCM: el asiento contable se creará manualmente desde el módulo de pagos");
+            } 
+            // Para otros tipos de transacciones (que no son OCM)
+            // SÍ crear asiento automático (este bloque no se ejecutará en este método específico,
+            // pero se deja como referencia para futuros métodos que manejen otros tipos de transacciones)
+            else {
+                // Calcular el monto total para el asiento contable
+                BigDecimal montoTotal = BigDecimal.ZERO;
+                for (ItemOrdenCompra itemOrdenCompra : oc.getItemsOrdenCompra()) {
+                    BigDecimal valorItem = BigDecimal.valueOf(itemOrdenCompra.getPrecioUnitario() * itemOrdenCompra.getCantidad());
+                    montoTotal = montoTotal.add(valorItem);
+                }
 
-            // Registrar el asiento contable
-            try {
-                AsientoContable asiento = contabilidadService.registrarAsientoIngresoOCM(ingresoOCM, oc, montoTotal);
-                log.info("Asiento contable registrado con ID: " + asiento.getId());
-            } catch (Exception e) {
-                log.error("Error al registrar asiento contable: " + e.getMessage(), e);
-                // No interrumpimos el flujo principal si falla la contabilidad
+                try {
+                    AsientoContable asiento = contabilidadService.registrarAsientoIngresoOCM(ingresoOCM, oc, montoTotal);
+                    ingresoOCM.setAsientoContable(asiento);
+                    ingresoOCM.setEstadoContable(TransaccionAlmacen.EstadoContable.CONTABILIZADA);
+                    transaccionAlmacenHeaderRepo.save(ingresoOCM);
+                    log.info("Asiento contable registrado con ID: " + asiento.getId());
+                } catch (Exception e) {
+                    log.error("Error al registrar asiento contable: " + e.getMessage(), e);
+                    // No interrumpimos el flujo principal si falla la contabilidad
+                }
             }
 
             // se actualizan los precios de todos las materias primas
