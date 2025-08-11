@@ -62,9 +62,9 @@
         private TipoEntidadCausante tipoEntidadCausante;
 
         /**
-         * una transaccion de almancen se compone de 1 o mas movimientos de inventario.
+         * Una transaccion de almancen se compone de 1 o mas movimientos de inventario.
          * no pouede haber ningun movimiento de almancen que no este asociado a una
-         * transaccion de inventario. de la misma forma ninguna transaccion de
+         * transaccion de inventario. De la misma forma ninguna transaccion de
          * inventario o almancen puede existir si no esta asociada a una entidad
          * causante, por Ej: Orden de Compra de materiales (OCM), Orden de Produccion,
          * Orden de ajuste de almance (OAA).

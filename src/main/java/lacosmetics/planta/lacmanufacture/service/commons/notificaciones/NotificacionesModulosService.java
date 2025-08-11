@@ -1,10 +1,12 @@
 package lacosmetics.planta.lacmanufacture.service.commons.notificaciones;
 
 import lacosmetics.planta.lacmanufacture.model.commons.notificaciones.ModuleNotificationDTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.users.Acceso;
 import lacosmetics.planta.lacmanufacture.model.users.Acceso.Modulo;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ public class NotificacionesModulosService {
 
     private final OrdenCompraRepo ordenCompraRepo;
     private final UserRepository userRepository;
+    private final TransaccionAlmacenHeaderRepo transaccionAlmacenHeaderRepo;
 
     /**
      * Verifica las notificaciones para todos los módulos a los que tiene acceso un usuario
@@ -98,6 +101,9 @@ public class NotificacionesModulosService {
                         break;
                     case ORGANIGRAMA:
                         notification = checkNotificacionesOrganigrama(user);
+                        break;
+                    case PAGOS_PROVEEDORES:
+                        notification = checkNotificacionesPagosProveedores(user);
                         break;
                 }
 
@@ -378,6 +384,33 @@ public class NotificacionesModulosService {
         notification.setModulo(Modulo.ORGANIGRAMA);
         notification.setRequireAtention(false);
         notification.setMessage("");
+        return notification;
+    }
+
+    /**
+     * Verifica si hay notificaciones para el módulo PAGOS_PROVEEDORES
+     * @param user Usuario para el que se verifican las notificaciones
+     * @return Objeto con información de notificación
+     */
+    public ModuleNotificationDTA checkNotificacionesPagosProveedores(User user) {
+        ModuleNotificationDTA notification = new ModuleNotificationDTA();
+        notification.setModulo(Modulo.PAGOS_PROVEEDORES);
+
+        // Verificar si hay transacciones de almacén pendientes por asentar contablemente
+        // causadas por órdenes de compra de materiales
+        long countPendientes = transaccionAlmacenHeaderRepo.countByEstadoContableAndTipoEntidadCausante(
+            TransaccionAlmacen.EstadoContable.PENDIENTE,
+            TransaccionAlmacen.TipoEntidadCausante.OCM
+        );
+
+        if (countPendientes > 0) {
+            notification.setRequireAtention(true);
+            notification.setMessage("Hay " + countPendientes + " transacciones de almacén pendientes por asentar contablemente");
+        } else {
+            notification.setRequireAtention(false);
+            notification.setMessage("");
+        }
+
         return notification;
     }
 
