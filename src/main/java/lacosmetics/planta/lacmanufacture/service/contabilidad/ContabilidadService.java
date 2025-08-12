@@ -1,15 +1,20 @@
 package lacosmetics.planta.lacmanufacture.service.contabilidad;
 
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.IncorporacionActivoHeader;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.CuentaContableCodigo;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.LineaAsientoContable;
+import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchIncorporacionActivo;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.repo.activos.fijos.gestion.IncorporacionActivoHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.contabilidad.AsientoContableRepo;
 import lacosmetics.planta.lacmanufacture.repo.contabilidad.CuentaContableRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,6 +33,7 @@ public class ContabilidadService {
 
     private final AsientoContableRepo asientoContableRepo;
     private final CuentaContableRepo cuentaContableRepo;
+    private final IncorporacionActivoHeaderRepo incorporacionActivoHeaderRepo;
 
     /**
      * Registra un asiento contable para un ingreso de mercancía por OCM
@@ -184,5 +190,53 @@ public class ContabilidadService {
                 "Débitos=" + totalDebitos + ", Créditos=" + totalCreditos
             );
         }
+    }
+
+    /**
+     * Busca incorporaciones de activos fijos según los criterios especificados.
+     * 
+     * @param searchParams DTO con los parámetros de búsqueda
+     * @param pageable Configuración de paginación
+     * @return Página de incorporaciones que cumplen con los criterios
+     */
+    public Page<IncorporacionActivoHeader> searchIncorporaciones(
+            DTO_SearchIncorporacionActivo searchParams, 
+            Pageable pageable) {
+
+        log.info("Buscando incorporaciones de activos. Estado contable: {}, Estado: {}, Fecha inicio: {}, Fecha fin: {}", 
+                 searchParams.getEstadoContable(), searchParams.getEstado(), 
+                 searchParams.getFechaInicio(), searchParams.getFechaFin());
+
+        // Usar la consulta dinámica con todos los filtros
+        return incorporacionActivoHeaderRepo.findByFilters(
+            searchParams.getEstadoContable(), 
+            searchParams.getEstado(), 
+            searchParams.getFechaInicio(), 
+            searchParams.getFechaFin(), 
+            pageable
+        );
+    }
+
+    /**
+     * Registra un asiento contable para una incorporación de activos fijos.
+     * 
+     * @param incorporacion La incorporación de activos fijos
+     * @return El asiento contable creado
+     */
+    public AsientoContable registrarAsientoIncorporacionActivos(IncorporacionActivoHeader incorporacion) {
+        // Implementación pendiente - Este método se completará en una fase posterior
+        // cuando se defina la lógica contable específica para incorporaciones de activos
+
+        AsientoContable asiento = new AsientoContable();
+        asiento.setFecha(LocalDateTime.now());
+        asiento.setDescripcion("Incorporación de activos fijos #" + incorporacion.getIncorporacionId());
+        asiento.setModulo("ACTIVOS_FIJOS");
+        asiento.setDocumentoOrigen("INCORP-" + incorporacion.getIncorporacionId());
+        asiento.setEstado(AsientoContable.EstadoAsiento.BORRADOR);
+
+        // Aquí se agregarían las líneas del asiento según la lógica contable específica
+        // Por ahora, dejamos este método como un placeholder
+
+        return asientoContableRepo.save(asiento);
     }
 }

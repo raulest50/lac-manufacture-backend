@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.compras.FacturaCompraActivo;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -66,9 +67,31 @@ public class IncorporacionActivoHeader {
     private int estado;
 
     /**
+     * Estado contable de la incorporación
+     */
+    @Enumerated(EnumType.STRING)
+    private EstadoContable estadoContable = EstadoContable.PENDIENTE;
+
+    /**
+     * Referencia al asiento contable asociado a esta incorporación
+     */
+    @OneToOne
+    @JoinColumn(name = "asiento_contable_id")
+    private AsientoContable asientoContable;
+
+    /**
      * Líneas de la incorporación (detalle de activos)
      */
     @OneToMany(mappedBy = "incorporacionHeader", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<IncorporacionActivoLine> lineasIncorporacion = new ArrayList<>();
+
+    /**
+     * Estados posibles para la contabilización de una incorporación
+     */
+    public enum EstadoContable {
+        PENDIENTE,      // No ha sido contabilizada
+        CONTABILIZADA,  // Ya tiene asiento contable
+        NO_APLICA       // No requiere contabilización
+    }
 }

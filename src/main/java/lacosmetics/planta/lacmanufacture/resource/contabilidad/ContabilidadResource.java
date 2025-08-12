@@ -1,6 +1,8 @@
 package lacosmetics.planta.lacmanufacture.resource.contabilidad;
 
+import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.IncorporacionActivoHeader;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
+import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchIncorporacionActivo;
 import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchTransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.service.contabilidad.ContabilidadService;
@@ -136,5 +138,54 @@ public class ContabilidadResource {
             log.error("Error al contabilizar transacción {}: {}", transaccionId, e.getMessage(), e);
             return ResponseEntity.badRequest().body("Error al contabilizar transacción: " + e.getMessage());
         }
+    }
+
+    /**
+     * Endpoint para obtener incorporaciones de activos fijos filtradas por estado contable y rango de fechas.
+     * 
+     * Este endpoint permite filtrar incorporaciones según diferentes criterios:
+     * - Por estado contable (PENDIENTE, CONTABILIZADA, NO_APLICA)
+     * - Por estado de incorporación (En proceso, Completada, Cancelada)
+     * - Por rango de fechas (fechaInicio y fechaFin)
+     * 
+     * @param searchParams DTO con los parámetros de búsqueda
+     * @return Lista paginada de incorporaciones que cumplen con los filtros
+     * 
+     * Ejemplos de uso:
+     * 1. Buscar todas las incorporaciones pendientes de contabilizar:
+     *    POST /api/contabilidad/incorporaciones-activos
+     *    { "estadoContable": "PENDIENTE" }
+     * 
+     * 2. Buscar incorporaciones completadas y contabilizadas en un rango de fechas:
+     *    POST /api/contabilidad/incorporaciones-activos
+     *    { 
+     *      "estadoContable": "CONTABILIZADA", 
+     *      "estado": 1,
+     *      "fechaInicio": "2023-01-01T00:00:00", 
+     *      "fechaFin": "2023-01-31T23:59:59" 
+     *    }
+     */
+    @PostMapping("/incorporaciones-activos")
+    public ResponseEntity<Page<IncorporacionActivoHeader>> getIncorporacionesActivos(
+            @RequestBody DTO_SearchIncorporacionActivo searchParams) {
+
+        log.info("REST request para obtener incorporaciones de activos. Estado contable: {}, Estado: {}, Fecha inicio: {}, Fecha fin: {}", 
+                 searchParams.getEstadoContable(), searchParams.getEstado(), 
+                 searchParams.getFechaInicio(), searchParams.getFechaFin());
+
+        // Configurar paginación con ordenamiento por fecha descendente
+        Pageable pageable = PageRequest.of(
+            searchParams.getPage(), 
+            searchParams.getSize(), 
+            Sort.by("fechaIncorporacion").descending()
+        );
+
+        // Usar el servicio para realizar la búsqueda
+        Page<IncorporacionActivoHeader> incorporaciones = contabilidadService.searchIncorporaciones(
+            searchParams, 
+            pageable
+        );
+
+        return ResponseEntity.ok(incorporaciones);
     }
 }
