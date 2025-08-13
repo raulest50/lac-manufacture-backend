@@ -29,13 +29,8 @@ public class ProcesoProduccion {
      */
     private int nivelAcceso;
 
-    @ManyToMany
-    @JoinTable(
-            name = "proceso_recurso",
-            joinColumns = @JoinColumn(name = "proceso_id"),
-            inverseJoinColumns = @JoinColumn(name = "recurso_id")
-    )
-    private List<RecursoProduccion> recursosRequeridos;
+    @OneToMany(mappedBy = "proceso", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProcesoRecurso> recursosRequeridos;
 
     // modelamiento de tiempos
     private double setUpTime; // tiempo de preparacion

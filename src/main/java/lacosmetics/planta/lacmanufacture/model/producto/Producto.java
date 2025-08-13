@@ -76,4 +76,14 @@ public abstract class Producto {
 
     private double stockMinimo;
 
+    /**
+     * Se agrego para modelar insumos como el agua, el cual
+     * no se guarda en almacen y por tanto no se inventarea.
+     *
+     * Tambien estaba pensando en usar este atributo tambien para
+     * los semiterminados, ya que estos no se retornan al almacen.
+     *
+     */
+    private boolean inventoryTracked;
+
 }

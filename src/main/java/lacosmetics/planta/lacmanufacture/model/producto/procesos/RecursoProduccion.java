@@ -38,4 +38,7 @@ public class RecursoProduccion {
     private Integer turnos; // Número de turnos operativos
     private Double horasPorTurno; // Horas efectivas por turno
 
+    @OneToMany(mappedBy = "recurso")
+    private List<ProcesoRecurso> procesos;
+
 }
