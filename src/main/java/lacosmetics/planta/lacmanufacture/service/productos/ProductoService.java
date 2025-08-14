@@ -322,6 +322,8 @@ public class ProductoService {
                     mp.setObservaciones("");
                     mp.setCantidadUnidad(1);
                     mp.setTipoMaterial(tipoMateria);
+                    // Set inventareable to true by default for all materials created through bulk upload
+                    mp.setInventareable(true);
                     // fechaCreacion is automatically set by @CreationTimestamp
 
                     materialRepo.save(mp);
