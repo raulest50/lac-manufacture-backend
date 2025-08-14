@@ -83,7 +83,10 @@ public abstract class Producto {
      * Tambien estaba pensando en usar este atributo tambien para
      * los semiterminados, ya que estos no se retornan al almacen.
      *
+     * true: si pasa por almacen.
+     * false: no pasa por alamacen
+     *
      */
-    private boolean inventoryTracked;
+    private boolean inventareable;
 
 }
