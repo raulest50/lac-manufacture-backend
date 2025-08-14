@@ -87,6 +87,7 @@ public abstract class Producto {
      * false: no pasa por alamacen
      *
      */
+    @Column(columnDefinition = "boolean default true")
     private boolean inventareable;
 
 }
