@@ -31,8 +31,8 @@ public class Terminado extends Producto{
     private ProcesoProduccionCompleto procesoProduccionCompleto;
 
     @ManyToOne
-    @JoinColumn(name = "familia_id")
-    private Familia familia;
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
 
     /**
      * Una imagen o ilustracion del producto
