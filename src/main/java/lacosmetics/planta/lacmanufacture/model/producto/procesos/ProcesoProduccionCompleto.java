@@ -35,16 +35,6 @@ public class ProcesoProduccionCompleto {
     @JsonBackReference(value = "orden-proceso")
     private OrdenProduccion ordenProduccion;
 
-    @Column(name = "rendimiento_teorico_unitario")
-    private double rendimientoTeoricoUnitario;
-
-    /**
-     * Calcula el rendimiento teórico total basado en el número de lotes
-     * @param numeroLotes Número de lotes a producir
-     * @return Rendimiento teórico total
-     */
-    @Transient
-    public double calcularRendimientoTeoricoTotal(int numeroLotes) {
-        return rendimientoTeoricoUnitario * numeroLotes;
-    }
+    @Column(name = "rendimiento_teorico")
+    private double rendimientoTeorico;
 }
