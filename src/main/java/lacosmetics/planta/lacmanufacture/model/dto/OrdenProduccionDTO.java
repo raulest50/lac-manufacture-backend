@@ -18,5 +18,6 @@ public class OrdenProduccionDTO {
     private LocalDateTime fechaInicio;
     private int estadoOrden;        // 0: en produccion, 1: terminada
     private String observaciones;
+    private int numeroLotes;        // Número de lotes a producir
     private List<OrdenSeguimientoDTO> ordenesSeguimiento;
 }

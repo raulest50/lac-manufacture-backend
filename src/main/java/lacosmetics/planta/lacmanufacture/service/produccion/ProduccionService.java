@@ -61,7 +61,7 @@ public class ProduccionService {
         Optional<Producto> optionalProducto = productoRepo.findById(ordenProduccionDTO.getProductoId());
         if (optionalProducto.isPresent()) {
             Producto producto = optionalProducto.get();
-            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones());
+            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getNumeroLotes());
             OrdenProduccion savedOrden = ordenProduccionRepo.save(ordenProduccion);
 
             // Create Movimiento entries for each Insumo
@@ -112,6 +112,7 @@ public class ProduccionService {
         dto.setFechaInicio(orden.getFechaInicio());
         dto.setEstadoOrden(orden.getEstadoOrden());
         dto.setObservaciones(orden.getObservaciones());
+        dto.setNumeroLotes(orden.getNumeroLotes());
 
         List<OrdenSeguimientoDTO> seguimientoDTOs = orden.getOrdenesSeguimiento().stream()
                 .map(this::convertSeguimientoToDto)

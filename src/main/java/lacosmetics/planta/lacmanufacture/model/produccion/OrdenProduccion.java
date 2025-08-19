@@ -55,6 +55,9 @@ public class OrdenProduccion {
 
     private String observaciones;
 
+    @Column(nullable = false)
+    private int numeroLotes = 1; // Valor por defecto: 1 lote
+
     /**
      * instante en el que se crea la orden de produccion en el sistema.
      * debe ser asignada automaticamente por el backend
@@ -84,10 +87,11 @@ public class OrdenProduccion {
     @JsonManagedReference(value = "orden-planificacion")
     private PlanificacionProduccion planificacionProduccion;
 
-    public OrdenProduccion(Producto producto, String observaciones) {
+    public OrdenProduccion(Producto producto, String observaciones, int numeroLotes) {
         this.producto = producto;
         this.observaciones = observaciones;
         this.estadoOrden = 0;
+        this.numeroLotes = numeroLotes > 0 ? numeroLotes : 1;
 
         List<OrdenSeguimiento> ordenesSeguimiento = new ArrayList<>();
         List<Insumo> insumos = new ArrayList<>();
@@ -103,9 +107,19 @@ public class OrdenProduccion {
         }
 
         for (Insumo insumo : insumos) {
-            ordenesSeguimiento.add(new OrdenSeguimiento(insumo, this));
+            // Crear una copia del insumo con la cantidad ajustada
+            Insumo insumoAjustado = new Insumo();
+            insumoAjustado.setProducto(insumo.getProducto());
+            insumoAjustado.setCantidadRequerida(insumo.getCantidadRequerida() * numeroLotes);
+
+            ordenesSeguimiento.add(new OrdenSeguimiento(insumoAjustado, this));
         }
         this.ordenesSeguimiento = ordenesSeguimiento;
+    }
+
+    // Mantener constructor anterior para compatibilidad
+    public OrdenProduccion(Producto producto, String observaciones) {
+        this(producto, observaciones, 1);
     }
 
 }
