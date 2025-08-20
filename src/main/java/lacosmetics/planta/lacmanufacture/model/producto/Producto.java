@@ -86,8 +86,8 @@ public abstract class Producto {
      * true: si pasa por almacen.
      * false: no pasa por alamacen
      *
-     */
-    @Column(columnDefinition = "boolean default true")
-    private boolean inventareable;
+    */
+    @Column
+    private boolean inventareable = true;
 
 }
