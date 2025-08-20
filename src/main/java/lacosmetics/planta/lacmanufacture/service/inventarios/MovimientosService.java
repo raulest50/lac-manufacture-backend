@@ -7,6 +7,8 @@ import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionItemDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
@@ -15,8 +17,12 @@ import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
+import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
+import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
+import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.LoteRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
@@ -44,6 +50,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,6 +72,8 @@ public class MovimientosService {
     private final LoteRepo loteRepo;
     private final UserRepository userRepository;
     private final ContabilidadService contabilidadService;
+    private final OrdenProduccionRepo ordenProduccionRepo;
+    private final OrdenSeguimientoRepo ordenSeguimientoRepo;
 
     @Transactional
     public Movimiento saveMovimiento(Movimiento movimientoReal){
@@ -367,4 +376,65 @@ public class MovimientosService {
         return  (int) Math.ceil(nuevoCosto);
     }
 
+    /**
+     * Creates a dispensation transaction for a production order.
+     * This method handles the dispensation of materials from the warehouse to execute production orders.
+     * 
+     * @param dispensacionDTO The DTO containing the dispensation information
+     * @return The created transaction
+     */
+    @Transactional
+    public TransaccionAlmacen createDispensacion(DispensacionDTO dispensacionDTO) {
+        // Obtain the production order
+        OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(dispensacionDTO.getOrdenProduccionId())
+            .orElseThrow(() -> new RuntimeException("Orden de producción no encontrada con ID: " + dispensacionDTO.getOrdenProduccionId()));
+
+        // Create the warehouse transaction
+        TransaccionAlmacen transaccion = new TransaccionAlmacen();
+        transaccion.setTipoEntidadCausante(TransaccionAlmacen.TipoEntidadCausante.OP);
+        transaccion.setIdEntidadCausante(ordenProduccion.getOrdenId());
+        transaccion.setObservaciones(dispensacionDTO.getObservaciones());
+
+        // Get the current user (this will depend on how authentication is handled)
+        User user = userRepository.findById(Long.valueOf(dispensacionDTO.getUsuarioId()))
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dispensacionDTO.getUsuarioId()));
+        transaccion.setUser(user);
+
+        // Create the movements
+        List<Movimiento> movimientos = new ArrayList<>();
+        for (DispensacionItemDTO item : dispensacionDTO.getItems()) {
+            // Get the tracking
+            OrdenSeguimiento seguimiento = ordenSeguimientoRepo.findById(item.getSeguimientoId())
+                .orElseThrow(() -> new RuntimeException("Seguimiento no encontrado con ID: " + item.getSeguimientoId()));
+
+            // Create the movement
+            Movimiento movimiento = new Movimiento();
+            movimiento.setCantidad(-item.getCantidad()); // Negative because it's an output
+            movimiento.setProducto(seguimiento.getInsumo().getProducto());
+            movimiento.setTipoMovimiento(Movimiento.TipoMovimiento.CONSUMO);
+            movimiento.setAlmacen(Movimiento.Almacen.GENERAL);
+            movimiento.setTransaccionAlmacen(transaccion);
+
+            // If a batch is specified, associate it
+            if (item.getLoteId() != null) {
+                Lote lote = loteRepo.findById(Long.valueOf(item.getLoteId()))
+                    .orElseThrow(() -> new RuntimeException("Lote no encontrado con ID: " + item.getLoteId()));
+                movimiento.setLote(lote);
+            }
+
+            movimientos.add(movimiento);
+
+            // Update the tracking status if necessary
+            if (item.isCompletarSeguimiento()) {
+                seguimiento.setEstado(1); // Finished
+                seguimiento.setFechaFinalizacion(LocalDateTime.now());
+                ordenSeguimientoRepo.save(seguimiento);
+            }
+        }
+
+        transaccion.setMovimientosTransaccion(movimientos);
+
+        // Save the transaction
+        return transaccionAlmacenHeaderRepo.save(transaccion);
+    }
 }

@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.resource.produccion;
 
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
+import lacosmetics.planta.lacmanufacture.model.dto.InsumoDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/produccion")
@@ -24,6 +26,12 @@ import java.time.LocalDateTime;
 public class ProduccionResource {
 
     private final ProduccionService produccionService;
+
+    @GetMapping("/orden_produccion/{id}/insumos")
+    public ResponseEntity<List<InsumoDTO>> getInsumosOrdenProduccion(@PathVariable int id) {
+        List<InsumoDTO> insumos = produccionService.getInsumosOrdenProduccion(id);
+        return ResponseEntity.ok(insumos);
+    }
 
 
     @PostMapping("/save")

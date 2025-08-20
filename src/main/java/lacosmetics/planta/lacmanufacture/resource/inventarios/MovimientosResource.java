@@ -1,8 +1,10 @@
 package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.inventarios.MovimientosService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,13 @@ public class MovimientosResource {
             @RequestPart("docIngresoDTA") IngresoOCM_DTA docIngresoDTO,
             @RequestPart("file") MultipartFile file) {
         return movimientoService.createDocIngreso(docIngresoDTO, file);
+    }
+
+    @PostMapping("/dispensacion")
+    public ResponseEntity<?> createDispensacion(@RequestBody DispensacionDTO dispensacionDTO) {
+        TransaccionAlmacen transaccion = movimientoService.createDispensacion(dispensacionDTO);
+        return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
+            .body(transaccion);
     }
 
 

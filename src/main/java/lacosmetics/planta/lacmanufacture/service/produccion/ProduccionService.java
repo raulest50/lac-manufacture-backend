@@ -9,6 +9,7 @@ import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
+import lacosmetics.planta.lacmanufacture.model.dto.InsumoDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
@@ -271,9 +272,24 @@ public class ProduccionService {
         return convertToDto(ordenProduccion);
     }
 
+    /**
+     * Get the inputs (insumos) needed for a production order.
+     */
+    public List<InsumoDTO> getInsumosOrdenProduccion(int ordenId) {
+        OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenId)
+            .orElseThrow(() -> new RuntimeException("Orden de producción no encontrada con ID: " + ordenId));
 
-
-
-
-
+        return ordenProduccion.getOrdenesSeguimiento().stream()
+            .map(ordenSeguimiento -> {
+                Insumo insumo = ordenSeguimiento.getInsumo();
+                InsumoDTO insumoDTO = new InsumoDTO();
+                insumoDTO.setProductoId(insumo.getProducto().getProductoId());
+                insumoDTO.setNombreProducto(insumo.getProducto().getNombre());
+                insumoDTO.setCantidadRequerida(insumo.getCantidadRequerida());
+                insumoDTO.setEstadoSeguimiento(ordenSeguimiento.getEstado());
+                insumoDTO.setSeguimientoId(ordenSeguimiento.getSeguimientoId());
+                return insumoDTO;
+            })
+            .collect(Collectors.toList());
+    }
 }
