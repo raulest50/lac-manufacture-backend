@@ -7,11 +7,15 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * DTO que representa una dispensación de material.
+ * Encapsula la información de un material y los lotes recomendados para dispensar.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class InsumoDTO {
+public class DispensacionDTO {
     private String productoId;
     private String nombreProducto;
     private double cantidadRequerida;
