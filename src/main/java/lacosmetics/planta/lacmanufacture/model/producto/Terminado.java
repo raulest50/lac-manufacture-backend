@@ -1,5 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model.producto;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
@@ -27,7 +28,7 @@ public class Terminado extends Producto{
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "proceso_prod_id")
-    @com.fasterxml.jackson.annotation.JsonManagedReference(value = "terminado-proceso")
+    @JsonManagedReference("producto-proceso")
     private ProcesoProduccionCompleto procesoProduccionCompleto;
 
     @ManyToOne
