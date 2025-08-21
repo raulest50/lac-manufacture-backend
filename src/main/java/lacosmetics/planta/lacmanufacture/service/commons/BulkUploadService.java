@@ -317,6 +317,10 @@ public class BulkUploadService {
                 // Verificar si la fila está vacía
                 boolean isEmpty = isRowEmpty(row);
 
+                if (rowNumber <= 3) {
+                    log.info("Evaluando fila {} - vacía?: {}", rowNumber, isEmpty);
+                }
+
                 if (isEmpty) {
                     emptyRowCount++;
                     // Si hay más de 2 filas vacías consecutivas, detenemos el procesamiento
@@ -682,6 +686,8 @@ public class BulkUploadService {
             mapping = new MaterialBulkUploadMappingDTO();
         }
 
+        log.info("Using mapping: {}", mapping);
+
         // Limpiar datos existentes antes de la carga
         cleanAllProductsData();
 
@@ -725,6 +731,12 @@ public class BulkUploadService {
         String iva = getCellValue(row, mapping.getIva());
         String puntoReorden = getCellValue(row, mapping.getPuntoReorden());
         String costoUnitario = getCellValue(row, mapping.getCostoUnitario());
+
+        // Logs de depuración para las primeras filas
+        if (rowNumber <= 3) {
+            log.info("Fila {} - descripcion: {}, unidadMedida: {}, stock: {}, productoId: {}, iva: {}, puntoReorden: {}, costoUnitario: {}",
+                    rowNumber, descripcion, unidadMedida, stock, nuevoCodigo, iva, puntoReorden, costoUnitario);
+        }
 
         // Validar que exista un nuevo código
         if (nuevoCodigo == null || nuevoCodigo.trim().isEmpty()) {
@@ -872,6 +884,7 @@ public class BulkUploadService {
 
     private BulkUploadResponseDTO processExcelProductData(MultipartFile file, MaterialBulkUploadMappingDTO mapping) {
         log.info("Processing Excel file with product data: {}", file.getOriginalFilename());
+        log.info("Using sheet '{}' for processing", mapping.getSheetName());
 
         BulkUploadResponseDTO response = BulkUploadResponseDTO.builder()
                 .totalRecords(0)
@@ -886,15 +899,15 @@ public class BulkUploadService {
         try (InputStream is = file.getInputStream();
              Workbook workbook = new XSSFWorkbook(is)) {
 
-            // Obtener la primera hoja del libro
-            Sheet sheet = workbook.getSheet("inventario");
-            if (sheet == null) { // manejo de erres en caso que la hoja no exista
-                log.error("La hoja 'inventarios' no existe en el archivo Excel");
+            // Obtener la hoja indicada en el mapeo
+            Sheet sheet = workbook.getSheet(mapping.getSheetName());
+            if (sheet == null) { // manejo de errores en caso que la hoja no exista
+                log.error("La hoja '{}' no existe en el archivo Excel", mapping.getSheetName());
                 response.setFailureCount(1);
                 response.getErrors().add(
                         BulkUploadResponseDTO.ErrorRecord.builder()
                                 .rowNumber(0)
-                                .errorMessage("Error: La hoja 'inventarios' no existe en el archivo Excel")
+                                .errorMessage("Error: La hoja '" + mapping.getSheetName() + "' no existe en el archivo Excel")
                                 .build()
                 );
                 return response;
@@ -933,6 +946,10 @@ public class BulkUploadService {
 
                 // Verificar si la fila está vacía
                 boolean isEmpty = isRowEmpty(row);
+
+                if (rowNumber <= 3) {
+                    log.info("Evaluando fila {} - vacía?: {}", rowNumber, isEmpty);
+                }
 
                 if (isEmpty) {
                     emptyRowCount++;
