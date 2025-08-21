@@ -4,6 +4,7 @@ import lacosmetics.planta.lacmanufacture.config.StorageProperties;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.BulkUploadResponseDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
+import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.MaterialBulkUploadMappingDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
@@ -545,6 +546,22 @@ public class BulkUploadService {
     }
 
     /**
+     * Obtiene el valor de una celda utilizando un índice seguro. Si el índice es
+     * negativo o la celda es nula, retorna {@code null} para evitar excepciones.
+     *
+     * @param row   Fila del archivo Excel
+     * @param index Índice de la columna a leer
+     * @return Valor de la celda como cadena o {@code null} si no existe
+     */
+    private String getCellValue(Row row, int index) {
+        if (index < 0) {
+            return null;
+        }
+        Cell cell = row.getCell(index);
+        return getCellValueAsString(cell);
+    }
+
+    /**
      * Verifica si una fila está vacía (todas sus celdas están vacías o son nulas)
      * 
      * @param row La fila a verificar
@@ -657,14 +674,19 @@ public class BulkUploadService {
      * @param file The file containing product data (Excel)
      * @return Result of the processing operation with details about success and failures
      */
-    public BulkUploadResponseDTO processBulkProductUpload(MultipartFile file) {
+    public BulkUploadResponseDTO processBulkProductUpload(MultipartFile file, MaterialBulkUploadMappingDTO mapping) {
         log.info("Processing bulk product upload from file: {}", file.getOriginalFilename());
+
+        // Usar valores por defecto si no se proporciona mapeo
+        if (mapping == null) {
+            mapping = new MaterialBulkUploadMappingDTO();
+        }
 
         // Limpiar datos existentes antes de la carga
         cleanAllProductsData();
 
         // Procesar el archivo Excel
-        BulkUploadResponseDTO response = processExcelProductData(file);
+        BulkUploadResponseDTO response = processExcelProductData(file, mapping);
 
         // Generar archivo de reporte en todos los casos
         byte[] reportFile = generateReportFile(response, "reporte_productos");
@@ -693,19 +715,16 @@ public class BulkUploadService {
      * @param rowNumber El número de fila actual
      * @return Objeto Material creado a partir de los datos de la fila, o null si debe ser ignorado
      */
-    private Material processExcelMaterialRow(Row row, BulkUploadResponseDTO response, int rowNumber) {
+    private Material processExcelMaterialRow(Row row, BulkUploadResponseDTO response, int rowNumber,
+                                             MaterialBulkUploadMappingDTO mapping) {
         // Obtener los valores de las celdas
-        String codigo = getCellValueAsString(row.getCell(0)); // CODIGO (ignorado)
-        String descripcion = getCellValueAsString(row.getCell(1)); // DESCRIPCION
-        String lote = getCellValueAsString(row.getCell(2)); // LOTE (ignorado)
-        String unidadMedida = getCellValueAsString(row.getCell(3)); // UNI/MEDIDAS
-        String entrada = getCellValueAsString(row.getCell(4)); // ENTRADA (ignorado)
-        String salida = getCellValueAsString(row.getCell(5)); // SALIDAS (ignorado)
-        String stock = getCellValueAsString(row.getCell(6)); // STOCK
-        String nuevoCodigo = getCellValueAsString(row.getCell(7)); // NUEVO CODIGO
-        String iva = getCellValueAsString(row.getCell(8)); // IVA
-        String puntoReorden = getCellValueAsString(row.getCell(9)); // PUNTO DE REORDEN;
-        String costoUnitario = getCellValueAsString(row.getCell(10)); // COSTO UNITARIO DEL PRODUCTO
+        String descripcion = getCellValue(row, mapping.getDescripcion());
+        String unidadMedida = getCellValue(row, mapping.getUnidadMedida());
+        String stock = getCellValue(row, mapping.getStock());
+        String nuevoCodigo = getCellValue(row, mapping.getProductoId());
+        String iva = getCellValue(row, mapping.getIva());
+        String puntoReorden = getCellValue(row, mapping.getPuntoReorden());
+        String costoUnitario = getCellValue(row, mapping.getCostoUnitario());
 
         // Validar que exista un nuevo código
         if (nuevoCodigo == null || nuevoCodigo.trim().isEmpty()) {
@@ -851,7 +870,7 @@ public class BulkUploadService {
         return material;
     }
 
-    private BulkUploadResponseDTO processExcelProductData(MultipartFile file) {
+    private BulkUploadResponseDTO processExcelProductData(MultipartFile file, MaterialBulkUploadMappingDTO mapping) {
         log.info("Processing Excel file with product data: {}", file.getOriginalFilename());
 
         BulkUploadResponseDTO response = BulkUploadResponseDTO.builder()
@@ -932,7 +951,7 @@ public class BulkUploadService {
 
                 try {
                     // Procesar la fila
-                    Material material = processExcelMaterialRow(row, response, rowNumber);
+                    Material material = processExcelMaterialRow(row, response, rowNumber, mapping);
 
                     // Si el material es null, significa que debe ser ignorado
                     // (ya se registró en el método processExcelMaterialRow)
@@ -957,7 +976,7 @@ public class BulkUploadService {
                     // Crear un movimiento para este material
                     Movimiento movimiento = new Movimiento();
                     movimiento.setProducto(material);
-                    movimiento.setCantidad(Double.parseDouble(getCellValueAsString(row.getCell(6)))); // STOCK
+                    movimiento.setCantidad(Double.parseDouble(getCellValue(row, mapping.getStock()))); // STOCK
                     movimiento.setTipoMovimiento(Movimiento.TipoMovimiento.COMPRA); // Usamos COMPRA como tipo para inicialización
                     movimiento.setAlmacen(Movimiento.Almacen.GENERAL);
                     movimiento.setLote(lote);

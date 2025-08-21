@@ -1,6 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource.commons;
 
 import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.BulkUploadResponseDTO;
+import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.MaterialBulkUploadMappingDTO;
 import lacosmetics.planta.lacmanufacture.service.commons.BulkUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -49,9 +50,11 @@ public class BulkUploadResource {
      * @param file The file containing product data
      * @return Response with status of the upload operation or a file with detailed report
      */
-    @PostMapping("/products")
-    public ResponseEntity<?> bulkUploadProducts(@RequestParam("file") MultipartFile file) {
-        BulkUploadResponseDTO response = bulkUploadService.processBulkProductUpload(file);
+    @PostMapping(value = "/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> bulkUploadProducts(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "mapping", required = false) MaterialBulkUploadMappingDTO mapping) {
+        BulkUploadResponseDTO response = bulkUploadService.processBulkProductUpload(file, mapping);
 
         // Siempre devolver el archivo de reporte
         HttpHeaders headers = new HttpHeaders();
