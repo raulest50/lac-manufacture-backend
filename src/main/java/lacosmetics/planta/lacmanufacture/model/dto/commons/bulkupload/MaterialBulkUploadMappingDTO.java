@@ -11,6 +11,9 @@ import lombok.Data;
 @Data
 public class MaterialBulkUploadMappingDTO {
 
+    /** Nombre de la hoja de cálculo que contiene los datos. */
+    private String sheetName = "inventario";
+
     /** Índice de la columna de descripción del producto. */
     private int descripcion = 1;
 
