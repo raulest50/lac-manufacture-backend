@@ -314,7 +314,8 @@ public class CargaMasiva {
 
     /**
      * Converts the unit of measure string to the corresponding string for tipoUnidades.
-     * For example: "KG" -> "KG", "UND" -> "U", "L" -> "L".
+     * Supported units: "KG", "L", "U", "G".
+     * For example: "KG" -> "KG", "UND" -> "U", "L" -> "L", "G" -> "G".
      */
     private String convertUnidad(String unidad) {
         if (unidad.equalsIgnoreCase("KG")) {
@@ -323,6 +324,10 @@ public class CargaMasiva {
             return "U";
         } else if (unidad.equalsIgnoreCase("L")) {
             return "L";
+        } else if (unidad.equalsIgnoreCase("G") ||
+                unidad.equalsIgnoreCase("GRAMO") ||
+                unidad.equalsIgnoreCase("GRAMOS")) {
+            return "G";
         }
         // default to "KG" if the unit is not recognized
         return "KG";

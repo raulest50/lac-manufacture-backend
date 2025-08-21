@@ -57,9 +57,15 @@ curl -X POST \
 Campos del mapeo:
 
 - `descripcion`: índice de la descripción del producto.
-- `unidadMedida`: índice de la unidad de medida.
+- `unidadMedida`: índice de la unidad de medida (soportadas: `KG`, `L`, `U`, `G`).
 - `stock`: índice del stock inicial.
 - `productoId`: índice del identificador del producto.
 - `iva`: índice del IVA del producto.
 - `puntoReorden`: índice del punto de reorden.
 - `costoUnitario`: índice del costo unitario.
+
+Ejemplo de fila usando gramos:
+
+| descripcion        | unidadMedida | stock | productoId | iva | puntoReorden | costoUnitario |
+|--------------------|--------------|-------|------------|-----|--------------|---------------|
+| Polvo de Colágeno  | G            | 500   | MP004      | 19  | 50           | 35000         |
