@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/**
+ * DTO que representa un lote recomendado para dispensación.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,5 +19,6 @@ public class LoteRecomendadoDTO {
     private String batchNumber;
     private LocalDate productionDate;
     private LocalDate expirationDate;
-    private double cantidadDisponible;
+    private double cantidadDisponible;  // Cantidad total disponible en el lote
+    private double cantidadRecomendada; // Cantidad recomendada a tomar de este lote
 }

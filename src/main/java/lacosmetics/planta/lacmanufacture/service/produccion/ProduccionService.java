@@ -378,7 +378,8 @@ public class ProduccionService {
                         loteRecomendado.setBatchNumber(lote.getBatchNumber());
                         loteRecomendado.setProductionDate(lote.getProductionDate());
                         loteRecomendado.setExpirationDate(lote.getExpirationDate());
-                        loteRecomendado.setCantidadDisponible(cantidadAUsar);
+                        loteRecomendado.setCantidadDisponible(stockDisponible);  // Cantidad total disponible en el lote
+                        loteRecomendado.setCantidadRecomendada(cantidadAUsar);   // Cantidad recomendada a tomar
 
                         lotesRecomendados.add(loteRecomendado);
 
@@ -501,7 +502,8 @@ public class ProduccionService {
                         loteRecomendado.setBatchNumber(lote.getBatchNumber());
                         loteRecomendado.setProductionDate(lote.getProductionDate());
                         loteRecomendado.setExpirationDate(lote.getExpirationDate());
-                        loteRecomendado.setCantidadDisponible(cantidadAUsar);
+                        loteRecomendado.setCantidadDisponible(stockDisponible);  // Cantidad total disponible en el lote
+                        loteRecomendado.setCantidadRecomendada(cantidadAUsar);   // Cantidad recomendada a tomar
 
                         lotesRecomendados.add(loteRecomendado);
 
