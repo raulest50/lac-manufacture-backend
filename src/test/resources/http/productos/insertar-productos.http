@@ -270,3 +270,21 @@ Authorization: Bearer {{auth_token}}
   },
   "fotoUrl": "data/assets/productos/mascarilla.jpg"
 }
+
+### Insertar Materia Prima 4 en gramos
+POST {{host}}/productos/save
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{
+  "productoId": "MP004",
+  "nombre": "Polvo de Colágeno",
+  "observaciones": "Suplemento en polvo para pruebas",
+  "costo": 35000,
+  "iva_percentual": 19.0,
+  "tipoUnidades": "G",
+  "cantidadUnidad": 500.0,
+  "tipo_producto": "M",
+  "fichaTecnicaUrl": "data/fichas_tecnicas_mp/polvo_colageno.pdf",
+  "tipoMaterial": 1
+}
