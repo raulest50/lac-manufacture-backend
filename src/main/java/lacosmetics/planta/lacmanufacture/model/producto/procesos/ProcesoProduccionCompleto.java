@@ -25,6 +25,7 @@ public class ProcesoProduccionCompleto {
 
     @ManyToOne
     @JoinColumn(name = "producto_id")
+    @JsonBackReference("producto-proceso")
     private Producto producto;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
