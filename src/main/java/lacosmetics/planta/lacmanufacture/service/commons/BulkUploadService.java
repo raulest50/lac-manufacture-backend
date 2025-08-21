@@ -683,7 +683,10 @@ public class BulkUploadService {
 
         // Usar valores por defecto si no se proporciona mapeo
         if (mapping == null) {
+            log.info("No se proporcionó mapeo, usando mapeo por defecto");
             mapping = new MaterialBulkUploadMappingDTO();
+        } else {
+            log.info("Usando mapeo enviado por el cliente");
         }
 
         log.info("Using mapping: {}", mapping);
