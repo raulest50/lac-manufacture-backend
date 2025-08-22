@@ -354,6 +354,7 @@ public class ComprasService {
         // Actualizar los nuevos atributos de divisa y TRM
         ordenExistente.setDivisas(ordenCompraMateriales.getDivisas());
         ordenExistente.setTrm(ordenCompraMateriales.getTrm());
+        ordenExistente.setObservaciones(ordenCompraMateriales.getObservaciones());
 
         // No modificamos el estado ni la fecha de emisión aquí
         // Si se necesita cambiar el estado, se debe usar updateEstadoOrdenCompra

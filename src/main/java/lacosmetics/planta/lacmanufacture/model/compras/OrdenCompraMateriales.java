@@ -71,4 +71,7 @@ public class OrdenCompraMateriales {
 
     private double trm;
 
+    @Column(name = "observaciones")
+    private String observaciones;
+
 }
