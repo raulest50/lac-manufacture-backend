@@ -15,23 +15,23 @@ public class MaterialBulkUploadMappingDTO {
     private String sheetName = "inventario";
 
     /** Índice de la columna de descripción del producto. */
-    private int descripcion = 1;
+    private int descripcion = 2;
 
     /** Índice de la columna de unidad de medida. */
-    private int unidadMedida = 3;
+    private int unidadMedida = 4;
 
     /** Índice de la columna de stock inicial. */
-    private int stock = 6;
+    private int stock = 7;
 
     /** Índice de la columna del identificador del producto. */
-    private int productoId = 7;
+    private int productoId = 0;
 
     /** Índice de la columna del IVA. */
-    private int iva = 8;
+    private int iva = 10;
 
     /** Índice de la columna del punto de reorden. */
-    private int puntoReorden = 9;
+    private int puntoReorden = 8;
 
     /** Índice de la columna del costo unitario. */
-    private int costoUnitario = 10;
+    private int costoUnitario = 11;
 }

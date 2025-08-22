@@ -888,6 +888,10 @@ public class BulkUploadService {
     private BulkUploadResponseDTO processExcelProductData(MultipartFile file, MaterialBulkUploadMappingDTO mapping) {
         log.info("Processing Excel file with product data: {}", file.getOriginalFilename());
         log.info("Using sheet '{}' for processing", mapping.getSheetName());
+        log.info("Column mapping configuration: descripcion={}, unidadMedida={}, stock={}, productoId={}, iva={}, puntoReorden={}, costoUnitario={}",
+                mapping.getDescripcion(), mapping.getUnidadMedida(), mapping.getStock(), 
+                mapping.getProductoId(), mapping.getIva(), mapping.getPuntoReorden(), 
+                mapping.getCostoUnitario());
 
         BulkUploadResponseDTO response = BulkUploadResponseDTO.builder()
                 .totalRecords(0)
@@ -921,7 +925,18 @@ public class BulkUploadService {
 
             // Leer la primera fila (encabezados)
             if (rowIterator.hasNext()) {
-                rowIterator.next(); // Saltar la fila de encabezados
+                Row headerRow = rowIterator.next();
+
+                // Log the header row (row 1)
+                StringBuilder headerData = new StringBuilder();
+                headerData.append("Fila 1 (Header) - Raw Excel data: ");
+                for (int i = 0; i < 15; i++) { // Log first 15 columns
+                    String cellValue = getCellValue(headerRow, i);
+                    headerData.append(String.format("[Col %d: %s] ", i, cellValue));
+                }
+                log.info(headerData.toString());
+
+                // Ya se ha leído la fila de encabezados
             }
 
             // Crear una transacción de almacén para la inicialización de inventario
@@ -950,8 +965,18 @@ public class BulkUploadService {
                 // Verificar si la fila está vacía
                 boolean isEmpty = isRowEmpty(row);
 
-                if (rowNumber <= 3) {
+                // Log raw data for the first 10 rows (rows 2-10, since row 1 is the header)
+                if (rowNumber <= 10) {
                     log.info("Evaluando fila {} - vacía?: {}", rowNumber, isEmpty);
+
+                    // Log raw Excel data for this row
+                    StringBuilder rawData = new StringBuilder();
+                    rawData.append(String.format("Fila %d - Raw Excel data: ", rowNumber));
+                    for (int i = 0; i < 15; i++) { // Log first 15 columns
+                        String cellValue = getCellValue(row, i);
+                        rawData.append(String.format("[Col %d: %s] ", i, cellValue));
+                    }
+                    log.info(rawData.toString());
                 }
 
                 if (isEmpty) {
