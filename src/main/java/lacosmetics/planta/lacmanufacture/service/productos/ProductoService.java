@@ -143,7 +143,10 @@ public class ProductoService {
         return terminadoRepo.findAll(PageRequest.of(page, size));
     }
 
-    public Page<Material> searchByName_MP(String searchTerm, int page, int size){
+    public Page<Material> searchByName_MP(String searchTerm, int page, int size, boolean fuzzy, double threshold){
+        if (fuzzy) {
+            return materialRepo.searchByNombreFuzzy(searchTerm, threshold, PageRequest.of(page, size));
+        }
         String[] searchTerms = searchTerm.toLowerCase().split(" ");
         Specification<Material> spec = (root, query, criteriaBuilder) -> {
             Predicate[] predicates = new Predicate[searchTerms.length];
@@ -158,7 +161,10 @@ public class ProductoService {
         return materialRepo.findAll(spec, PageRequest.of(page, size));
     }
 
-    public Page<SemiTerminado> searchByName_S(String searchTerm, int page, int size){
+    public Page<SemiTerminado> searchByName_S(String searchTerm, int page, int size, boolean fuzzy, double threshold){
+        if (fuzzy) {
+            return semiTerminadoRepo.searchByNombreFuzzy(searchTerm, threshold, PageRequest.of(page, size));
+        }
         String[] searchTerms = searchTerm.toLowerCase().split(" ");
 
         Specification<SemiTerminado> spec = (root, query, criteriaBuilder) -> {
