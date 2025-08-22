@@ -85,14 +85,16 @@ public class ProductoResource {
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String search,
-            @RequestParam String tipoBusqueda) {
+            @RequestParam String tipoBusqueda,
+            @RequestParam(value = "fuzzy", defaultValue = "false") boolean fuzzy,
+            @RequestParam(value = "threshold", defaultValue = "0.3") double threshold) {
 
         // Si estamos en modo ID pero el parámetro 'search' está vacío,
         // redirigimos a la búsqueda por nombre (que hace LIKE "%%" y retorna todo).
         if ("ID".equalsIgnoreCase(tipoBusqueda)) {
             if (search == null || search.trim().isEmpty()) {
                 // -> devuelve todas las materias primas (paginadas)
-                Page<Material> todas = productoService.searchByName_MP("", page, size);
+                Page<Material> todas = productoService.searchByName_MP("", page, size, false, threshold);
                 return ResponseEntity.ok(todas);
             }
 
@@ -103,7 +105,7 @@ public class ProductoResource {
             return ResponseEntity.ok(resultado);
         } else {
             // Modo NOMBRE (incluye el caso search == "")
-            Page<Material> resultadoNombre = productoService.searchByName_MP(search, page, size);
+            Page<Material> resultadoNombre = productoService.searchByName_MP(search, page, size, fuzzy, threshold);
             return ResponseEntity.ok(resultadoNombre);
         }
     }
@@ -113,7 +115,9 @@ public class ProductoResource {
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam String search,
-            @RequestParam String tipoBusqueda)
+            @RequestParam String tipoBusqueda,
+            @RequestParam(value = "fuzzy", defaultValue = "false") boolean fuzzy,
+            @RequestParam(value = "threshold", defaultValue = "0.3") double threshold)
     {
         if(tipoBusqueda.equals("ID")){
             Optional<SemiTerminado> semiTerminadoOptional = productoService.findSemiTerminadoByProductoId(search);
@@ -125,7 +129,7 @@ public class ProductoResource {
                 return ResponseEntity.ok().body(new PageImpl<>(List.of(), PageRequest.of(page, size), 0));
             }
         } else{
-            return ResponseEntity.ok().body(productoService.searchByName_S(search, page, size));
+            return ResponseEntity.ok().body(productoService.searchByName_S(search, page, size, fuzzy, threshold));
         }
     }
 
@@ -201,7 +205,7 @@ public class ProductoResource {
             pageResult = new PageImpl<>(result, PageRequest.of(page, size), result.size());
         } else {
             // Search by name
-            pageResult = productoService.searchByName_S(search, page, size);
+            pageResult = productoService.searchByName_S(search, page, size, false, 0.3);
         }
 
         Page<TargetDTO> dtoPage = pageResult.map(TargetDTO::fromProducto);
