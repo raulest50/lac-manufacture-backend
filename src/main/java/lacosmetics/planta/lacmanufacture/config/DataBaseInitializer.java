@@ -15,6 +15,7 @@ public class DataBaseInitializer {
     private final UsersInitializer usersInitializer;
     private final CargaMasiva cargaMasiva;
     private final CuentasInitializer cuentasInitializer;
+    private final MasterDirectiveInitializer masterDirectiveInitializer;
     private final AccesoRepository accesoRepository;
 
     private static final Logger log = LoggerFactory.getLogger(DataBaseInitializer.class);
@@ -29,6 +30,7 @@ public class DataBaseInitializer {
                 usersInitializer.initializeUsers();
                 //cargaMasiva.executeCargaMasiva();
                 cuentasInitializer.initializeCuentas();
+                masterDirectiveInitializer.initializeMasterDirectives();
             } else { // if already initialzed then do nothing
                 log.info("Database is already initialized. Skipping insert initialization.");
             }
