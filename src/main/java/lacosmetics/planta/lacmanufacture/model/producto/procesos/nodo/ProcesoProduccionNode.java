@@ -1,5 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccion;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import java.util.List;
 @Table(name = "proceso_produccion_node")
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProcesoProduccionNode {
 
     @Id
