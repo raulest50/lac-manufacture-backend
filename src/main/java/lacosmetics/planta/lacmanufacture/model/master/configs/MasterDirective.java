@@ -29,10 +29,17 @@ public class MasterDirective {
     private String resumen;
 
     /**
-     * para soportar cualquier tipo,
-     * booleano, TRUE, FALSE, 1020050 (topes monetarios), cualquier cosa
+     * Valor almacenado como string para soportar cualquier tipo de dato.
+     * Debe interpretarse según el tipo especificado en el campo 'tipoDato'.
      */
     private String valor;
+
+    /**
+     * Especifica el tipo de dato almacenado en el campo 'valor'.
+     * Facilita la conversión y validación del valor almacenado.
+     */
+    @Enumerated(EnumType.STRING)
+    private TipoDato tipoDato;
 
 
     @Enumerated(EnumType.STRING)
@@ -45,6 +52,18 @@ public class MasterDirective {
 
     public enum GRUPO {
         FLEXIBILIDAD_CONTROL,
+    }
+
+    /**
+     * Tipos de datos soportados por el sistema de directivas.
+     */
+    public enum TipoDato {
+        TEXTO,
+        NUMERO,
+        DECIMAL,
+        BOOLEANO,
+        FECHA,
+        JSON
     }
 
 }
