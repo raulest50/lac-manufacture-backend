@@ -38,4 +38,7 @@ public class ProcesoProduccionCompleto {
 
     @Column(name = "rendimiento_teorico")
     private double rendimientoTeorico;
+
+    @Lob
+    private String diagramaJson;
 }

@@ -53,6 +53,11 @@ public class ProductoService {
         return productoRepo.findAll(PageRequest.of(page, size));
     }
 
+    @Transactional(readOnly = true)
+    public Optional<Producto> findProductoById(String productoId) {
+        return productoRepo.findById(productoId);
+    }
+
     /**
      * no longer to be used to save a materia prima
      * @param producto

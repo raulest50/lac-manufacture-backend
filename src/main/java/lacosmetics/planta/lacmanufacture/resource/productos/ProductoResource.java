@@ -141,6 +141,13 @@ public class ProductoResource {
         return ResponseEntity.ok().body(productos);
     }
 
+    @GetMapping("/{productoId}")
+    public ResponseEntity<Producto> getProductoById(@PathVariable String productoId) {
+        return productoService.findProductoById(productoId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
     @GetMapping("/{productoId}/insumos_with_stock")
     public ResponseEntity<List<InsumoWithStockDTO>> getInsumosWithStock(@PathVariable String productoId) {
