@@ -70,9 +70,9 @@ public class DocumentPdfService {
             
             // Add totals
             addTotals(document, orden);
-            
+
             // Add observations
-            addObservations(document);
+            addObservations(document, orden);
             
             document.close();
             
@@ -276,22 +276,21 @@ public class DocumentPdfService {
         document.add(Chunk.NEWLINE);
     }
     
-    private void addObservations(Document document) throws DocumentException {
+    private void addObservations(Document document, OrdenCompraMateriales orden) throws DocumentException {
         Font headerFont = new Font(Font.FontFamily.HELVETICA, 14, Font.NORMAL, new BaseColor(242, 220, 219));
-        
+
         Paragraph header = new Paragraph("OBSERVACIONES", headerFont);
         header.setAlignment(Element.ALIGN_LEFT);
         document.add(header);
-        
-        // Add empty space for observations
+
         PdfPTable table = new PdfPTable(1);
         table.setWidthPercentage(100);
-        
-        PdfPCell cell = new PdfPCell();
-        cell.setFixedHeight(100);
+
+        String obs = orden.getObservaciones() != null ? orden.getObservaciones() : "\n";
+        PdfPCell cell = new PdfPCell(new Phrase(obs));
         cell.setBorder(Rectangle.BOX);
         table.addCell(cell);
-        
+
         document.add(table);
     }
     
