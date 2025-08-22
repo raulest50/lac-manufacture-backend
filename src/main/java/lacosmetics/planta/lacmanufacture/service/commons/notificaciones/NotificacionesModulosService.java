@@ -93,8 +93,8 @@ public class NotificacionesModulosService {
                     case ADMINISTRACION_ALERTAS:
                         notification = checkNotificacionesAdministracionAlertas(user);
                         break;
-                    case MASTER_CONFIGS:
-                        notification = checkNotificacionesMasterConfigs(user);
+                    case MASTER_DIRECTIVES:
+                        notification = checkNotificacionesMasterDirectives(user);
                         break;
                     case CRONOGRAMA:
                         notification = checkNotificacionesCronograma(user);
@@ -349,13 +349,13 @@ public class NotificacionesModulosService {
     }
 
     /**
-     * Verifica si hay notificaciones para el módulo MASTER_CONFIGS
+     * Verifica si hay notificaciones para el módulo MASTER_DIRECTIVES
      * @param user Usuario para el que se verifican las notificaciones
      * @return Objeto con información de notificación
      */
-    public ModuleNotificationDTA checkNotificacionesMasterConfigs(User user) {
+    public ModuleNotificationDTA checkNotificacionesMasterDirectives(User user) {
         ModuleNotificationDTA notification = new ModuleNotificationDTA();
-        notification.setModulo(Modulo.MASTER_CONFIGS);
+        notification.setModulo(Modulo.MASTER_DIRECTIVES);
         notification.setRequireAtention(false);
         notification.setMessage("");
         return notification;

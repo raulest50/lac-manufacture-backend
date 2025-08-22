@@ -44,7 +44,7 @@ public class Acceso {
         BINTELLIGENCE,
         CARGA_MASIVA, // nuevos endpoints de aca para abajo
         ADMINISTRACION_ALERTAS,
-        MASTER_CONFIGS,
+        MASTER_DIRECTIVES,
         CRONOGRAMA,
         ORGANIGRAMA,
         PAGOS_PROVEEDORES
