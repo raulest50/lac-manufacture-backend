@@ -51,9 +51,16 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.MovimientoExcelRequestDTO;
 
 @Service
 @Slf4j
@@ -436,5 +443,40 @@ public class MovimientosService {
 
         // Save the transaction
         return transaccionAlmacenHeaderRepo.save(transaccion);
+    }
+
+    public byte[] generateMovimientosExcel(MovimientoExcelRequestDTO dto) {
+        LocalDateTime startDateTime = dto.getStartDate().atStartOfDay();
+        LocalDateTime endDateTime = dto.getEndDate().atTime(LocalTime.MAX);
+
+        Double totalAcumulado = transaccionAlmacenRepo.findTotalCantidadByProductoIdAndFechaMovimientoBefore(dto.getProductoId(), startDateTime);
+        totalAcumulado = totalAcumulado != null ? totalAcumulado : 0.0;
+
+        List<Movimiento> movimientos = transaccionAlmacenRepo
+                .findByProducto_ProductoIdAndFechaMovimientoBetweenOrderByFechaMovimientoAsc(
+                        dto.getProductoId(), startDateTime, endDateTime);
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            var sheet = workbook.createSheet("Movimientos");
+
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("Total hasta " + dto.getStartDate());
+            header.createCell(1).setCellValue(totalAcumulado);
+
+            int rowIdx = 1;
+            for (Movimiento mov : movimientos) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(mov.getFechaMovimiento().toString());
+                row.createCell(1).setCellValue(mov.getTipoMovimiento().name());
+                row.createCell(2).setCellValue(mov.getCantidad());
+                row.createCell(3).setCellValue(mov.getAlmacen() != null ? mov.getAlmacen().name() : "");
+            }
+
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Error generating Excel", e);
+        }
     }
 }

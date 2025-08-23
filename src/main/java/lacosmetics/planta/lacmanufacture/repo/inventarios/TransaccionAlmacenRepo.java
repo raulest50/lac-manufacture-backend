@@ -8,12 +8,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TransaccionAlmacenRepo extends JpaRepository<Movimiento, Integer> {
 
     @Query("SELECT COALESCE(SUM(m.cantidad), 0) FROM Movimiento m WHERE m.producto.productoId = :productoId")
     Double findTotalCantidadByProductoId(@Param("productoId") String productoId);
+
+    @Query("SELECT COALESCE(SUM(m.cantidad), 0) FROM Movimiento m WHERE m.producto.productoId = :productoId AND m.fechaMovimiento < :fecha")
+    Double findTotalCantidadByProductoIdAndFechaMovimientoBefore(@Param("productoId") String productoId, @Param("fecha") LocalDateTime fecha);
 
     List<Movimiento> findMovimientosByCantidad(Double cantidad);
 
@@ -22,6 +26,8 @@ public interface TransaccionAlmacenRepo extends JpaRepository<Movimiento, Intege
 
     // New method
     Page<Movimiento> findByProducto_ProductoIdOrderByFechaMovimientoDesc(String productoId, Pageable pageable);
+
+    List<Movimiento> findByProducto_ProductoIdAndFechaMovimientoBetweenOrderByFechaMovimientoAsc(String productoId, LocalDateTime start, LocalDateTime end);
 
     /**
      * Encuentra lotes con stock disponible para un producto específico,
