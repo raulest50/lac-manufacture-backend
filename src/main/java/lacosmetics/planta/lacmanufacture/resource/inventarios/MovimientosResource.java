@@ -3,12 +3,14 @@ package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.MovimientoExcelRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.inventarios.MovimientosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +33,15 @@ public class MovimientosResource {
     ) {
         Page<ProductoStockDTO> result = movimientoService.searchProductsWithStock(searchTerm, tipoBusqueda, page, size);
         return ResponseEntity.ok().body(result);
+    }
+
+    @PostMapping("/exportar-movimientos-excel")
+    public ResponseEntity<byte[]> exportMovimientosExcel(@RequestBody MovimientoExcelRequestDTO dto) {
+        byte[] excel = movimientoService.generateMovimientosExcel(dto);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"movimientos.xlsx\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(excel);
     }
 
     // New endpoint to get movimientos for a product
