@@ -1,7 +1,9 @@
 package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushNoPlanificadoDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionNoPlanificadaDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.MovimientoExcelRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
@@ -65,6 +67,28 @@ public class MovimientosResource {
     @PostMapping("/dispensacion")
     public ResponseEntity<?> createDispensacion(@RequestBody DispensacionDTO dispensacionDTO) {
         TransaccionAlmacen transaccion = movimientoService.createDispensacion(dispensacionDTO);
+        return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
+            .body(transaccion);
+    }
+
+    /**
+     * Endpoint para crear una dispensación no planificada (sin orden de producción).
+     * Verifica la directiva "Permitir Consumo No Planificado" antes de permitir la operación.
+     */
+    @PostMapping("/dispensacion-no-planificada")
+    public ResponseEntity<?> createDispensacionNoPlanificada(@RequestBody DispensacionNoPlanificadaDTO dispensacionDTO) {
+        TransaccionAlmacen transaccion = movimientoService.createDispensacionNoPlanificada(dispensacionDTO);
+        return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
+            .body(transaccion);
+    }
+
+    /**
+     * Endpoint para crear un backflush no planificado (sin orden de producción).
+     * Verifica la directiva "Permitir Backflush No Planificado" antes de permitir la operación.
+     */
+    @PostMapping("/backflush-no-planificado")
+    public ResponseEntity<?> createBackflushNoPlanificado(@RequestBody BackflushNoPlanificadoDTO backflushDTO) {
+        TransaccionAlmacen transaccion = movimientoService.createBackflushNoPlanificado(backflushDTO);
         return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
             .body(transaccion);
     }

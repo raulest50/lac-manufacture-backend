@@ -19,6 +19,7 @@ public enum CuentaContableCodigo {
     // Gastos
     GASTO_POR_SCRAP("5200"),
     PERDIDAS_POR_AJUSTES_INVENTARIO("5300"),
+    GASTOS_PRODUCCION("5400"),
 
     // Otros códigos según necesidad...
     ;

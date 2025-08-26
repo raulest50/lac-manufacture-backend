@@ -8,6 +8,7 @@ import lacosmetics.planta.lacmanufacture.model.contabilidad.LineaAsientoContable
 import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchIncorporacionActivo;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.repo.activos.fijos.gestion.IncorporacionActivoHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.contabilidad.AsientoContableRepo;
 import lacosmetics.planta.lacmanufacture.repo.contabilidad.CuentaContableRepo;
@@ -236,6 +237,112 @@ public class ContabilidadService {
 
         // Aquí se agregarían las líneas del asiento según la lógica contable específica
         // Por ahora, dejamos este método como un placeholder
+
+        return asientoContableRepo.save(asiento);
+    }
+
+    /**
+     * Registra un asiento contable para un consumo no planificado de materiales
+     * 
+     * @param transaccion La transacción de almacén
+     * @param montoTotal El monto total de la transacción
+     * @return El asiento contable creado
+     */
+    public AsientoContable registrarAsientoConsumoNoPlanificado(
+            TransaccionAlmacen transaccion, 
+            BigDecimal montoTotal) {
+
+        // Validar que las cuentas existan
+        validarCuentasExisten(
+            CuentaContableCodigo.INVENTARIO_MATERIAS_PRIMAS.getCodigo(),
+            CuentaContableCodigo.GASTOS_PRODUCCION.getCodigo()
+        );
+
+        AsientoContable asiento = new AsientoContable();
+        asiento.setFecha(LocalDateTime.now());
+        asiento.setDescripcion("Consumo no planificado de materiales");
+        asiento.setModulo("INVENTARIO");
+        asiento.setDocumentoOrigen("DISP-NP-" + transaccion.getTransaccionId());
+        asiento.setEstado(AsientoContable.EstadoAsiento.PUBLICADO);
+
+        List<LineaAsientoContable> lineas = new ArrayList<>();
+
+        // 1. Débito a Gastos de Producción
+        lineas.add(crearLineaAsiento(
+            asiento,
+            CuentaContableCodigo.GASTOS_PRODUCCION.getCodigo(),
+            montoTotal,
+            BigDecimal.ZERO,
+            "Consumo no planificado de materiales"
+        ));
+
+        // 2. Crédito a Inventario Materias Primas
+        lineas.add(crearLineaAsiento(
+            asiento,
+            CuentaContableCodigo.INVENTARIO_MATERIAS_PRIMAS.getCodigo(),
+            BigDecimal.ZERO,
+            montoTotal,
+            "Salida de materiales por consumo no planificado"
+        ));
+
+        asiento.setLineas(lineas);
+
+        // Validar que el asiento esté balanceado
+        validarCuadreContable(asiento);
+
+        return asientoContableRepo.save(asiento);
+    }
+
+    /**
+     * Registra un asiento contable para un backflush no planificado
+     * 
+     * @param transaccion La transacción de almacén
+     * @param producto El producto ingresado
+     * @param montoTotal El monto total de la transacción
+     * @return El asiento contable creado
+     */
+    public AsientoContable registrarAsientoBackflushNoPlanificado(
+            TransaccionAlmacen transaccion, 
+            Producto producto,
+            BigDecimal montoTotal) {
+
+        // Validar que las cuentas existan
+        validarCuentasExisten(
+            CuentaContableCodigo.INVENTARIO_PRODUCTOS_TERMINADOS.getCodigo(),
+            CuentaContableCodigo.INVENTARIO_WIP.getCodigo()
+        );
+
+        AsientoContable asiento = new AsientoContable();
+        asiento.setFecha(LocalDateTime.now());
+        asiento.setDescripcion("Ingreso no planificado de producto: " + producto.getNombre());
+        asiento.setModulo("INVENTARIO");
+        asiento.setDocumentoOrigen("BF-NP-" + transaccion.getTransaccionId());
+        asiento.setEstado(AsientoContable.EstadoAsiento.PUBLICADO);
+
+        List<LineaAsientoContable> lineas = new ArrayList<>();
+
+        // 1. Débito a Inventario Productos Terminados
+        lineas.add(crearLineaAsiento(
+            asiento,
+            CuentaContableCodigo.INVENTARIO_PRODUCTOS_TERMINADOS.getCodigo(),
+            montoTotal,
+            BigDecimal.ZERO,
+            "Ingreso de producto terminado a inventario"
+        ));
+
+        // 2. Crédito a Inventario WIP
+        lineas.add(crearLineaAsiento(
+            asiento,
+            CuentaContableCodigo.INVENTARIO_WIP.getCodigo(),
+            BigDecimal.ZERO,
+            montoTotal,
+            "Salida de WIP por backflush no planificado"
+        ));
+
+        asiento.setLineas(lineas);
+
+        // Validar que el asiento esté balanceado
+        validarCuadreContable(asiento);
 
         return asientoContableRepo.save(asiento);
     }
