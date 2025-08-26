@@ -13,6 +13,7 @@ import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionItemD
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionNoPlanificadaDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionNoPlanificadaItemDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.RecomendacionLotesRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
@@ -595,6 +596,156 @@ public class MovimientosService {
 
         // Save the transaction
         return transaccionAlmacenHeaderRepo.save(transaccion);
+    }
+
+    /**
+     * Recomienda lotes para dispensación de un producto específico.
+     * Utiliza la lógica de selección de lotes por fecha de vencimiento (FEFO).
+     * 
+     * @param productoId ID del producto a dispensar
+     * @param cantidadRequerida Cantidad total requerida
+     * @return DTO con los items recomendados para dispensación
+     */
+    public DispensacionNoPlanificadaDTO recomendarLotesParaDispensacion(String productoId, double cantidadRequerida) {
+        // Verificar que el producto existe
+        Producto producto = productoRepo.findById(productoId)
+            .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productoId));
+
+        // Obtener lotes con stock disponible para este producto
+        List<Object[]> lotesConStock;
+        try {
+            // Intentar primero con la consulta JPQL
+            lotesConStock = transaccionAlmacenRepo.findLotesWithStockByProductoIdOrderByExpirationDate(productoId);
+        } catch (Exception e) {
+            // Si falla, usar la consulta SQL nativa como alternativa
+            log.warn("Error al ejecutar consulta JPQL para lotes, usando SQL nativo: " + e.getMessage());
+            lotesConStock = transaccionAlmacenRepo.findLotesWithStockByProductoIdNative(productoId);
+        }
+
+        // Crear el DTO de respuesta
+        DispensacionNoPlanificadaDTO dispensacionDTO = new DispensacionNoPlanificadaDTO();
+        dispensacionDTO.setObservaciones("Recomendación automática de lotes para " + producto.getNombre());
+        dispensacionDTO.setItems(new ArrayList<>());
+
+        // Calcular cuánto tomar de cada lote
+        double cantidadRestante = cantidadRequerida;
+
+        for (Object[] result : lotesConStock) {
+            if (cantidadRestante <= 0) {
+                break;
+            }
+
+            try {
+                Lote lote;
+                Double stockDisponible;
+
+                // Intentar procesar como resultado de consulta JPQL
+                if (result[0] instanceof Lote) {
+                    lote = (Lote) result[0];
+                    stockDisponible = (Double) result[1];
+                } 
+                // Procesar como resultado de consulta SQL nativa
+                else {
+                    // Para SQL nativo, necesitamos buscar el lote por ID
+                    Long loteId = null;
+
+                    // El primer elemento podría ser un número (ID del lote)
+                    if (result[0] instanceof Number) {
+                        loteId = ((Number) result[0]).longValue();
+                    } 
+                    // O podría ser un mapa con los valores de las columnas
+                    else if (result[0] instanceof Map) {
+                        Map<String, Object> map = (Map<String, Object>) result[0];
+                        loteId = ((Number) map.get("id")).longValue();
+                    }
+
+                    // Si no pudimos obtener el ID del lote, continuamos con el siguiente
+                    if (loteId == null) {
+                        log.warn("No se pudo obtener el ID del lote del resultado de la consulta");
+                        continue;
+                    }
+
+                    // Buscar el lote por ID
+                    Optional<Lote> optionalLote = loteRepo.findById(loteId);
+                    if (!optionalLote.isPresent()) {
+                        log.warn("No se encontró el lote con ID: " + loteId);
+                        continue;
+                    }
+
+                    lote = optionalLote.get();
+
+                    // El stock disponible podría estar en diferentes posiciones según la consulta
+                    if (result.length > 1 && result[1] instanceof Number) {
+                        stockDisponible = ((Number) result[1]).doubleValue();
+                    } else {
+                        log.warn("No se pudo obtener el stock disponible del resultado de la consulta");
+                        continue;
+                    }
+                }
+
+                double cantidadAUsar = Math.min(stockDisponible, cantidadRestante);
+
+                // Crear un item de dispensación para este lote
+                DispensacionNoPlanificadaItemDTO item = new DispensacionNoPlanificadaItemDTO();
+                item.setProductoId(productoId);
+                item.setCantidad(cantidadAUsar);
+                item.setLoteId(lote.getId().intValue());
+
+                dispensacionDTO.getItems().add(item);
+
+                cantidadRestante -= cantidadAUsar;
+            } catch (Exception e) {
+                log.error("Error al procesar lote recomendado: " + e.getMessage(), e);
+                // Continuamos con el siguiente lote
+            }
+        }
+
+        // Verificar si se pudo satisfacer toda la cantidad requerida
+        if (cantidadRestante > 0) {
+            log.warn("No hay suficiente stock para satisfacer la cantidad requerida. Faltante: " + cantidadRestante);
+            dispensacionDTO.setObservaciones(dispensacionDTO.getObservaciones() + 
+                ". ADVERTENCIA: Stock insuficiente. Faltante: " + cantidadRestante);
+        }
+
+        return dispensacionDTO;
+    }
+
+    /**
+     * Recomienda lotes para dispensación de múltiples productos.
+     * Procesa cada solicitud individualmente y combina los resultados en un solo DTO.
+     * 
+     * @param items Lista de solicitudes de recomendación (producto y cantidad)
+     * @return DTO con todos los items recomendados para dispensación
+     */
+    public DispensacionNoPlanificadaDTO recomendarLotesParaDispensacionMultiple(List<RecomendacionLotesRequestDTO> items) {
+        // Crear el DTO de respuesta
+        DispensacionNoPlanificadaDTO dispensacionDTO = new DispensacionNoPlanificadaDTO();
+        dispensacionDTO.setObservaciones("Recomendación automática de lotes para múltiples productos");
+        dispensacionDTO.setItems(new ArrayList<>());
+
+        // Procesar cada solicitud
+        for (RecomendacionLotesRequestDTO item : items) {
+            try {
+                // Obtener recomendación para este producto
+                DispensacionNoPlanificadaDTO recomendacionIndividual = recomendarLotesParaDispensacion(
+                        item.getProductoId(), item.getCantidad());
+
+                // Agregar los items recomendados a la respuesta
+                dispensacionDTO.getItems().addAll(recomendacionIndividual.getItems());
+
+                // Si hubo alguna advertencia, agregarla a las observaciones
+                if (recomendacionIndividual.getObservaciones().contains("ADVERTENCIA")) {
+                    dispensacionDTO.setObservaciones(dispensacionDTO.getObservaciones() + 
+                        "\n" + recomendacionIndividual.getObservaciones());
+                }
+            } catch (Exception e) {
+                log.error("Error al procesar recomendación para producto " + item.getProductoId() + ": " + e.getMessage(), e);
+                dispensacionDTO.setObservaciones(dispensacionDTO.getObservaciones() + 
+                    "\nError al procesar producto " + item.getProductoId() + ": " + e.getMessage());
+            }
+        }
+
+        return dispensacionDTO;
     }
 
     public byte[] generateMovimientosExcel(MovimientoExcelRequestDTO dto) {

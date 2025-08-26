@@ -5,6 +5,8 @@ import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushNoPlanif
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionNoPlanificadaDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.RecomendacionLotesRequestDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.RecomendacionLotesMultipleRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.MovimientoExcelRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
@@ -91,6 +93,30 @@ public class MovimientosResource {
         TransaccionAlmacen transaccion = movimientoService.createBackflushNoPlanificado(backflushDTO);
         return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
             .body(transaccion);
+    }
+
+    /**
+     * Endpoint para obtener recomendaciones de lotes para dispensación.
+     * Recibe un producto y cantidad, y devuelve los lotes recomendados para tomar.
+     */
+    @PostMapping("/recomendar-lotes")
+    public ResponseEntity<DispensacionNoPlanificadaDTO> recomendarLotes(
+            @RequestBody RecomendacionLotesRequestDTO requestDTO) {
+        DispensacionNoPlanificadaDTO recomendacion = movimientoService.recomendarLotesParaDispensacion(
+                requestDTO.getProductoId(), requestDTO.getCantidad());
+        return ResponseEntity.ok(recomendacion);
+    }
+
+    /**
+     * Endpoint para obtener recomendaciones de lotes para múltiples productos.
+     * Recibe una lista de productos y cantidades, y devuelve los lotes recomendados para todos ellos.
+     */
+    @PostMapping("/recomendar-lotes-multiple")
+    public ResponseEntity<DispensacionNoPlanificadaDTO> recomendarLotesMultiple(
+            @RequestBody RecomendacionLotesMultipleRequestDTO requestDTO) {
+        DispensacionNoPlanificadaDTO recomendacion = movimientoService.recomendarLotesParaDispensacionMultiple(
+                requestDTO.getItems());
+        return ResponseEntity.ok(recomendacion);
     }
 
 
