@@ -30,6 +30,10 @@ public class MasterDirectiveService {
         return new DTO_All_MasterDirectives(masterDirectives);
     }
 
+    public Optional<MasterDirective> getByNombre(String nombre) {
+        return masterDirectiveRepo.findByNombre(nombre);
+    }
+
     /**
      * Actualiza una directiva maestra
      * @param updateDTO DTO con la directiva original y la nueva directiva
