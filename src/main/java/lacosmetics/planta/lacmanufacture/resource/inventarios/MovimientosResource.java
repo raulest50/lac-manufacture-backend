@@ -6,6 +6,7 @@ import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushMultiple
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionNoPlanificadaDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.LoteDisponibleResponseDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.RecomendacionLotesRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.RecomendacionLotesMultipleRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.MovimientoExcelRequestDTO;
@@ -28,7 +29,16 @@ public class MovimientosResource {
 
     private final MovimientosService movimientoService;
 
-    // New endpoint to search products with stock
+    /**
+     * Endpoint para buscar productos con stock disponible.
+     * Permite filtrar productos según un término de búsqueda y tipo de búsqueda específico.
+     * 
+     * @param searchTerm Término de búsqueda para filtrar productos
+     * @param tipoBusqueda Tipo de búsqueda (por nombre, código, etc.)
+     * @param page Número de página para paginación (base 0)
+     * @param size Tamaño de página para paginación
+     * @return Página de productos con información de stock
+     */
     @GetMapping("/search_products_with_stock")
     public ResponseEntity<Page<ProductoStockDTO>> searchProductsWithStock(
             @RequestParam String searchTerm,
@@ -40,6 +50,13 @@ public class MovimientosResource {
         return ResponseEntity.ok().body(result);
     }
 
+    /**
+     * Endpoint para exportar movimientos de inventario a un archivo Excel.
+     * Genera un reporte de movimientos según los criterios especificados en el DTO.
+     * 
+     * @param dto DTO con los parámetros para filtrar los movimientos a exportar
+     * @return Archivo Excel con los movimientos filtrados
+     */
     @PostMapping("/exportar-movimientos-excel")
     public ResponseEntity<byte[]> exportMovimientosExcel(@RequestBody MovimientoExcelRequestDTO dto) {
         byte[] excel = movimientoService.generateMovimientosExcel(dto);
@@ -49,7 +66,15 @@ public class MovimientosResource {
                 .body(excel);
     }
 
-    // New endpoint to get movimientos for a product
+    /**
+     * Endpoint para obtener los movimientos de inventario de un producto específico.
+     * Devuelve una lista paginada de movimientos ordenados por fecha descendente.
+     * 
+     * @param productoId ID del producto para filtrar los movimientos
+     * @param page Número de página para paginación (base 0)
+     * @param size Tamaño de página para paginación
+     * @return Página de movimientos del producto especificado
+     */
     @GetMapping("/get_movimientos_by_producto")
     public ResponseEntity<Page<Movimiento>> getMovimientosByProducto(
             @RequestParam String productoId,
@@ -60,6 +85,14 @@ public class MovimientosResource {
         return ResponseEntity.ok().body(movimientos);
     }
 
+    /**
+     * Endpoint para registrar un documento de ingreso de materiales por orden de compra.
+     * Permite adjuntar un archivo como soporte documental de la transacción.
+     * 
+     * @param docIngresoDTO DTO con la información del ingreso de materiales
+     * @param file Archivo adjunto como soporte documental (factura, guía de remisión, etc.)
+     * @return Respuesta con el resultado de la operación
+     */
     @PostMapping(value = "/save_doc_ingreso_oc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createDocIngreso(
             @RequestPart("docIngresoDTA") IngresoOCM_DTA docIngresoDTO,
@@ -67,6 +100,13 @@ public class MovimientosResource {
         return movimientoService.createDocIngreso(docIngresoDTO, file);
     }
 
+    /**
+     * Endpoint para crear una dispensación asociada a una orden de producción.
+     * Este endpoint maneja la salida de materiales del almacén para ejecutar órdenes de producción.
+     * 
+     * @param dispensacionDTO Datos de la dispensación a crear
+     * @return La transacción de almacén creada
+     */
     @PostMapping("/dispensacion")
     public ResponseEntity<?> createDispensacion(@RequestBody DispensacionDTO dispensacionDTO) {
         TransaccionAlmacen transaccion = movimientoService.createDispensacion(dispensacionDTO);
@@ -131,6 +171,20 @@ public class MovimientosResource {
         TransaccionAlmacen transaccion = movimientoService.createBackflushMultipleNoPlanificado(backflushDTO);
         return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
             .body(transaccion);
+    }
+
+    /**
+     * Endpoint para obtener los lotes disponibles de un producto específico.
+     * Devuelve información detallada de cada lote, incluyendo fecha de vencimiento y cantidad disponible.
+     * 
+     * @param productoId ID del producto para consultar sus lotes
+     * @return Información de lotes disponibles con sus cantidades
+     */
+    @GetMapping("/lotes-disponibles")
+    public ResponseEntity<LoteDisponibleResponseDTO> getLotesDisponibles(
+            @RequestParam String productoId) {
+        LoteDisponibleResponseDTO lotesDisponibles = movimientoService.getLotesDisponiblesByProductoId(productoId);
+        return ResponseEntity.ok(lotesDisponibles);
     }
 
 

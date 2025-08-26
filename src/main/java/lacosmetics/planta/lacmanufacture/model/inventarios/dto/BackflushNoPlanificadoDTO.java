@@ -14,8 +14,25 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BackflushNoPlanificadoDTO {
+    /**
+     * ID del producto terminado a ingresar al inventario.
+     * Debe existir en el sistema como un producto de tipo Terminado o SemiTerminado.
+     */
     private String productoId;
+
+    /**
+     * Cantidad del producto a ingresar.
+     * Debe ser un valor positivo.
+     */
     private double cantidad;
+
+    /**
+     * Notas adicionales sobre este ingreso de producto.
+     */
     private String observaciones;
+
+    /**
+     * ID del usuario que realiza la operación.
+     */
     private int usuarioId;
 }
