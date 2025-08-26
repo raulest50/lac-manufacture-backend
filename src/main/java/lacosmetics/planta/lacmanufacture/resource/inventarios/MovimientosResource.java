@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushNoPlanificadoDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushMultipleNoPlanificadoDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionNoPlanificadaDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.IngresoOCM_DTA;
@@ -117,6 +118,19 @@ public class MovimientosResource {
         DispensacionNoPlanificadaDTO recomendacion = movimientoService.recomendarLotesParaDispensacionMultiple(
                 requestDTO.getItems());
         return ResponseEntity.ok(recomendacion);
+    }
+
+    /**
+     * Endpoint para crear múltiples backflush no planificados (sin orden de producción).
+     * Verifica la directiva "Permitir Backflush No Planificado" antes de permitir la operación.
+     * Permite especificar lotes para cada producto terminado.
+     */
+    @PostMapping("/backflush-multiple-no-planificado")
+    public ResponseEntity<?> createBackflushMultipleNoPlanificado(
+            @RequestBody BackflushMultipleNoPlanificadoDTO backflushDTO) {
+        TransaccionAlmacen transaccion = movimientoService.createBackflushMultipleNoPlanificado(backflushDTO);
+        return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
+            .body(transaccion);
     }
 
 

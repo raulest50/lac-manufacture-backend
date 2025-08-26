@@ -8,6 +8,8 @@ import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushNoPlanificadoDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushNoPlanificadoItemDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushMultipleNoPlanificadoDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionItemDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionNoPlanificadaDTO;
@@ -746,6 +748,108 @@ public class MovimientosService {
         }
 
         return dispensacionDTO;
+    }
+
+    /**
+     * Creates multiple unplanned backflush transactions without a production order.
+     * This method checks if unplanned backflush is allowed by system configuration.
+     * Allows specifying lots for each product.
+     * 
+     * @param backflushDTO The DTO containing the backflush information for multiple products
+     * @return The created transaction
+     */
+    @Transactional
+    public TransaccionAlmacen createBackflushMultipleNoPlanificado(BackflushMultipleNoPlanificadoDTO backflushDTO) {
+        // Check if unplanned backflush is allowed
+        MasterDirective directive = masterDirectiveRepo.findByNombre("Permitir Backflush No Planificado")
+            .orElseThrow(() -> new RuntimeException("Directiva de configuración no encontrada"));
+
+        if (!"true".equalsIgnoreCase(directive.getValor())) {
+            throw new RuntimeException("El backflush no planificado no está permitido según la configuración del sistema");
+        }
+
+        // Create the warehouse transaction
+        TransaccionAlmacen transaccion = new TransaccionAlmacen();
+        transaccion.setTipoEntidadCausante(TransaccionAlmacen.TipoEntidadCausante.OAA); // Usar OAA (Orden de Ajuste de Almacén)
+        transaccion.setIdEntidadCausante(0); // No hay entidad causante específica, usamos 0 en lugar de null
+        transaccion.setObservaciones(backflushDTO.getObservaciones());
+
+        // Get the current user
+        User user = userRepository.findById(Long.valueOf(backflushDTO.getUsuarioId()))
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + backflushDTO.getUsuarioId()));
+        transaccion.setUser(user);
+
+        // Create movements for each item
+        List<Movimiento> movimientos = new ArrayList<>();
+        BigDecimal montoTotalAsiento = BigDecimal.ZERO;
+
+        for (BackflushNoPlanificadoItemDTO item : backflushDTO.getItems()) {
+            // Get the product
+            Producto producto = productoRepo.findById(item.getProductoId())
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + item.getProductoId()));
+
+            // Create the movement
+            Movimiento movimiento = new Movimiento();
+            movimiento.setCantidad(item.getCantidad()); // Positive because it's an input
+            movimiento.setProducto(producto);
+            movimiento.setTipoMovimiento(Movimiento.TipoMovimiento.BACKFLUSH);
+            movimiento.setAlmacen(Movimiento.Almacen.GENERAL);
+            movimiento.setTransaccionAlmacen(transaccion);
+
+            // Handle lot assignment
+            if (item.getLoteId() != null) {
+                // Use existing lot if specified
+                Lote lote = loteRepo.findById(Long.valueOf(item.getLoteId()))
+                    .orElseThrow(() -> new RuntimeException("Lote no encontrado con ID: " + item.getLoteId()));
+                movimiento.setLote(lote);
+            } else {
+                // Generate a new batch for this product
+                Lote lote = new Lote();
+
+                // Use provided batch number or generate one
+                if (item.getBatchNumber() != null && !item.getBatchNumber().isEmpty()) {
+                    lote.setBatchNumber(item.getBatchNumber());
+                } else {
+                    lote.setBatchNumber(generateBatchNumber(producto));
+                }
+
+                lote.setProductionDate(LocalDate.now());
+                // No expiration date for now, as we don't have shelf life information
+                loteRepo.save(lote);
+
+                movimiento.setLote(lote);
+            }
+
+            movimientos.add(movimiento);
+
+            // Accumulate total amount for accounting entry
+            montoTotalAsiento = montoTotalAsiento.add(
+                BigDecimal.valueOf(item.getCantidad() * producto.getCosto())
+            );
+        }
+
+        transaccion.setMovimientosTransaccion(movimientos);
+
+        // Create accounting entry
+        try {
+            // We'll use the first product for the accounting entry description
+            Producto primerProducto = movimientos.get(0).getProducto();
+            String descripcionAsiento = backflushDTO.getItems().size() > 1 
+                ? "Ingreso múltiple de productos terminados" 
+                : "Ingreso de producto terminado: " + primerProducto.getNombre();
+
+            AsientoContable asiento = contabilidadService.registrarAsientoBackflushNoPlanificado(
+                transaccion, primerProducto, montoTotalAsiento);
+            transaccion.setAsientoContable(asiento);
+            transaccion.setEstadoContable(TransaccionAlmacen.EstadoContable.CONTABILIZADA);
+        } catch (Exception e) {
+            // Log error but continue with the transaction
+            log.error("Error al registrar asiento contable para backflush múltiple no planificado: " + e.getMessage(), e);
+            transaccion.setEstadoContable(TransaccionAlmacen.EstadoContable.PENDIENTE);
+        }
+
+        // Save the transaction
+        return transaccionAlmacenHeaderRepo.save(transaccion);
     }
 
     public byte[] generateMovimientosExcel(MovimientoExcelRequestDTO dto) {
