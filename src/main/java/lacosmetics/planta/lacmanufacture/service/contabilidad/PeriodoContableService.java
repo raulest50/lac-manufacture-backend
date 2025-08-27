@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +24,39 @@ public class PeriodoContableService {
 
     private final PeriodoContableRepo periodoContableRepo;
     private final AsientoContableRepo asientoContableRepo;
+
+    /**
+     * Obtiene un período contable para el mes especificado o lo crea si no existe.
+     * 
+     * @param yearMonth El mes y año para el período contable
+     * @return El período contable existente o uno nuevo
+     */
+    @Transactional
+    public PeriodoContable obtenerOCrearPeriodo(YearMonth yearMonth) {
+        LocalDate fechaInicio = yearMonth.atDay(1);
+        LocalDate fechaFin = yearMonth.atEndOfMonth();
+        String nombrePeriodo = yearMonth.getMonth().toString() + " " + yearMonth.getYear();
+
+        log.info("Buscando o creando período contable para {}", nombrePeriodo);
+
+        // Buscar si ya existe un período para este mes
+        Optional<PeriodoContable> periodoExistente = periodoContableRepo.findByFechaInicioAndFechaFin(fechaInicio, fechaFin);
+
+        if (periodoExistente.isPresent()) {
+            log.info("Período contable encontrado para {}", nombrePeriodo);
+            return periodoExistente.get();
+        }
+
+        // Crear nuevo período
+        log.info("Creando nuevo período contable para {}", nombrePeriodo);
+        PeriodoContable nuevoPeriodo = new PeriodoContable();
+        nuevoPeriodo.setFechaInicio(fechaInicio);
+        nuevoPeriodo.setFechaFin(fechaFin);
+        nuevoPeriodo.setNombre(nombrePeriodo);
+        nuevoPeriodo.setEstado(PeriodoContable.EstadoPeriodo.ABIERTO);
+
+        return periodoContableRepo.save(nuevoPeriodo);
+    }
 
     /**
      * Obtiene todos los períodos contables, opcionalmente filtrados por estado.

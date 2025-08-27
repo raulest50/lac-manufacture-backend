@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repositorio para la entidad PeriodoContable.
@@ -13,7 +14,7 @@ import java.util.List;
  */
 @Repository
 public interface PeriodoContableRepo extends JpaRepository<PeriodoContable, Long> {
-    
+
     /**
      * Encuentra períodos contables por su estado
      * 
@@ -21,7 +22,16 @@ public interface PeriodoContableRepo extends JpaRepository<PeriodoContable, Long
      * @return Lista de períodos contables con el estado especificado
      */
     List<PeriodoContable> findByEstado(PeriodoContable.EstadoPeriodo estado);
-    
+
+    /**
+     * Encuentra un período contable por sus fechas de inicio y fin exactas
+     * 
+     * @param fechaInicio Fecha de inicio del período
+     * @param fechaFin Fecha de fin del período
+     * @return Optional con el período contable si existe, vacío en caso contrario
+     */
+    Optional<PeriodoContable> findByFechaInicioAndFechaFin(LocalDate fechaInicio, LocalDate fechaFin);
+
     /**
      * Verifica si existe algún período contable que se solape con el rango de fechas dado
      * 

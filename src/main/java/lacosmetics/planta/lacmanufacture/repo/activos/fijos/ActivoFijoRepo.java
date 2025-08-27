@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.repo.activos.fijos;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ActivoFijoRepo extends JpaRepository<ActivoFijo, String>, JpaSpecificationExecutor<ActivoFijo> {
-    
+
     /**
      * Busca activos fijos por ubicación.
      * 
@@ -20,7 +21,7 @@ public interface ActivoFijoRepo extends JpaRepository<ActivoFijo, String>, JpaSp
      * @return Lista de activos fijos que coinciden con la ubicación especificada
      */
     java.util.List<ActivoFijo> findByUbicacion(String ubicacion);
-    
+
     /**
      * Busca activos fijos por responsable.
      * 
@@ -28,7 +29,7 @@ public interface ActivoFijoRepo extends JpaRepository<ActivoFijo, String>, JpaSp
      * @return Lista de activos fijos asignados al responsable especificado
      */
     java.util.List<ActivoFijo> findByResponsableId(long responsableId);
-    
+
     /**
      * Busca activos fijos por tipo.
      * 
@@ -36,4 +37,16 @@ public interface ActivoFijoRepo extends JpaRepository<ActivoFijo, String>, JpaSp
      * @return Lista de activos fijos del tipo especificado
      */
     java.util.List<ActivoFijo> findByTipoActivo(ActivoFijo.TipoActivo tipoActivo);
+
+    /**
+     * Encuentra activos fijos que pueden ser depreciados.
+     * Un activo es depreciable si:
+     * - Está activo (estado = 0)
+     * - Tiene valor de adquisición
+     * - Tiene vida útil definida mayor a 0
+     * 
+     * @return Lista de activos fijos depreciables
+     */
+    @Query("SELECT a FROM ActivoFijo a WHERE a.estado = 0 AND a.valorAdquisicion IS NOT NULL AND a.vidaUtilMeses > 0")
+    java.util.List<ActivoFijo> findActivosDepreciables();
 }
