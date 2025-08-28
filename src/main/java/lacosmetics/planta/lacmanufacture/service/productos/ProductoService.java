@@ -14,6 +14,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.*;
 import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
+import lacosmetics.planta.lacmanufacture.repo.compras.ItemOrdenCompraRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -45,6 +46,8 @@ public class ProductoService {
     private final InsumoRepo insumoRepository;
 
     private final TransaccionAlmacenRepo transaccionAlmacenRepo;
+
+    private final ItemOrdenCompraRepo itemOrdenCompraRepo;
 
     private final FileStorageService fileStorageService;
 
@@ -493,6 +496,27 @@ public class ProductoService {
      */
     public boolean existsById(String productoId) {
         return productoRepo.existsById(productoId);
+    }
+
+    public void deleteMaterial(String productoId) {
+        boolean hasOrdenCompra = itemOrdenCompraRepo.existsByMaterial_ProductoId(productoId);
+        boolean hasMovimientos = transaccionAlmacenRepo.existsByProducto_ProductoId(productoId);
+
+        if (hasOrdenCompra || hasMovimientos) {
+            StringBuilder message = new StringBuilder("No se puede eliminar el material porque está referenciado en ");
+            if (hasOrdenCompra) {
+                message.append("ítems de órdenes de compra");
+            }
+            if (hasMovimientos) {
+                if (hasOrdenCompra) {
+                    message.append(" y ");
+                }
+                message.append("transacciones de almacén");
+            }
+            throw new IllegalStateException(message.toString());
+        }
+
+        materialRepo.deleteById(productoId);
     }
 
 

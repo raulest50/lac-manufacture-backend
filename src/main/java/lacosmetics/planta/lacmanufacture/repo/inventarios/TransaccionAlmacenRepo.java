@@ -63,4 +63,6 @@ public interface TransaccionAlmacenRepo extends JpaRepository<Movimiento, Intege
                    "ORDER BY l.expiration_date ASC NULLS LAST", 
            nativeQuery = true)
     List<Object[]> findLotesWithStockByProductoIdNative(@Param("productoId") String productoId);
+
+    boolean existsByProducto_ProductoId(String productoId);
 }
