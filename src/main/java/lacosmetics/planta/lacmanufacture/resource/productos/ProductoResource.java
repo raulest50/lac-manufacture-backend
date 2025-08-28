@@ -271,4 +271,15 @@ public class ProductoResource {
         }
     }
 
+    @DeleteMapping("/{productoId}")
+    public ResponseEntity<Object> deleteMaterial(@PathVariable String productoId) {
+        try {
+            productoService.deleteMaterial(productoId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }
