@@ -199,7 +199,7 @@ public class ProductoResource {
      * @return Lista paginada de productos terminados que coinciden con los criterios
      */
     @PostMapping("/search_terminados_picker")
-    public ResponseEntity<Page<TargetDTO>> searchTerminadosPicker(
+    public ResponseEntity<Page<Terminado>> searchTerminadosPicker(
             @RequestBody DTO_SearchTerminado searchCriteria) {
         Page<Terminado> pageResult;
 
@@ -218,8 +218,8 @@ public class ProductoResource {
             pageResult = productoService.searchByName_T(searchTerm, page, size);
         }
 
-        Page<TargetDTO> dtoPage = pageResult.map(TargetDTO::fromProducto);
-        return ResponseEntity.ok(dtoPage);
+        // Ya no es necesario convertir a TargetDTO
+        return ResponseEntity.ok(pageResult);
     }
 
     // Endpoint para buscar semiterminados para la feuture de process designer
