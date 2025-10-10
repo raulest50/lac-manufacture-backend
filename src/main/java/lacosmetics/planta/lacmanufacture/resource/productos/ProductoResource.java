@@ -4,6 +4,7 @@ package lacosmetics.planta.lacmanufacture.resource.productos;
 import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.search.ProductoSearchCriteria;
+import lacosmetics.planta.lacmanufacture.model.producto.dto.search.DTO_SearchTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.procdesigner.TargetDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
@@ -182,6 +183,38 @@ public class ProductoResource {
             pageResult = new PageImpl<>(result, PageRequest.of(page, size), result.size());
         } else {
             // Search by name
+            pageResult = productoService.searchByName_T(searchTerm, page, size);
+        }
+
+        Page<TargetDTO> dtoPage = pageResult.map(TargetDTO::fromProducto);
+        return ResponseEntity.ok(dtoPage);
+    }
+
+    /**
+     * Endpoint para buscar productos terminados para el módulo de creación manual de órdenes de producción.
+     * Este endpoint es utilizado específicamente por el componente terminado picker en el proceso
+     * de creación de órdenes de producción.
+     * 
+     * @param searchCriteria Criterios de búsqueda para productos terminados
+     * @return Lista paginada de productos terminados que coinciden con los criterios
+     */
+    @PostMapping("/search_terminados_picker")
+    public ResponseEntity<Page<TargetDTO>> searchTerminadosPicker(
+            @RequestBody DTO_SearchTerminado searchCriteria) {
+        Page<Terminado> pageResult;
+
+        // Establecer valores predeterminados si no se proporcionan
+        int page = searchCriteria.getPage() != null ? searchCriteria.getPage() : 0;
+        int size = searchCriteria.getSize() != null ? searchCriteria.getSize() : 10;
+        String searchTerm = searchCriteria.getSearchTerm() != null ? searchCriteria.getSearchTerm() : "";
+
+        if (searchCriteria.getTipoBusqueda() == DTO_SearchTerminado.TipoBusqueda.ID) {
+            // Búsqueda por ID
+            Optional<Terminado> terminadoOpt = productoService.findTerminadoByProductoId(searchTerm);
+            List<Terminado> result = terminadoOpt.map(List::of).orElse(List.of());
+            pageResult = new PageImpl<>(result, PageRequest.of(page, size), result.size());
+        } else {
+            // Búsqueda por nombre (valor predeterminado)
             pageResult = productoService.searchByName_T(searchTerm, page, size);
         }
 
