@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -11,4 +13,13 @@ public class OrdenProduccionDTO_save {
     private String productoId;
     private String observaciones;
     private int numeroLotes = 1; // Valor por defecto: 1 lote
+
+    private LocalDateTime fechaLanzamiento;
+    private LocalDateTime fechaFinalPlanificada;
+
+    private String numeroPedidoComercial;
+    private String areaOperativa;
+    private String departamentoOperativo;
+
+    private String loteBatchNumber;
 }

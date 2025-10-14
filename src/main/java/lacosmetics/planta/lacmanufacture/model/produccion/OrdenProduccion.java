@@ -66,11 +66,18 @@ public class OrdenProduccion {
     private LocalDateTime fechaCreacion;
 
     /**
-     * instante a partir del cual se planea autorizar el inicio de la Orden de Produccion.
-     * nunca puede ser un instante pasado. El backend debe consultar el instante actual de
-     * tiempo para validar esto y no permitir registrar si se viola este principio.
+     * Instante planificado para autorizar el inicio de la orden. No puede ubicarse en el
+     * pasado y facilita la coordinación con ventas para asegurar recursos y prioridades.
      */
+    @Column(name = "fecha_lanzamiento")
     private LocalDateTime fechaLanzamiento;
+
+    /**
+     * Momento objetivo en el que la orden debería estar finalizada según el plan maestro.
+     * Facilita el seguimiento de compromisos con clientes y la detección temprana de desvíos.
+     */
+    @Column(name = "fecha_final_planificada")
+    private LocalDateTime fechaFinalPlanificada;
 
     /**
      * instante en el que realmente se inicia, o almenos que se reporta
@@ -81,6 +88,27 @@ public class OrdenProduccion {
      * instante en el que realmente se termina, o almenos que se reporta
      */
     private LocalDateTime fechaFinal;
+
+    /**
+     * Número de pedido comercial que origina la orden. Permite trazar el vínculo con ventas
+     * y responder consultas comerciales sobre la fabricación de cada compromiso.
+     */
+    @Column(name = "numero_pedido_comercial")
+    private String numeroPedidoComercial;
+
+    /**
+     * Área operativa encargada de ejecutar la orden. Favorece la coordinación entre equipos
+     * cuando existen múltiples células de producción.
+     */
+    @Column(name = "area_operativa")
+    private String areaOperativa;
+
+    /**
+     * Departamento operativo responsable de supervisar la orden. Permite asignar
+     * responsabilidades y escalar desvíos a la gerencia adecuada.
+     */
+    @Column(name = "departamento_operativo")
+    private String departamentoOperativo;
 
     @OneToOne
     @JoinColumn(name = "planificacion_id")
