@@ -73,7 +73,19 @@ public class ProduccionService {
         if (optionalProducto.isPresent()) {
             Producto producto = optionalProducto.get();
             OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getNumeroLotes());
+            ordenProduccion.setFechaLanzamiento(ordenProduccionDTO.getFechaLanzamiento());
+            ordenProduccion.setFechaFinalPlanificada(ordenProduccionDTO.getFechaFinalPlanificada());
+            ordenProduccion.setNumeroPedidoComercial(ordenProduccionDTO.getNumeroPedidoComercial());
+            ordenProduccion.setAreaOperativa(ordenProduccionDTO.getAreaOperativa());
+            ordenProduccion.setDepartamentoOperativo(ordenProduccionDTO.getDepartamentoOperativo());
             OrdenProduccion savedOrden = ordenProduccionRepo.save(ordenProduccion);
+
+            if (ordenProduccionDTO.getLoteBatchNumber() != null && !ordenProduccionDTO.getLoteBatchNumber().isBlank()) {
+                Lote lote = new Lote();
+                lote.setBatchNumber(ordenProduccionDTO.getLoteBatchNumber());
+                lote.setOrdenProduccion(savedOrden);
+                loteRepo.save(lote);
+            }
 
             // Create Movimiento entries for each Insumo
             for (OrdenSeguimiento ordenSeguimiento : savedOrden.getOrdenesSeguimiento()) {
@@ -121,9 +133,14 @@ public class ProduccionService {
         dto.setOrdenId(orden.getOrdenId());
         dto.setProductoNombre(orden.getProducto().getNombre());
         dto.setFechaInicio(orden.getFechaInicio());
+        dto.setFechaLanzamiento(orden.getFechaLanzamiento());
+        dto.setFechaFinalPlanificada(orden.getFechaFinalPlanificada());
         dto.setEstadoOrden(orden.getEstadoOrden());
         dto.setObservaciones(orden.getObservaciones());
         dto.setNumeroLotes(orden.getNumeroLotes());
+        dto.setNumeroPedidoComercial(orden.getNumeroPedidoComercial());
+        dto.setAreaOperativa(orden.getAreaOperativa());
+        dto.setDepartamentoOperativo(orden.getDepartamentoOperativo());
 
         List<OrdenSeguimientoDTO> seguimientoDTOs = orden.getOrdenesSeguimiento().stream()
                 .map(this::convertSeguimientoToDto)
