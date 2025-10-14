@@ -10,7 +10,7 @@ public class ProductoDTO {
     private String nombre;
     private String tipo_producto;
     private String observaciones;
-    private int costo;
+    private double costo;
     private String tipoUnidades;
     private double cantidadUnidad;
     private String fechaCreacion;

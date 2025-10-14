@@ -19,7 +19,7 @@ public class TargetDTO {
     private String productoId;
     private String nombre;
     private String observaciones;
-    private int costo;
+    private double costo;
     private String fechaCreacion; // sent as ISO string
     private String tipoUnidades;
     private double cantidadUnidad;

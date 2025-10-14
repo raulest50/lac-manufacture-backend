@@ -287,7 +287,7 @@ public class MovimientosService {
 
                 // Retrieve current stock
                 Double currentStockOpt = transaccionAlmacenRepo.findTotalCantidadByProductoId(material.getProductoId());
-                int nuevoCosto = getNuevoCosto(itemOrdenCompra, currentStockOpt, material);
+                double nuevoCosto = getNuevoCosto(itemOrdenCompra, currentStockOpt, material);
 
                 // Update MateriaPrima's costo
                 material.setCosto(nuevoCosto);
@@ -339,7 +339,7 @@ public class MovimientosService {
                 double cantidadRequerida = insumo.getCantidadRequerida();
                 newCosto += insumoCosto * cantidadRequerida;
             }
-            semiTerminado.setCosto((int) newCosto);
+            semiTerminado.setCosto(newCosto);
 
             // Save updated SemiTerminado
             semiTerminadoRepo.save(semiTerminado);
@@ -355,7 +355,7 @@ public class MovimientosService {
                 double cantidadRequerida = insumo.getCantidadRequerida();
                 newCosto += insumoCosto * cantidadRequerida;
             }
-            terminado.setCosto((int) newCosto);
+            terminado.setCosto(newCosto);
 
             // Save updated Terminado
             terminadoRepo.save(terminado);
@@ -375,7 +375,7 @@ public class MovimientosService {
     }
 
 
-    private static int getNuevoCosto(ItemOrdenCompra itemOrdenCompra, Double currentStockOpt, Material material) {
+    private static double getNuevoCosto(ItemOrdenCompra itemOrdenCompra, Double currentStockOpt, Material material) {
         double currentStock = (currentStockOpt != null) ? currentStockOpt : 0;
 
         // Retrieve current costo
@@ -391,7 +391,7 @@ public class MovimientosService {
         }
 
         double nuevoCosto = ((currentCosto * currentStock) + (incomingPrecio * incomingUnits)) / (currentStock + incomingUnits);
-        return  (int) Math.ceil(nuevoCosto);
+        return Math.ceil(nuevoCosto);
     }
 
     /**

@@ -795,11 +795,11 @@ public class BulkUploadService {
         }
 
         // Validar el costo unitario
-        int costoValue = 0;
+        double costoValue = 0.0;
         try {
             if (costoUnitario != null && !costoUnitario.trim().isEmpty()) {
                 String costoNormalized = costoUnitario.replace(",", ".");
-                costoValue = (int) Double.parseDouble(costoNormalized);
+                costoValue = Double.parseDouble(costoNormalized);
             }
         } catch (NumberFormatException e) {
             // Si hay error de formato, se maneja como si fuera 0

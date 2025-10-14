@@ -43,7 +43,7 @@ public abstract class Producto {
     private String observaciones;
 
     @Min(value=0, message = "El costo no puede ser negativo") // validacion en db engine
-    private int costo;
+    private double costo;
 
     /**
      * valores vigentes: 0%, 5% y 19%
