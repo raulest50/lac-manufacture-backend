@@ -12,10 +12,21 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Integer> {
 
     List<OrdenProduccion> findByEstadoOrden(int estadoOrden);
+
+    @EntityGraph(attributePaths = {
+            "producto",
+            "ordenesSeguimiento.insumo.producto",
+            "ordenesSeguimiento.recursosAsignados.recursoProduccion",
+            "ordenesSeguimiento.recursosAsignados.activoFijoAsignado",
+            "planificacionProduccion.recursosAsignados",
+            "procesoProduccionCompleto.procesosProduccion"
+    })
+    Optional<OrdenProduccion> findByIdWithDetalles(int ordenId);
 
 
     /**

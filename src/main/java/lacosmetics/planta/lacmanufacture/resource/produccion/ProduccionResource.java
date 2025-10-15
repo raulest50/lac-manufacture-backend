@@ -7,12 +7,16 @@ import lacosmetics.planta.lacmanufacture.model.dto.InsumoDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
+import lacosmetics.planta.lacmanufacture.service.produccion.ODPPdfGenerator;
 import lacosmetics.planta.lacmanufacture.service.produccion.ProduccionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +30,7 @@ import java.util.List;
 public class ProduccionResource {
 
     private final ProduccionService produccionService;
+    private final ODPPdfGenerator odpPdfGenerator;
 
     @GetMapping("/orden_produccion/{id}/insumos")
     public ResponseEntity<List<InsumoDTO>> getInsumosOrdenProduccion(@PathVariable int id) {
@@ -92,5 +97,23 @@ public class ProduccionResource {
 
 
 
+
+    @GetMapping("/orden_produccion/{id}/pdf")
+    public ResponseEntity<byte[]> downloadOrdenProduccionPdf(@PathVariable int id) {
+        try {
+            byte[] pdfBytes = odpPdfGenerator.generateOrdenProduccionPdf(id);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "orden-produccion-" + id + ".pdf");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }
