@@ -16,6 +16,7 @@ public class OrdenProduccionDTO {
     private int ordenId;
     private String productoNombre;  // producto.nombre
     private LocalDateTime fechaInicio;
+    private LocalDateTime fechaCreacion;
     private LocalDateTime fechaLanzamiento; // fecha planeada de autorización
     private LocalDateTime fechaFinalPlanificada; // fecha objetivo para terminar
     private int estadoOrden;        // 0: en produccion, 1: terminada
