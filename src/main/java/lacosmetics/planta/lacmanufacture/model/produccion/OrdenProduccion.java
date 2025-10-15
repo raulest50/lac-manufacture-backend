@@ -4,10 +4,7 @@ package lacosmetics.planta.lacmanufacture.model.produccion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
-import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
-import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.model.produccion.PlanificacionProduccion;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -120,29 +117,7 @@ public class OrdenProduccion {
         this.observaciones = observaciones;
         this.estadoOrden = 0;
         this.numeroLotes = numeroLotes > 0 ? numeroLotes : 1;
-
-        List<OrdenSeguimiento> ordenesSeguimiento = new ArrayList<>();
-        List<Insumo> insumos = new ArrayList<>();
-
-        if (producto instanceof Terminado) {
-            Terminado terminado = (Terminado) producto;
-            insumos = terminado.getInsumos();
-        } else if (producto instanceof SemiTerminado) {
-            SemiTerminado semiTerminado = (SemiTerminado) producto;
-            insumos = semiTerminado.getInsumos();
-        } else {
-            throw new IllegalArgumentException("El producto debe ser Terminado o SemiTerminado");
-        }
-
-        for (Insumo insumo : insumos) {
-            // Crear una copia del insumo con la cantidad ajustada
-            Insumo insumoAjustado = new Insumo();
-            insumoAjustado.setProducto(insumo.getProducto());
-            insumoAjustado.setCantidadRequerida(insumo.getCantidadRequerida() * numeroLotes);
-
-            ordenesSeguimiento.add(new OrdenSeguimiento(insumoAjustado, this));
-        }
-        this.ordenesSeguimiento = ordenesSeguimiento;
+        this.ordenesSeguimiento = new ArrayList<>();
     }
 
     // Mantener constructor anterior para compatibilidad

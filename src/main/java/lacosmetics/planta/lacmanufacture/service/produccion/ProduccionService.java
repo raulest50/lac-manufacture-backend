@@ -87,15 +87,18 @@ public class ProduccionService {
                 loteRepo.save(lote);
             }
 
-            // Create Movimiento entries for each Insumo
-            for (OrdenSeguimiento ordenSeguimiento : savedOrden.getOrdenesSeguimiento()) {
-                Insumo insumo = ordenSeguimiento.getInsumo();
-                Movimiento movimientoReal = new Movimiento();
-                movimientoReal.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
-                movimientoReal.setProducto(insumo.getProducto());
-                movimientoReal.setTipoMovimiento(Movimiento.TipoMovimiento.CONSUMO);
-                //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
-                transaccionAlmacenRepo.save(movimientoReal);
+            List<OrdenSeguimiento> ordenesSeguimiento = savedOrden.getOrdenesSeguimiento();
+            if (ordenesSeguimiento != null && !ordenesSeguimiento.isEmpty()) {
+                // Create Movimiento entries for each Insumo
+                for (OrdenSeguimiento ordenSeguimiento : ordenesSeguimiento) {
+                    Insumo insumo = ordenSeguimiento.getInsumo();
+                    Movimiento movimientoReal = new Movimiento();
+                    movimientoReal.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
+                    movimientoReal.setProducto(insumo.getProducto());
+                    movimientoReal.setTipoMovimiento(Movimiento.TipoMovimiento.CONSUMO);
+                    //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
+                    transaccionAlmacenRepo.save(movimientoReal);
+                }
             }
 
             return savedOrden;
