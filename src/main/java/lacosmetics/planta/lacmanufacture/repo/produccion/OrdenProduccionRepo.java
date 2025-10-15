@@ -29,9 +29,9 @@ public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Inte
      * @return Page of OrdenProduccion matching the criteria.
      */
     @EntityGraph(attributePaths = {"ordenesSeguimiento", "producto"})
-    @Query("SELECT o FROM OrdenProduccion o WHERE o.fechaInicio BETWEEN :startDate AND :endDate " +
-            "AND (:estadoOrden = 2 OR o.estadoOrden = :estadoOrden)")
-    Page<OrdenProduccion> findByFechaInicioBetweenAndEstadoOrden(
+    @Query("SELECT o FROM OrdenProduccion o WHERE o.fechaCreacion BETWEEN :startDate AND :endDate " +
+            "AND (:estadoOrden = 2 OR o.estadoOrden = :estadoOrden) ORDER BY o.fechaCreacion")
+    Page<OrdenProduccion> findByFechaCreacionBetweenAndEstadoOrden(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("estadoOrden") int estadoOrden,

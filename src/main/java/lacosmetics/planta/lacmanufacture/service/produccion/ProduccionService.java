@@ -115,7 +115,7 @@ public class ProduccionService {
             int estadoOrden,
             Pageable pageable
     ) {
-        Page<OrdenProduccion> page = ordenProduccionRepo.findByFechaInicioBetweenAndEstadoOrden(startDate, endDate, estadoOrden, pageable);
+        Page<OrdenProduccion> page = ordenProduccionRepo.findByFechaCreacionBetweenAndEstadoOrden(startDate, endDate, estadoOrden, pageable);
         // Initialize necessary associations
         page.getContent().forEach(orden -> {
             Hibernate.initialize(orden.getOrdenesSeguimiento());
@@ -136,6 +136,7 @@ public class ProduccionService {
         dto.setOrdenId(orden.getOrdenId());
         dto.setProductoNombre(orden.getProducto().getNombre());
         dto.setFechaInicio(orden.getFechaInicio());
+        dto.setFechaCreacion(orden.getFechaCreacion());
         dto.setFechaLanzamiento(orden.getFechaLanzamiento());
         dto.setFechaFinalPlanificada(orden.getFechaFinalPlanificada());
         dto.setEstadoOrden(orden.getEstadoOrden());
