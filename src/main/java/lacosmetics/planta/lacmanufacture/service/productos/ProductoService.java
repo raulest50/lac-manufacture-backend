@@ -251,25 +251,47 @@ public class ProductoService {
                 throw new RuntimeException("Producto must be Terminado or SemiTerminado");
             }
 
-            List<InsumoWithStockDTO> insumosWithStock = new ArrayList<>();
-            for (Insumo insumo : insumos) {
-                Producto insumoProducto = insumo.getProducto();
-                Double stockActual = transaccionAlmacenRepo.findTotalCantidadByProductoId(insumoProducto.getProductoId());
-                stockActual = (stockActual != null) ? stockActual : 0.0;
-
-                InsumoWithStockDTO dto = new InsumoWithStockDTO();
-                dto.setInsumoId(insumo.getInsumoId());
-                dto.setProductoId(insumoProducto.getProductoId());
-                dto.setProductoNombre(insumoProducto.getNombre());
-                dto.setCantidadRequerida(insumo.getCantidadRequerida());
-                dto.setStockActual(stockActual);
-
-                insumosWithStock.add(dto);
-            }
-            return insumosWithStock;
+            return getInsumosWithStockRecursive(insumos);
         } else {
             throw new RuntimeException("Producto not found");
         }
+    }
+
+    private List<InsumoWithStockDTO> getInsumosWithStockRecursive(List<Insumo> insumos) {
+        List<InsumoWithStockDTO> insumosWithStock = new ArrayList<>();
+
+        for (Insumo insumo : insumos) {
+            Producto insumoProducto = insumo.getProducto();
+            Double stockActual = transaccionAlmacenRepo.findTotalCantidadByProductoId(insumoProducto.getProductoId());
+            stockActual = (stockActual != null) ? stockActual : 0.0;
+
+            InsumoWithStockDTO dto = new InsumoWithStockDTO();
+            dto.setInsumoId(insumo.getInsumoId());
+            dto.setProductoId(insumoProducto.getProductoId());
+            dto.setProductoNombre(insumoProducto.getNombre());
+            dto.setCantidadRequerida(insumo.getCantidadRequerida());
+            dto.setStockActual(stockActual);
+            dto.setTipoUnidades(insumoProducto.getTipoUnidades());
+
+            // Establecer el tipo de producto basado en la instancia
+            if (insumoProducto instanceof Material) {
+                dto.setTipoProducto(InsumoWithStockDTO.TipoProducto.M);
+            } else if (insumoProducto instanceof SemiTerminado semiTerminado) {
+                dto.setTipoProducto(InsumoWithStockDTO.TipoProducto.S);
+
+                // Obtener recursivamente los insumos del semielaborado
+                List<Insumo> subInsumos = semiTerminado.getInsumos();
+                if (subInsumos != null && !subInsumos.isEmpty()) {
+                    dto.setSubInsumos(getInsumosWithStockRecursive(subInsumos));
+                }
+            } else if (insumoProducto instanceof Terminado) {
+                dto.setTipoProducto(InsumoWithStockDTO.TipoProducto.T);
+            }
+
+            insumosWithStock.add(dto);
+        }
+
+        return insumosWithStock;
     }
 
 
