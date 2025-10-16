@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
-import lacosmetics.planta.lacmanufacture.model.dto.InventarioExcelRequestDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.InventarioExcelRequestDTO;
 import lacosmetics.planta.lacmanufacture.service.inventarios.InventarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

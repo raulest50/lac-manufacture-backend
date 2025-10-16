@@ -1,10 +1,10 @@
-package lacosmetics.planta.lacmanufacture.model.dto;
+package lacosmetics.planta.lacmanufacture.model.produccion.dto;
+
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

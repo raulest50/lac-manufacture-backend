@@ -1,9 +1,9 @@
 package lacosmetics.planta.lacmanufacture.resource.commons;
 
 import jakarta.mail.MessagingException;
-import lacosmetics.planta.lacmanufacture.model.dto.email.EmailRequestDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.email.HtmlEmailRequestDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.email.MultipleRecipientsEmailRequestDTO;
+import lacosmetics.planta.lacmanufacture.model.commons.dto.email.EmailRequestDTO;
+import lacosmetics.planta.lacmanufacture.model.commons.dto.email.HtmlEmailRequestDTO;
+import lacosmetics.planta.lacmanufacture.model.commons.dto.email.MultipleRecipientsEmailRequestDTO;
 import lacosmetics.planta.lacmanufacture.service.commons.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

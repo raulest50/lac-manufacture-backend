@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto.email;
+package lacosmetics.planta.lacmanufacture.model.commons.dto.email;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

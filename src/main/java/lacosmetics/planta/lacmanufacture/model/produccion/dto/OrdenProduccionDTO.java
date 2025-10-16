@@ -1,13 +1,13 @@
-// In lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO.java
+// In lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO.java
 
-package lacosmetics.planta.lacmanufacture.model.dto;
+package lacosmetics.planta.lacmanufacture.model.produccion.dto;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @AllArgsConstructor

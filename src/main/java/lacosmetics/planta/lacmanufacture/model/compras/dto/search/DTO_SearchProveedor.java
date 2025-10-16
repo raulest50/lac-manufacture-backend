@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto.search;
+package lacosmetics.planta.lacmanufacture.model.compras.dto.search;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,8 +1,8 @@
 package lacosmetics.planta.lacmanufacture.service.commons;
 
 import lacosmetics.planta.lacmanufacture.config.StorageProperties;
-import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.BulkUploadResponseDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.MaterialBulkUploadMappingDTO;
+import lacosmetics.planta.lacmanufacture.model.commons.dto.bulkupload.BulkUploadResponseDTO;
+import lacosmetics.planta.lacmanufacture.model.commons.dto.bulkupload.MaterialBulkUploadMappingDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;

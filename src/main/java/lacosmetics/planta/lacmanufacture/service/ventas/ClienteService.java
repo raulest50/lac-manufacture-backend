@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.service.ventas;
 
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchCliente;
+import lacosmetics.planta.lacmanufacture.model.ventas.dto.search.DTO_SearchCliente;
 import lacosmetics.planta.lacmanufacture.model.ventas.Cliente;
 import lacosmetics.planta.lacmanufacture.repo.ventas.ClienteRepo;
 import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;

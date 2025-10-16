@@ -1,12 +1,12 @@
-package lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload;
+package lacosmetics.planta.lacmanufacture.model.commons.dto.bulkupload;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * DTO for representing the response from a bulk upload operation.

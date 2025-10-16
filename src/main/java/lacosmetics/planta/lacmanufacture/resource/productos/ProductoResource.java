@@ -1,8 +1,8 @@
 package lacosmetics.planta.lacmanufacture.resource.productos;
 
 
-import lacosmetics.planta.lacmanufacture.model.dto.InsumoWithStockDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
+import lacosmetics.planta.lacmanufacture.model.producto.dto.InsumoWithStockDTO;
+import lacosmetics.planta.lacmanufacture.model.producto.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.search.ProductoSearchCriteria;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.search.DTO_SearchTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.procdesigner.TargetDTO;

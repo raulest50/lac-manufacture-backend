@@ -1,11 +1,11 @@
-package lacosmetics.planta.lacmanufacture.model.dto;
+package lacosmetics.planta.lacmanufacture.model.produccion.dto;
+
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * DTO que representa un formulario de dispensación.

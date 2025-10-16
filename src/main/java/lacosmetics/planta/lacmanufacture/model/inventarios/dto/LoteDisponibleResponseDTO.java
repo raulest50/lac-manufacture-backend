@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model.inventarios.dto;
 
-import lacosmetics.planta.lacmanufacture.model.dto.LoteRecomendadoDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.LoteRecomendadoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

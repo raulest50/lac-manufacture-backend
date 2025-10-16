@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource.ventas;
 
 import jakarta.persistence.EntityNotFoundException;
-import lacosmetics.planta.lacmanufacture.model.dto.ventas.CrearVendedorDTO;
+import lacosmetics.planta.lacmanufacture.model.ventas.dto.CrearVendedorDTO;
 import lacosmetics.planta.lacmanufacture.model.ventas.Vendedor;
 import lacosmetics.planta.lacmanufacture.service.ventas.VendedorService;
 import lombok.RequiredArgsConstructor;

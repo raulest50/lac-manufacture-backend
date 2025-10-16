@@ -19,8 +19,8 @@ import lacosmetics.planta.lacmanufacture.model.inventarios.dto.LoteDisponibleRes
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.RecomendacionLotesRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
-import lacosmetics.planta.lacmanufacture.model.dto.LoteRecomendadoDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.LoteRecomendadoDTO;
+import lacosmetics.planta.lacmanufacture.model.producto.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;

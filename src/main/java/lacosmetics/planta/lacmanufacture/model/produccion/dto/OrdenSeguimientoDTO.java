@@ -1,6 +1,6 @@
-// In lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO.java
+// In lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenSeguimientoDTO.java
 
-package lacosmetics.planta.lacmanufacture.model.dto;
+package lacosmetics.planta.lacmanufacture.model.produccion.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

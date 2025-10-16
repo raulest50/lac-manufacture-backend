@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload;
+package lacosmetics.planta.lacmanufacture.model.commons.dto.bulkupload;
 
 import lombok.Data;
 

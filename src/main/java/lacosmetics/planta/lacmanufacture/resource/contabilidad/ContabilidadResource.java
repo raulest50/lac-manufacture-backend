@@ -2,8 +2,8 @@ package lacosmetics.planta.lacmanufacture.resource.contabilidad;
 
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.IncorporacionActivoHeader;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
-import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchIncorporacionActivo;
-import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchTransaccionAlmacen;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.dto.search.DTO_SearchIncorporacionActivo;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.dto.search.DTO_SearchTransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.service.contabilidad.ContabilidadService;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
