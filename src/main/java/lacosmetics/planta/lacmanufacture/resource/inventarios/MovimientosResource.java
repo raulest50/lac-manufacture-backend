@@ -12,7 +12,7 @@ import lacosmetics.planta.lacmanufacture.model.inventarios.dto.RecomendacionLote
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.MovimientoExcelRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
-import lacosmetics.planta.lacmanufacture.model.dto.ProductoStockDTO;
+import lacosmetics.planta.lacmanufacture.model.producto.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.service.inventarios.MovimientosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

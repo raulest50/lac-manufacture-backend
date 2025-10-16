@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource.ventas;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchCliente;
+import lacosmetics.planta.lacmanufacture.model.ventas.dto.search.DTO_SearchCliente;
 import lacosmetics.planta.lacmanufacture.model.ventas.Cliente;
 import lacosmetics.planta.lacmanufacture.service.ventas.ClienteService;
 import lombok.RequiredArgsConstructor;

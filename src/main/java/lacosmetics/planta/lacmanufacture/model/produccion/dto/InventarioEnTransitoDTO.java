@@ -1,9 +1,10 @@
-// src/main/java/lacosmetics/planta/lacmanufacture/model/dto/InventarioEnTransitoDTO.java
+// src/main/java/lacosmetics/planta/lacmanufacture/model/produccion/dto/InventarioEnTransitoDTO.java
 
-package lacosmetics.planta.lacmanufacture.model.dto;
+package lacosmetics.planta.lacmanufacture.model.produccion.dto;
+
+import java.util.List;
 
 import lombok.Data;
-import java.util.List;
 
 @Data
 public class InventarioEnTransitoDTO {

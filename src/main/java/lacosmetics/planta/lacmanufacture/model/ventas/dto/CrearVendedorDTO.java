@@ -1,12 +1,12 @@
-package lacosmetics.planta.lacmanufacture.model.dto.ventas;
+package lacosmetics.planta.lacmanufacture.model.ventas.dto;
+
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @Getter
 @Setter

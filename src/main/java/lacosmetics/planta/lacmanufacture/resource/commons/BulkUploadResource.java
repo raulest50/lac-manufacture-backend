@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource.commons;
 
-import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.BulkUploadResponseDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.commons.bulkupload.MaterialBulkUploadMappingDTO;
+import lacosmetics.planta.lacmanufacture.model.commons.dto.bulkupload.BulkUploadResponseDTO;
+import lacosmetics.planta.lacmanufacture.model.commons.dto.bulkupload.MaterialBulkUploadMappingDTO;
 import lacosmetics.planta.lacmanufacture.service.commons.BulkUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

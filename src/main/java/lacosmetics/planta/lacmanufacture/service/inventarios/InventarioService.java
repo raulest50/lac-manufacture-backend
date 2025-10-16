@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.service.inventarios;
 
-import lacosmetics.planta.lacmanufacture.model.dto.InventarioExcelRequestDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.InventarioExcelRequestDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;

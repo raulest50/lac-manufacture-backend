@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.service.compras;
 
 import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
-import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchProveedor;
+import lacosmetics.planta.lacmanufacture.model.compras.dto.search.DTO_SearchProveedor;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
 import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
 import lombok.RequiredArgsConstructor;

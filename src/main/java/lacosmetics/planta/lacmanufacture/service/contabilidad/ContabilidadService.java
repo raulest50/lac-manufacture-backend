@@ -5,7 +5,7 @@ import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.CuentaContableCodigo;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.LineaAsientoContable;
-import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchIncorporacionActivo;
+import lacosmetics.planta.lacmanufacture.model.contabilidad.dto.search.DTO_SearchIncorporacionActivo;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;

@@ -2,11 +2,11 @@ package lacosmetics.planta.lacmanufacture.resource.produccion;
 
 
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
-import lacosmetics.planta.lacmanufacture.model.dto.InventarioEnTransitoDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.InsumoDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO;
-import lacosmetics.planta.lacmanufacture.model.dto.OrdenProduccionDTO_save;
-import lacosmetics.planta.lacmanufacture.model.dto.OrdenSeguimientoDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.InventarioEnTransitoDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.InsumoDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO_save;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenSeguimientoDTO;
 import lacosmetics.planta.lacmanufacture.service.produccion.ProduccionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

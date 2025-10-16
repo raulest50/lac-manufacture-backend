@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.resource.compras;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
-import lacosmetics.planta.lacmanufacture.model.dto.search.DTO_SearchProveedor;
+import lacosmetics.planta.lacmanufacture.model.compras.dto.search.DTO_SearchProveedor;
 import lacosmetics.planta.lacmanufacture.service.compras.ProveedorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

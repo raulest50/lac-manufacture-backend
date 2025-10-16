@@ -1,8 +1,9 @@
-package lacosmetics.planta.lacmanufacture.model.dto;
+package lacosmetics.planta.lacmanufacture.model.producto.dto;
 
-import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Data;
 
 @Data
 public class InsumoWithStockDTO {
