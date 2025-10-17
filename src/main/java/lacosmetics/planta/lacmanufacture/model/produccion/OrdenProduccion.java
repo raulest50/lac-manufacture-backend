@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.produccion.PlanificacionProduccion;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +21,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class OrdenProduccion {
 
     @Id
@@ -52,8 +50,12 @@ public class OrdenProduccion {
 
     private String observaciones;
 
-    @Column(nullable = false)
-    private int numeroLotes = 1; // Valor por defecto: 1 lote
+    /**
+     * Cantidad total planificada a producir. Puede incluir fracciones y nunca debe ser
+     * inferior a una unidad para garantizar lotes viables.
+     */
+    @Column(name = "cantidad_producir", nullable = false)
+    private double cantidadProducir = 1.0; // Valor por defecto: 1.0 (al menos una unidad)
 
     /**
      * instante en el que se crea la orden de produccion en el sistema.
@@ -112,17 +114,25 @@ public class OrdenProduccion {
     @JsonManagedReference(value = "orden-planificacion")
     private PlanificacionProduccion planificacionProduccion;
 
-    public OrdenProduccion(Producto producto, String observaciones, int numeroLotes) {
+    public OrdenProduccion(Producto producto, String observaciones, double cantidadProducir) {
         this.producto = producto;
         this.observaciones = observaciones;
         this.estadoOrden = 0;
-        this.numeroLotes = numeroLotes > 0 ? numeroLotes : 1;
+        setCantidadProducir(cantidadProducir);
         this.ordenesSeguimiento = new ArrayList<>();
     }
 
     // Mantener constructor anterior para compatibilidad
     public OrdenProduccion(Producto producto, String observaciones) {
         this(producto, observaciones, 1);
+    }
+
+    public double getCantidadProducir() {
+        return cantidadProducir;
+    }
+
+    public void setCantidadProducir(double cantidadProducir) {
+        this.cantidadProducir = cantidadProducir >= 1.0 ? cantidadProducir : 1.0;
     }
 
 }

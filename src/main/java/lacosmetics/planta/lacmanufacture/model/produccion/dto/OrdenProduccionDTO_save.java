@@ -12,7 +12,7 @@ import lombok.Setter;
 public class OrdenProduccionDTO_save {
     private String productoId;
     private String observaciones;
-    private int numeroLotes = 1; // Valor por defecto: 1 lote
+    private double cantidadProducir = 1.0; // Valor por defecto: 1.0 unidades a producir
 
     private LocalDateTime fechaLanzamiento;
     private LocalDateTime fechaFinalPlanificada;

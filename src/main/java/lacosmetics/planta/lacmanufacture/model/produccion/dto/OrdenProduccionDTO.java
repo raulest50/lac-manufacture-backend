@@ -21,7 +21,7 @@ public class OrdenProduccionDTO {
     private LocalDateTime fechaFinalPlanificada; // fecha objetivo para terminar
     private int estadoOrden;        // 0: en produccion, 1: terminada
     private String observaciones;
-    private int numeroLotes;        // Número de lotes a producir
+    private double cantidadProducir = 1.0; // Cantidad planificada a producir (mínimo 1.0)
     private String numeroPedidoComercial; // pedido comercial origen
     private String areaOperativa; // área operativa que ejecuta
     private String departamentoOperativo; // departamento responsable de coordinar
