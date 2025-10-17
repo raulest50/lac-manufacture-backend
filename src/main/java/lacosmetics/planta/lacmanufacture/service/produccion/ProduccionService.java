@@ -72,7 +72,7 @@ public class ProduccionService {
         Optional<Producto> optionalProducto = productoRepo.findById(ordenProduccionDTO.getProductoId());
         if (optionalProducto.isPresent()) {
             Producto producto = optionalProducto.get();
-            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getNumeroLotes());
+            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getCantidadProducir());
             ordenProduccion.setFechaLanzamiento(ordenProduccionDTO.getFechaLanzamiento());
             ordenProduccion.setFechaFinalPlanificada(ordenProduccionDTO.getFechaFinalPlanificada());
             ordenProduccion.setNumeroPedidoComercial(ordenProduccionDTO.getNumeroPedidoComercial());
@@ -141,7 +141,7 @@ public class ProduccionService {
         dto.setFechaFinalPlanificada(orden.getFechaFinalPlanificada());
         dto.setEstadoOrden(orden.getEstadoOrden());
         dto.setObservaciones(orden.getObservaciones());
-        dto.setNumeroLotes(orden.getNumeroLotes());
+        dto.setCantidadProducir(orden.getCantidadProducir());
         dto.setNumeroPedidoComercial(orden.getNumeroPedidoComercial());
         dto.setAreaOperativa(orden.getAreaOperativa());
         dto.setDepartamentoOperativo(orden.getDepartamentoOperativo());
