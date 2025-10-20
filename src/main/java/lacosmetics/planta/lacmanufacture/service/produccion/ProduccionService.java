@@ -134,6 +134,7 @@ public class ProduccionService {
     private OrdenProduccionDTO convertToDto(OrdenProduccion orden) {
         OrdenProduccionDTO dto = new OrdenProduccionDTO();
         dto.setOrdenId(orden.getOrdenId());
+        dto.setProductoId(orden.getProducto().getProductoId());
         dto.setProductoNombre(orden.getProducto().getNombre());
         dto.setFechaInicio(orden.getFechaInicio());
         dto.setFechaCreacion(orden.getFechaCreacion());
