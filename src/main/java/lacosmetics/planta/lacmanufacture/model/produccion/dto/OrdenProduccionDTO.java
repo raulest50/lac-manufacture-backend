@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrdenProduccionDTO {
     private int ordenId;
+    private String productoId;
     private String productoNombre;  // producto.nombre
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaCreacion;
