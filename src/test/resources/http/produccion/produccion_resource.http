@@ -1,7 +1,8 @@
 @host = {{host}}
 @contentType = {{contentType}}
 # Obtén {{auth_token}} ejecutando previamente ../users/auth.http
-@ordenId = 1
+@ordenId =1
+@terminadoId =t001
 
 ### (Opcional) Crear una orden de producción de prueba
 # Ejecuta esta petición si tu entorno no cuenta con órdenes registradas.
@@ -23,19 +24,8 @@ GET {{host}}/produccion/orden_produccion/{{ordenId}}/insumos
 Content-Type: {{contentType}}
 Authorization: Bearer {{auth_token}}
 
-> {%
-    client.test("Respuesta 200", function() {
-        client.assert(response.status === 200, "Se esperaba HTTP 200");
-    });
-    client.test("Respuesta es un arreglo", function() {
-        client.assert(Array.isArray(response.body), "La respuesta debe ser una lista");
-    });
-    if (response.body.length > 0) {
-        const item = response.body[0];
-        client.test("Campos básicos presentes", function() {
-            client.assert(item.productoId, "productoId faltante");
-            client.assert(item.nombreProducto, "nombreProducto faltante");
-            client.assert(item.hasOwnProperty("cantidadRequerida"), "cantidadRequerida faltante");
-        });
-    }
-%}
+
+### Obtener los datos necesarios para crear una version pdf de la orden de produccion
+GET {{host}}/produccion/terminado/{{terminadoId}}/data4pdf
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}

@@ -14,10 +14,15 @@ import lacosmetics.planta.lacmanufacture.model.produccion.dto.DispensacionFormul
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.InventarioEnTransitoDTO;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.InsumoDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.LoteRecomendadoDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.ODP_Data4PDF;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenSeguimientoDTO;
+import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
+import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo.ProcesoProduccionNode;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.LoteRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
@@ -545,5 +550,92 @@ public class ProduccionService {
         formulario.setDispensaciones(dispensaciones);
 
         return formulario;
+    }
+    /**
+     * Obtiene los datos necesarios para generar un PDF de un producto terminado.
+     * Incluye el producto terminado, la lista de materiales, la lista de semiterminados
+     * y la lista de nombres de procesos.
+     * 
+     * @param terminadoId ID del producto terminado
+     * @return Objeto ODP_Data4PDF con la información necesaria
+     */
+    public ODP_Data4PDF getTerminadoData4PDF(String terminadoId) {
+        ODP_Data4PDF data = new ODP_Data4PDF();
+
+        // Obtener el producto terminado
+        Terminado terminado = terminadoRepo.findById(terminadoId)
+            .orElseThrow(() -> new RuntimeException("Producto terminado no encontrado con ID: " + terminadoId));
+
+        data.setTerminado(terminado);
+
+        // Separar insumos en materiales y semiterminados
+        List<Material> materials = new ArrayList<>();
+        List<SemiTerminado> semiterminados = new ArrayList<>();
+
+        for (Insumo insumo : terminado.getInsumos()) {
+            Producto producto = insumo.getProducto();
+            if (producto instanceof Material) {
+                materials.add((Material) producto);
+            } else if (producto instanceof SemiTerminado) {
+                semiterminados.add((SemiTerminado) producto);
+            }
+        }
+
+        data.setMaterials(materials);
+        data.setSemiterminados(semiterminados);
+
+        // Obtener nombres de procesos
+        data.setNombreProceso(getProcesoNombres(terminadoId));
+
+        return data;
+    }
+
+    /**
+     * Obtiene la lista de nombres de procesos asociados a un producto terminado
+     * y todos sus semiterminados, extrayendo los nombres específicamente de cada 
+     * nodo en la lista ProcesoProduccionNode.
+     * 
+     * @param terminadoId ID del producto terminado
+     * @return Lista de nombres de procesos
+     */
+    public List<String> getProcesoNombres(String terminadoId) {
+        Set<String> nombresProcesos = new HashSet<>();
+
+        // Obtener el producto terminado
+        Terminado terminado = terminadoRepo.findById(terminadoId)
+            .orElseThrow(() -> new RuntimeException("Producto terminado no encontrado con ID: " + terminadoId));
+
+        // Añadir procesos del producto terminado
+        if (terminado.getProcesoProduccionCompleto() != null && 
+            terminado.getProcesoProduccionCompleto().getProcesosProduccion() != null) {
+
+            for (ProcesoProduccionNode nodo : terminado.getProcesoProduccionCompleto().getProcesosProduccion()) {
+                if (nodo.getProcesoProduccion() != null) {
+                    // Extraer el nombre del proceso específicamente del nodo
+                    nombresProcesos.add(nodo.getProcesoProduccion().getNombre());
+                }
+            }
+        }
+
+        // Añadir procesos de cada semiterminado
+        for (Insumo insumo : terminado.getInsumos()) {
+            Producto producto = insumo.getProducto();
+            if (producto instanceof SemiTerminado) {
+                SemiTerminado semiterminado = (SemiTerminado) producto;
+
+                if (semiterminado.getProcesoProduccionCompleto() != null && 
+                    semiterminado.getProcesoProduccionCompleto().getProcesosProduccion() != null) {
+
+                    for (ProcesoProduccionNode nodo : semiterminado.getProcesoProduccionCompleto().getProcesosProduccion()) {
+                        if (nodo.getProcesoProduccion() != null) {
+                            // Extraer el nombre del proceso específicamente del nodo
+                            nombresProcesos.add(nodo.getProcesoProduccion().getNombre());
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(nombresProcesos);
     }
 }

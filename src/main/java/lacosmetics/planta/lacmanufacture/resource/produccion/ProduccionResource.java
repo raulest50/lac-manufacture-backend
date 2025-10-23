@@ -4,6 +4,7 @@ package lacosmetics.planta.lacmanufacture.resource.produccion;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.InventarioEnTransitoDTO;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.InsumoDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.ODP_Data4PDF;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO_save;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenSeguimientoDTO;
@@ -92,6 +93,16 @@ public class ProduccionResource {
 
 
 
-
+    /**
+     * Obtiene los datos necesarios para generar un PDF de un producto terminado.
+     * 
+     * @param id ID del producto terminado
+     * @return Objeto ODP_Data4PDF con la información necesaria
+     */
+    @GetMapping("/terminado/{id}/data4pdf")
+    public ResponseEntity<ODP_Data4PDF> getTerminadoData4PDF(@PathVariable String id) {
+        ODP_Data4PDF data = produccionService.getTerminadoData4PDF(id);
+        return ResponseEntity.ok(data);
+    }
 
 }
