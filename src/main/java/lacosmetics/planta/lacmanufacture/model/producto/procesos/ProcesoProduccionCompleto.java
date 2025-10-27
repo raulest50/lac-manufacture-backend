@@ -44,7 +44,6 @@ public class ProcesoProduccionCompleto {
     @JoinColumn(name = "area_produccion_id")
     private AreaProduccion areaProduccion;
 
-
     @Lob
     private String diagramaJson;
 }
