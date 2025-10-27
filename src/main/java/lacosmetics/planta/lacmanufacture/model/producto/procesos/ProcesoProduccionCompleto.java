@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo.ProcesoProduccionNode;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.AreaProduccion;
 import lombok.*;
 
 import java.util.List;
@@ -38,6 +39,11 @@ public class ProcesoProduccionCompleto {
 
     @Column(name = "rendimiento_teorico")
     private double rendimientoTeorico;
+
+    @ManyToOne
+    @JoinColumn(name = "area_produccion_id")
+    private AreaProduccion areaProduccion;
+
 
     @Lob
     private String diagramaJson;

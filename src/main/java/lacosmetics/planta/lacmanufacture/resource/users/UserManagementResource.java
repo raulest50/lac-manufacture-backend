@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.resource.users;
 
 import lacosmetics.planta.lacmanufacture.model.users.Acceso;
 import lacosmetics.planta.lacmanufacture.model.users.User;
+import lacosmetics.planta.lacmanufacture.model.users.dto.SearchUserDTO;
 import lacosmetics.planta.lacmanufacture.service.users.UserManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -120,6 +121,20 @@ public class UserManagementResource {
     @GetMapping("/filter")
     public ResponseEntity<List<User>> getUsersByEstado(@RequestParam int estado) {
         List<User> users = userManagementService.getUsersByEstado(estado);
+        return ResponseEntity.ok(users);
+    }
+
+    @PostMapping("/search_by_dto")
+    public ResponseEntity<List<User>> searchUserbyDTO(
+            @RequestBody SearchUserDTO searchUserDTO,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        List<User> users = userManagementService.searchUser_by_DTO(searchUserDTO, page, size);
+
+        // Limpiar las contraseñas antes de devolver los usuarios
+        users.forEach(user -> user.setPassword(""));
+
         return ResponseEntity.ok(users);
     }
 }

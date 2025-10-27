@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.config.PasswordConfig;
 import lacosmetics.planta.lacmanufacture.model.users.Acceso;
 import lacosmetics.planta.lacmanufacture.model.users.User;
+import lacosmetics.planta.lacmanufacture.model.users.dto.SearchUserDTO;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.AccesoRepository;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.PasswordResetTokenRepository;
@@ -15,7 +16,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -170,4 +174,58 @@ public class UserManagementService {
         user.getAccesos().add(acceso);
         return userRepository.save(user);
     }
+
+    public List<User> searchUser_by_DTO(SearchUserDTO searchUserDTO, int page, int size) {
+        // Validar parámetros de paginación
+        if (page < 0) page = 0;
+        if (size <= 0) size = 10;
+
+        // Crear objeto Pageable para paginación
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Realizar búsqueda según el tipo
+        if (searchUserDTO.getSearchType() == null || searchUserDTO.getSearch() == null || searchUserDTO.getSearch().trim().isEmpty()) {
+            // Si no hay criterios de búsqueda, devolver todos los usuarios paginados
+            return userRepository.findAll(pageable).getContent();
+        }
+
+        switch (searchUserDTO.getSearchType()) {
+            case ID:
+                try {
+                    // Buscar por cédula (convertir a long)
+                    long cedula = Long.parseLong(searchUserDTO.getSearch());
+                    return userRepository.findAll(
+                        (root, query, cb) -> cb.equal(root.get("cedula"), cedula),
+                        pageable
+                    ).getContent();
+                } catch (NumberFormatException e) {
+                    // Si no es un número válido, devolver lista vacía
+                    return new ArrayList<>();
+                }
+
+            case NAME:
+                // Buscar por coincidencia parcial del nombre
+                return userRepository.findAll(
+                    (root, query, cb) -> cb.like(
+                        cb.lower(root.get("nombreCompleto")), 
+                        "%" + searchUserDTO.getSearch().toLowerCase() + "%"
+                    ),
+                    pageable
+                ).getContent();
+
+            case EMAIL:
+                // Buscar por email
+                return userRepository.findAll(
+                    (root, query, cb) -> cb.like(
+                        cb.lower(root.get("email")), 
+                        "%" + searchUserDTO.getSearch().toLowerCase() + "%"
+                    ),
+                    pageable
+                ).getContent();
+
+            default:
+                return new ArrayList<>();
+        }
+    }
+
 }
