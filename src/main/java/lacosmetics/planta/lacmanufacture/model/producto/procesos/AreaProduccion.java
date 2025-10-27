@@ -19,7 +19,7 @@ public class AreaProduccion {
 
     private String descripcion;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "responsable_id")
     private User responsableArea;
     

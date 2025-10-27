@@ -22,6 +22,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.AreaProduccion;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo.ProcesoProduccionNode;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.LoteRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
@@ -554,7 +555,7 @@ public class ProduccionService {
     /**
      * Obtiene los datos necesarios para generar un PDF de un producto terminado.
      * Incluye el producto terminado, la lista de materiales, la lista de semiterminados
-     * y la lista de nombres de procesos.
+     * y la lista de áreas de producción ordenadas (con el área del terminado al final).
      * 
      * @param terminadoId ID del producto terminado
      * @return Objeto ODP_Data4PDF con la información necesaria
@@ -584,10 +585,55 @@ public class ProduccionService {
         data.setMaterials(materials);
         data.setSemiterminados(semiterminados);
 
-        // Obtener nombres de procesos
-        data.setNombreProceso(getProcesoNombres(terminadoId));
+        // Obtener y ordenar áreas de producción (con el área del terminado al final)
+        data.setAreasProduccion(getAreasProduccionOrdenadas(terminado));
 
         return data;
+    }
+
+    /**
+     * Obtiene la lista de áreas de producción asociadas a un producto terminado
+     * y todos sus semiterminados, colocando el área del terminado al final.
+     * 
+     * @param terminado El producto terminado
+     * @return Lista ordenada de áreas de producción
+     */
+    private List<AreaProduccion> getAreasProduccionOrdenadas(Terminado terminado) {
+        List<AreaProduccion> areasProduccion = new ArrayList<>();
+        AreaProduccion areaTerminado = null;
+
+        // Obtener el área de producción del terminado
+        if (terminado.getProcesoProduccionCompleto() != null && 
+            terminado.getProcesoProduccionCompleto().getAreaProduccion() != null) {
+            areaTerminado = terminado.getProcesoProduccionCompleto().getAreaProduccion();
+        }
+
+        // Recolectar áreas de producción de los semiterminados
+        for (Insumo insumo : terminado.getInsumos()) {
+            Producto producto = insumo.getProducto();
+            if (producto instanceof SemiTerminado) {
+                SemiTerminado semiterminado = (SemiTerminado) producto;
+
+                if (semiterminado.getProcesoProduccionCompleto() != null && 
+                    semiterminado.getProcesoProduccionCompleto().getAreaProduccion() != null) {
+
+                    AreaProduccion areaSemiterminado = semiterminado.getProcesoProduccionCompleto().getAreaProduccion();
+
+                    // Evitar duplicados
+                    if (!areasProduccion.contains(areaSemiterminado) && 
+                        (areaTerminado == null || !areaSemiterminado.equals(areaTerminado))) {
+                        areasProduccion.add(areaSemiterminado);
+                    }
+                }
+            }
+        }
+
+        // Añadir el área del terminado al final si existe
+        if (areaTerminado != null) {
+            areasProduccion.add(areaTerminado);
+        }
+
+        return areasProduccion;
     }
 
     /**
