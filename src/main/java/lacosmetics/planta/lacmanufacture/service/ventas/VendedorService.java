@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.service.ventas;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.ventas.dto.CrearVendedorDTO;
+import lacosmetics.planta.lacmanufacture.model.ventas.dto.SearchVendedorDTO;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.model.ventas.Vendedor;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
@@ -50,5 +51,41 @@ public class VendedorService {
     public Page<Vendedor> listAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return vendedorRepository.findAll(pageable);
+    }
+
+    public Page<Vendedor> searchVendedores(SearchVendedorDTO searchDTO, int page, int size) {
+        // Validar parámetros de paginación
+        if (page < 0) page = 0;
+        if (size <= 0) size = 10;
+
+        // Crear objeto Pageable para paginación
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Si no hay criterios de búsqueda o el texto de búsqueda está vacío, devolver todos los vendedores
+        if (searchDTO == null || searchDTO.getSearchType() == null || 
+            searchDTO.getSearch() == null || searchDTO.getSearch().trim().isEmpty()) {
+            return vendedorRepository.findAll(pageable);
+        }
+
+        switch (searchDTO.getSearchType()) {
+            case ID:
+                try {
+                    // Buscar por cédula (convertir a long)
+                    long cedula = Long.parseLong(searchDTO.getSearch());
+                    return vendedorRepository.findByCedula(cedula, pageable);
+                } catch (NumberFormatException e) {
+                    // Si no es un número válido, devolver página vacía
+                    return Page.empty(pageable);
+                }
+
+            case NAME:
+                // Buscar por coincidencia parcial del nombre o apellido
+                String searchTerm = searchDTO.getSearch().toLowerCase();
+                return vendedorRepository.findByNombresContainingIgnoreCaseOrApellidosContainingIgnoreCase(
+                    searchTerm, searchTerm, pageable);
+
+            default:
+                return Page.empty(pageable);
+        }
     }
 }

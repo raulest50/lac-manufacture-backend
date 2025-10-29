@@ -2,13 +2,13 @@ package lacosmetics.planta.lacmanufacture.resource.ventas;
 
 import jakarta.persistence.EntityNotFoundException;
 import lacosmetics.planta.lacmanufacture.model.ventas.dto.CrearVendedorDTO;
+import lacosmetics.planta.lacmanufacture.model.ventas.dto.SearchVendedorDTO;
 import lacosmetics.planta.lacmanufacture.model.ventas.Vendedor;
 import lacosmetics.planta.lacmanufacture.service.ventas.VendedorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,13 +19,13 @@ import java.net.URI;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/ventas")
+@RequestMapping("/vendedor")
 @RequiredArgsConstructor
 public class VendedorResource {
 
     private final VendedorService vendedorService;
 
-    @PostMapping("/vendedores")
+    @PostMapping("/crear_vendedor")
     public ResponseEntity<?> createVendedor(@RequestBody CrearVendedorDTO request) {
         try {
             Vendedor saved = vendedorService.create(request);
@@ -37,12 +37,13 @@ public class VendedorResource {
         }
     }
 
-    @GetMapping("/vendedores")
-    public ResponseEntity<Page<Vendedor>> listVendedores(
+    @PostMapping("/search_vendedores")
+    public ResponseEntity<Page<Vendedor>> searchVendedores(
+            @RequestBody SearchVendedorDTO searchDTO,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        Page<Vendedor> vendedores = vendedorService.listAll(page, size);
+        Page<Vendedor> vendedores = vendedorService.searchVendedores(searchDTO, page, size);
         return ResponseEntity.ok(vendedores);
     }
 }

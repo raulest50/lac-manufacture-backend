@@ -12,4 +12,6 @@ public interface VendedorRepository extends JpaRepository<Vendedor, Long> {
     Page<Vendedor> findByNombresContainingIgnoreCaseOrApellidosContainingIgnoreCase(String nombres,
                                                                                     String apellidos,
                                                                                     Pageable pageable);
+
+    Page<Vendedor> findByCedula(long cedula, Pageable pageable);
 }
