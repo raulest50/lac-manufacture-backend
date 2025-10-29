@@ -48,8 +48,7 @@ public class Vendedor {
     @Column(name = "direccion")
     private String direccion;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne
     @JoinColumn(name = "user_id", unique = true, nullable = false)
-    @JsonIgnoreProperties({"accesos"})
     private User user;
 }
