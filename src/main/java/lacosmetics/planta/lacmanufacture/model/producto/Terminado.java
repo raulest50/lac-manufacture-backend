@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.producto;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.producto.packaging.CasePack;
 import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
 import lombok.AllArgsConstructor;
@@ -39,5 +40,8 @@ public class Terminado extends Producto{
      * Una imagen o ilustracion del producto
      */
     private String fotoUrl;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private CasePack casePack;
 
 }
