@@ -59,11 +59,11 @@ public class EmailService {
         log.info("Sending HTML email to: {}", to);
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        
+
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlContent, true);
-        
+
         mailSender.send(message);
         log.info("HTML email sent successfully to: {}", to);
     }
@@ -82,14 +82,14 @@ public class EmailService {
         log.info("Sending email with attachment to: {}", to);
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        
+
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(text);
-        
+
         FileSystemResource file = new FileSystemResource(new File(attachmentPath));
         helper.addAttachment(attachmentName, file);
-        
+
         mailSender.send(message);
         log.info("Email with attachment sent successfully to: {}", to);
     }
@@ -105,21 +105,36 @@ public class EmailService {
      * @throws IOException        If there is an error reading the attachment
      */
     public void sendEmailWithAttachment(String to, String subject, String text, MultipartFile attachment) throws MessagingException, IOException {
-        log.info("Sending email with MultipartFile attachment to: {}", to);
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(text);
-        
-        helper.addAttachment(
-            Objects.requireNonNull(attachment.getOriginalFilename()),
-            new ByteArrayResource(attachment.getBytes())
-        );
-        
-        mailSender.send(message);
-        log.info("Email with MultipartFile attachment sent successfully to: {}", to);
+        log.info("Preparando email con adjunto para: {}, asunto: {}", to, subject);
+        log.info("Detalles del adjunto: nombre={}, tamaño={} bytes, tipo={}", 
+                 attachment.getOriginalFilename(), attachment.getSize(), attachment.getContentType());
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(text);
+
+            helper.addAttachment(
+                Objects.requireNonNull(attachment.getOriginalFilename()),
+                new ByteArrayResource(attachment.getBytes())
+            );
+
+            log.info("Enviando email a: {}", to);
+            mailSender.send(message);
+            log.info("Email con adjunto enviado exitosamente a: {}", to);
+        } catch (MessagingException e) {
+            log.error("Error al crear o enviar el mensaje: {}", e.getMessage(), e);
+            throw e;
+        } catch (IOException e) {
+            log.error("Error al procesar el archivo adjunto: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error inesperado al enviar email: {}", e.getMessage(), e);
+            throw new MessagingException("Error inesperado al enviar email: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -134,24 +149,40 @@ public class EmailService {
      * @throws IOException        If there is an error reading the attachment
      */
     public void sendEmailWithAttachmentAndCC(String to, String[] cc, String subject, String text, MultipartFile attachment) throws MessagingException, IOException {
-        log.info("Sending email with MultipartFile attachment to: {} with CC {}", to, (Object) cc);
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        log.info("Preparando email con adjunto para: {}, CC: {}, asunto: {}", to, (Object) cc, subject);
+        log.info("Detalles del adjunto: nombre={}, tamaño={} bytes, tipo={}", 
+                 attachment.getOriginalFilename(), attachment.getSize(), attachment.getContentType());
 
-        helper.setTo(to);
-        if (cc != null && cc.length > 0) {
-            helper.setCc(cc);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setTo(to);
+            if (cc != null && cc.length > 0) {
+                helper.setCc(cc);
+                log.info("Configurados {} destinatarios en copia", cc.length);
+            }
+            helper.setSubject(subject);
+            helper.setText(text);
+
+            helper.addAttachment(
+                Objects.requireNonNull(attachment.getOriginalFilename()),
+                new ByteArrayResource(attachment.getBytes())
+            );
+
+            log.info("Enviando email a: {} con CC: {}", to, (Object) cc);
+            mailSender.send(message);
+            log.info("Email con adjunto enviado exitosamente a: {} con CC: {}", to, (Object) cc);
+        } catch (MessagingException e) {
+            log.error("Error al crear o enviar el mensaje: {}", e.getMessage(), e);
+            throw e;
+        } catch (IOException e) {
+            log.error("Error al procesar el archivo adjunto: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error inesperado al enviar email: {}", e.getMessage(), e);
+            throw new MessagingException("Error inesperado al enviar email: " + e.getMessage(), e);
         }
-        helper.setSubject(subject);
-        helper.setText(text);
-
-        helper.addAttachment(
-            Objects.requireNonNull(attachment.getOriginalFilename()),
-            new ByteArrayResource(attachment.getBytes())
-        );
-
-        mailSender.send(message);
-        log.info("Email with MultipartFile attachment sent successfully to: {} with CC {}", to, (Object) cc);
     }
 
     /**

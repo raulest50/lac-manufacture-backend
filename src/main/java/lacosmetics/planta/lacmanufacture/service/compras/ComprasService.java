@@ -130,24 +130,36 @@ public class ComprasService {
      */
     public void enviarCorreoOrdenCompraProveedor(OrdenCompraMateriales orden, MultipartFile pdfAttachment) 
             throws MessagingException, IOException {
+        log.info("Iniciando envío de correo para orden ID: {}, Proveedor: {}", 
+                 orden.getOrdenCompraId(), orden.getProveedor().getNombre());
 
         if (pdfAttachment == null || pdfAttachment.isEmpty()) {
+            log.error("PDF no proporcionado o vacío para orden ID: {}", orden.getOrdenCompraId());
             throw new RuntimeException("No se proporcionó archivo PDF para enviar por email para la orden: " + orden.getOrdenCompraId());
         }
 
+        log.info("PDF adjunto recibido: nombre={}, tamaño={} bytes, tipo={}", 
+                 pdfAttachment.getOriginalFilename(), pdfAttachment.getSize(), pdfAttachment.getContentType());
+
         // Obtener el proveedor y su información de contacto
         Proveedor proveedor = orden.getProveedor();
+        log.info("Datos del proveedor - ID: {}, Nombre: {}, Contactos: {}", 
+                 proveedor.getId(), proveedor.getNombre(), proveedor.getContactos());
 
         // Buscar el email del proveedor en la lista de contactos
         String emailProveedor = null;
         for (Map<String, Object> contacto : proveedor.getContactos()) {
+            log.info("Revisando contacto: {}", contacto);
             if (contacto.containsKey("email")) {
                 emailProveedor = (String) contacto.get("email");
+                log.info("Email encontrado para el proveedor: {}", emailProveedor);
                 break;
             }
         }
 
         if (emailProveedor == null) {
+            log.error("No se encontró email para el proveedor ID: {}, Nombre: {}", 
+                     proveedor.getId(), proveedor.getNombre());
             throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
         }
 
@@ -187,24 +199,36 @@ public class ComprasService {
      */
     public void enviarCorreoOrdenCompraProveedor_wCC(OrdenCompraMateriales orden, MultipartFile pdfAttachment, List<String> ccEmails)
             throws MessagingException, IOException {
+        log.info("Iniciando envío de correo con CC para orden ID: {}, Proveedor: {}, CC: {}", 
+                 orden.getOrdenCompraId(), orden.getProveedor().getNombre(), ccEmails);
 
         if (pdfAttachment == null || pdfAttachment.isEmpty()) {
+            log.error("PDF no proporcionado o vacío para orden ID: {}", orden.getOrdenCompraId());
             throw new RuntimeException("No se proporcionó archivo PDF para enviar por email para la orden: " + orden.getOrdenCompraId());
         }
 
+        log.info("PDF adjunto recibido: nombre={}, tamaño={} bytes, tipo={}", 
+                 pdfAttachment.getOriginalFilename(), pdfAttachment.getSize(), pdfAttachment.getContentType());
+
         // Obtener el proveedor y su información de contacto
         Proveedor proveedor = orden.getProveedor();
+        log.info("Datos del proveedor - ID: {}, Nombre: {}, Contactos: {}", 
+                 proveedor.getId(), proveedor.getNombre(), proveedor.getContactos());
 
         // Buscar el email del proveedor en la lista de contactos
         String emailProveedor = null;
         for (Map<String, Object> contacto : proveedor.getContactos()) {
+            log.info("Revisando contacto: {}", contacto);
             if (contacto.containsKey("email")) {
                 emailProveedor = (String) contacto.get("email");
+                log.info("Email encontrado para el proveedor: {}", emailProveedor);
                 break;
             }
         }
 
         if (emailProveedor == null) {
+            log.error("No se encontró email para el proveedor ID: {}, Nombre: {}", 
+                     proveedor.getId(), proveedor.getNombre());
             throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
         }
 
@@ -246,13 +270,22 @@ public class ComprasService {
 
     @Transactional
     public OrdenCompraMateriales updateEstadoOrdenCompra(int ordenCompraId, UpdateEstadoOrdenCompraRequest ue) {
+        log.info("Iniciando actualización de estado para orden de compra ID: {}, nuevo estado: {}", ordenCompraId, ue.getNewEstado());
+
         OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId)
                 .orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with id: " + ordenCompraId));
 
+        log.info("Orden encontrada. Estado actual: {}, Proveedor ID: {}, Nombre: {}", 
+                 orden.getEstado(), orden.getProveedor().getId(), orden.getProveedor().getNombre());
+
         // Si el nuevo estado es 2 y estamos cambiando desde estado 1, manejar según el tipo de envío
         if (ue.getNewEstado() == 2 && orden.getEstado() == 1) {
+            log.info("Cambiando estado de 1 a 2 para orden ID: {}", ordenCompraId);
+
             // Verificar el tipo de envío seleccionado
             if (ue.getTipoEnvio() != null) {
+                log.info("Tipo de envío seleccionado: {}", ue.getTipoEnvio());
+
                 switch (ue.getTipoEnvio()) {
                     case MANUAL:
                         // Para envío manual, solo se actualiza el estado sin procesar el PDF
