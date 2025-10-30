@@ -1,6 +1,8 @@
 package lacosmetics.planta.lacmanufacture.service.produccion;
 
 
+import lacosmetics.planta.lacmanufacture.model.ventas.Vendedor;
+import lacosmetics.planta.lacmanufacture.repo.ventas.VendedorRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
@@ -67,7 +69,8 @@ public class ProduccionService {
     private final ProductoRepo productoRepo;
 
     private final LoteRepo loteRepo;
-    private final UserRepository userRepository;
+    //private final UserRepository userRepository;
+    private final VendedorRepository vendedorRepository;
 
     @Autowired
     private final OrdenSeguimientoRepo ordenSeguimientoRepo;
@@ -81,13 +84,13 @@ public class ProduccionService {
         Producto producto = productoRepo.findById(ordenProduccionDTO.getProductoId())
             .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + ordenProduccionDTO.getProductoId()));
 
-        Long responsableId = ordenProduccionDTO.getResponsableId();
-        if (responsableId == null) {
+        Long vendedorResponsableId = ordenProduccionDTO.getVendedorResponsableId();
+        if (vendedorResponsableId == null) {
             throw new IllegalArgumentException("El ID del responsable es obligatorio para registrar la orden de producción.");
         }
 
-        User responsable = userRepository.findById(responsableId)
-            .orElseThrow(() -> new IllegalArgumentException("Responsable no encontrado con ID: " + responsableId));
+        Vendedor vendedorResponsable = vendedorRepository.findById(vendedorResponsableId)
+            .orElseThrow(() -> new IllegalArgumentException("Responsable no encontrado con ID: " + vendedorResponsableId));
 
         OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getCantidadProducir());
         ordenProduccion.setFechaLanzamiento(ordenProduccionDTO.getFechaLanzamiento());
@@ -95,7 +98,7 @@ public class ProduccionService {
         ordenProduccion.setNumeroPedidoComercial(ordenProduccionDTO.getNumeroPedidoComercial());
         ordenProduccion.setAreaOperativa(ordenProduccionDTO.getAreaOperativa());
         ordenProduccion.setDepartamentoOperativo(ordenProduccionDTO.getDepartamentoOperativo());
-        ordenProduccion.setResponsable(responsable);
+        ordenProduccion.setVendedorResponsable(vendedorResponsable);
 
         OrdenProduccion savedOrden = ordenProduccionRepo.save(ordenProduccion);
 
@@ -162,8 +165,8 @@ public class ProduccionService {
         dto.setNumeroPedidoComercial(orden.getNumeroPedidoComercial());
         dto.setAreaOperativa(orden.getAreaOperativa());
         dto.setDepartamentoOperativo(orden.getDepartamentoOperativo());
-        if (orden.getResponsable() != null) {
-            dto.setResponsableId(orden.getResponsable().getId());
+        if (orden.getVendedorResponsable() != null) {
+            dto.setResponsableId(orden.getVendedorResponsable().getCedula());
         }
 
         List<OrdenSeguimientoDTO> seguimientoDTOs = orden.getOrdenesSeguimiento().stream()

@@ -4,9 +4,8 @@ package lacosmetics.planta.lacmanufacture.model.produccion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.model.produccion.PlanificacionProduccion;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
-import lacosmetics.planta.lacmanufacture.model.users.User;
+import lacosmetics.planta.lacmanufacture.model.ventas.Vendedor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -112,7 +111,7 @@ public class OrdenProduccion {
 
     @ManyToOne
     @JoinColumn(name = "responsable_id")
-    private User responsable;
+    private Vendedor vendedorResponsable;
 
     @OneToOne
     @JoinColumn(name = "planificacion_id")
