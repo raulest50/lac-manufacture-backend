@@ -3,9 +3,10 @@ package lacosmetics.planta.lacmanufacture.model.produccion;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.produccion.PlanificacionProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
+import lacosmetics.planta.lacmanufacture.model.users.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -108,6 +109,10 @@ public class OrdenProduccion {
      */
     @Column(name = "departamento_operativo")
     private String departamentoOperativo;
+
+    @ManyToOne
+    @JoinColumn(name = "responsable_id")
+    private User responsable;
 
     @OneToOne
     @JoinColumn(name = "planificacion_id")

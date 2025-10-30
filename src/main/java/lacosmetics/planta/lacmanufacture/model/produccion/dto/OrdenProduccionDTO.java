@@ -26,5 +26,6 @@ public class OrdenProduccionDTO {
     private String numeroPedidoComercial; // pedido comercial origen
     private String areaOperativa; // área operativa que ejecuta
     private String departamentoOperativo; // departamento responsable de coordinar
+    private Long responsableId;
     private List<OrdenSeguimientoDTO> ordenesSeguimiento;
 }

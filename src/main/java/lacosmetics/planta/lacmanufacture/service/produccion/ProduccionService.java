@@ -2,36 +2,38 @@ package lacosmetics.planta.lacmanufacture.service.produccion;
 
 
 import org.springframework.transaction.annotation.Transactional;
-import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Lote;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
-import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
-import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
-import lacosmetics.planta.lacmanufacture.model.produccion.dto.DispensacionDTO;
-import lacosmetics.planta.lacmanufacture.model.produccion.dto.DispensacionFormularioDTO;
-import lacosmetics.planta.lacmanufacture.model.produccion.dto.InventarioEnTransitoDTO;
-import lacosmetics.planta.lacmanufacture.model.produccion.dto.InsumoDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.LoteRecomendadoDTO;
-import lacosmetics.planta.lacmanufacture.model.produccion.dto.ODP_Data4PDF;
-import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO;
-import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO_save;
-import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenSeguimientoDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.AreaProduccion;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo.ProcesoProduccionNode;
+import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
+import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.DispensacionDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.DispensacionFormularioDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.InventarioEnTransitoDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.InsumoDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.ODP_Data4PDF;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenProduccionDTO_save;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.OrdenSeguimientoDTO;
+import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.LoteRepo;
-import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
-import lacosmetics.planta.lacmanufacture.service.contabilidad.ContabilidadService;
-import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
-import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
+import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
+import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
+import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
+import lacosmetics.planta.lacmanufacture.service.contabilidad.ContabilidadService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -65,6 +67,7 @@ public class ProduccionService {
     private final ProductoRepo productoRepo;
 
     private final LoteRepo loteRepo;
+    private final UserRepository userRepository;
 
     @Autowired
     private final OrdenSeguimientoRepo ordenSeguimientoRepo;
@@ -75,42 +78,49 @@ public class ProduccionService {
 
     @Transactional(rollbackFor = Exception.class)
     public OrdenProduccion saveOrdenProduccion(OrdenProduccionDTO_save ordenProduccionDTO) {
-        Optional<Producto> optionalProducto = productoRepo.findById(ordenProduccionDTO.getProductoId());
-        if (optionalProducto.isPresent()) {
-            Producto producto = optionalProducto.get();
-            OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getCantidadProducir());
-            ordenProduccion.setFechaLanzamiento(ordenProduccionDTO.getFechaLanzamiento());
-            ordenProduccion.setFechaFinalPlanificada(ordenProduccionDTO.getFechaFinalPlanificada());
-            ordenProduccion.setNumeroPedidoComercial(ordenProduccionDTO.getNumeroPedidoComercial());
-            ordenProduccion.setAreaOperativa(ordenProduccionDTO.getAreaOperativa());
-            ordenProduccion.setDepartamentoOperativo(ordenProduccionDTO.getDepartamentoOperativo());
-            OrdenProduccion savedOrden = ordenProduccionRepo.save(ordenProduccion);
+        Producto producto = productoRepo.findById(ordenProduccionDTO.getProductoId())
+            .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + ordenProduccionDTO.getProductoId()));
 
-            if (ordenProduccionDTO.getLoteBatchNumber() != null && !ordenProduccionDTO.getLoteBatchNumber().isBlank()) {
-                Lote lote = new Lote();
-                lote.setBatchNumber(ordenProduccionDTO.getLoteBatchNumber());
-                lote.setOrdenProduccion(savedOrden);
-                loteRepo.save(lote);
-            }
-
-            List<OrdenSeguimiento> ordenesSeguimiento = savedOrden.getOrdenesSeguimiento();
-            if (ordenesSeguimiento != null && !ordenesSeguimiento.isEmpty()) {
-                // Create Movimiento entries for each Insumo
-                for (OrdenSeguimiento ordenSeguimiento : ordenesSeguimiento) {
-                    Insumo insumo = ordenSeguimiento.getInsumo();
-                    Movimiento movimientoReal = new Movimiento();
-                    movimientoReal.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
-                    movimientoReal.setProducto(insumo.getProducto());
-                    movimientoReal.setTipoMovimiento(Movimiento.TipoMovimiento.CONSUMO);
-                    //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
-                    transaccionAlmacenRepo.save(movimientoReal);
-                }
-            }
-
-            return savedOrden;
-        } else {
-            throw new RuntimeException("Producto not found");
+        Long responsableId = ordenProduccionDTO.getResponsableId();
+        if (responsableId == null) {
+            throw new IllegalArgumentException("El ID del responsable es obligatorio para registrar la orden de producción.");
         }
+
+        User responsable = userRepository.findById(responsableId)
+            .orElseThrow(() -> new IllegalArgumentException("Responsable no encontrado con ID: " + responsableId));
+
+        OrdenProduccion ordenProduccion = new OrdenProduccion(producto, ordenProduccionDTO.getObservaciones(), ordenProduccionDTO.getCantidadProducir());
+        ordenProduccion.setFechaLanzamiento(ordenProduccionDTO.getFechaLanzamiento());
+        ordenProduccion.setFechaFinalPlanificada(ordenProduccionDTO.getFechaFinalPlanificada());
+        ordenProduccion.setNumeroPedidoComercial(ordenProduccionDTO.getNumeroPedidoComercial());
+        ordenProduccion.setAreaOperativa(ordenProduccionDTO.getAreaOperativa());
+        ordenProduccion.setDepartamentoOperativo(ordenProduccionDTO.getDepartamentoOperativo());
+        ordenProduccion.setResponsable(responsable);
+
+        OrdenProduccion savedOrden = ordenProduccionRepo.save(ordenProduccion);
+
+        if (ordenProduccionDTO.getLoteBatchNumber() != null && !ordenProduccionDTO.getLoteBatchNumber().isBlank()) {
+            Lote lote = new Lote();
+            lote.setBatchNumber(ordenProduccionDTO.getLoteBatchNumber());
+            lote.setOrdenProduccion(savedOrden);
+            loteRepo.save(lote);
+        }
+
+        List<OrdenSeguimiento> ordenesSeguimiento = savedOrden.getOrdenesSeguimiento();
+        if (ordenesSeguimiento != null && !ordenesSeguimiento.isEmpty()) {
+            // Create Movimiento entries for each Insumo
+            for (OrdenSeguimiento ordenSeguimiento : ordenesSeguimiento) {
+                Insumo insumo = ordenSeguimiento.getInsumo();
+                Movimiento movimientoReal = new Movimiento();
+                movimientoReal.setCantidad(-insumo.getCantidadRequerida()); // Negative cantidad
+                movimientoReal.setProducto(insumo.getProducto());
+                movimientoReal.setTipoMovimiento(Movimiento.TipoMovimiento.CONSUMO);
+                //movimiento.setObservaciones("Consumo para Orden de Producción ID: " + savedOrden.getOrdenId());
+                transaccionAlmacenRepo.save(movimientoReal);
+            }
+        }
+
+        return savedOrden;
     }
 
 
@@ -152,6 +162,9 @@ public class ProduccionService {
         dto.setNumeroPedidoComercial(orden.getNumeroPedidoComercial());
         dto.setAreaOperativa(orden.getAreaOperativa());
         dto.setDepartamentoOperativo(orden.getDepartamentoOperativo());
+        if (orden.getResponsable() != null) {
+            dto.setResponsableId(orden.getResponsable().getId());
+        }
 
         List<OrdenSeguimientoDTO> seguimientoDTOs = orden.getOrdenesSeguimiento().stream()
                 .map(this::convertSeguimientoToDto)
