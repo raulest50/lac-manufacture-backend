@@ -21,5 +21,7 @@ public class OrdenProduccionDTO_save {
     private String areaOperativa;
     private String departamentoOperativo;
 
+    private Long responsableId;
+
     private String loteBatchNumber;
 }
