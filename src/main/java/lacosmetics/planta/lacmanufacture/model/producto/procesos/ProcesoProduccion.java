@@ -35,21 +35,26 @@ public class ProcesoProduccion {
     @Enumerated(EnumType.STRING)
     private TimeModelType model;
 
+    /**
+     * Se utilizan tipos Double en lugar de double primitivos para permitir valores nulos en la base de datos.
+     * Los tipos primitivos no pueden ser null, lo que causa errores al cargar registros con campos nulos.
+     * Esto es especialmente importante en modelos que tienen múltiples campos opcionales según el tipo de modelo seleccionado.
+     */
     // modelamiento de tiempos
-    private double setUpTime; // tiempo de preparacion
+    private Double setUpTime; // tiempo de preparacion
 
     // CONSTANT
-    private double constantSeconds;       // si model = CONSTANT
+    private Double constantSeconds;       // si model = CONSTANT
 
     // THROUGHPUT_RATE (unidades/segundo)
-    private double throughputUnitsPerSec; // si model = THROUGHPUT_RATE
+    private Double throughputUnitsPerSec; // si model = THROUGHPUT_RATE
 
     // PER_UNIT
-    private double secondsPerUnit;        // si model = PER_UNIT
+    private Double secondsPerUnit;        // si model = PER_UNIT
 
     // PER_BATCH
-    private double secondsPerBatch;       // si model = PER_BATCH
-    private double batchSize;            // tamaño de lote
+    private Double secondsPerBatch;       // si model = PER_BATCH
+    private Double batchSize;            // tamaño de lote
 
     /**
      * Para modelar el tiempo de proceso. por ejemplo el enfriamiento es el mismo tiempo
