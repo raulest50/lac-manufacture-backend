@@ -17,7 +17,8 @@ public class ProcesoRecursoTest {
         proceso.setNombre("Proceso Test");
         proceso.setNivelAcceso(1);
         proceso.setSetUpTime(10.0);
-        proceso.setProcessTime(20.0);
+        proceso.setModel(ProcesoProduccion.TimeModelType.CONSTANT);
+        proceso.setConstantSeconds(20.0);
 
         // Create a RecursoProduccion
         RecursoProduccion recurso = new RecursoProduccion();

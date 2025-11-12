@@ -60,8 +60,41 @@ public class ProcesoProduccionService {
         ProcesoProduccion proceso = new ProcesoProduccion();
         proceso.setNombre(dto.getNombre());
         proceso.setSetUpTime(dto.getSetUpTime());
-        proceso.setProcessTime(dto.getProcessTime());
         proceso.setNivelAcceso(dto.getNivelAcceso() != null ? dto.getNivelAcceso() : 1);
+
+        // Configurar el modelo de tiempo y sus parámetros
+        proceso.setModel(dto.getModel());
+
+        // Configurar los parámetros específicos según el modelo de tiempo
+        switch (dto.getModel()) {
+            case CONSTANT:
+                if (dto.getConstantSeconds() == null) {
+                    throw new IllegalArgumentException("El tiempo constante no puede ser nulo para el modelo CONSTANT");
+                }
+                proceso.setConstantSeconds(dto.getConstantSeconds());
+                break;
+            case THROUGHPUT_RATE:
+                if (dto.getThroughputUnitsPerSec() == null) {
+                    throw new IllegalArgumentException("La tasa de rendimiento no puede ser nula para el modelo THROUGHPUT_RATE");
+                }
+                proceso.setThroughputUnitsPerSec(dto.getThroughputUnitsPerSec());
+                break;
+            case PER_UNIT:
+                if (dto.getSecondsPerUnit() == null) {
+                    throw new IllegalArgumentException("El tiempo por unidad no puede ser nulo para el modelo PER_UNIT");
+                }
+                proceso.setSecondsPerUnit(dto.getSecondsPerUnit());
+                break;
+            case PER_BATCH:
+                if (dto.getSecondsPerBatch() == null || dto.getBatchSize() == null) {
+                    throw new IllegalArgumentException("El tiempo por lote y el tamaño del lote no pueden ser nulos para el modelo PER_BATCH");
+                }
+                proceso.setSecondsPerBatch(dto.getSecondsPerBatch());
+                proceso.setBatchSize(dto.getBatchSize());
+                break;
+            default:
+                throw new IllegalArgumentException("Modelo de tiempo no soportado: " + dto.getModel());
+        }
 
         // Guardar el proceso para obtener su ID
         proceso = procesoProduccionRepo.save(proceso);
@@ -130,8 +163,41 @@ public class ProcesoProduccionService {
         // Actualizar los datos básicos del proceso
         proceso.setNombre(dto.getNombre());
         proceso.setSetUpTime(dto.getSetUpTime());
-        proceso.setProcessTime(dto.getProcessTime());
         proceso.setNivelAcceso(dto.getNivelAcceso() != null ? dto.getNivelAcceso() : 1);
+
+        // Configurar el modelo de tiempo y sus parámetros
+        proceso.setModel(dto.getModel());
+
+        // Configurar los parámetros específicos según el modelo de tiempo
+        switch (dto.getModel()) {
+            case CONSTANT:
+                if (dto.getConstantSeconds() == null) {
+                    throw new IllegalArgumentException("El tiempo constante no puede ser nulo para el modelo CONSTANT");
+                }
+                proceso.setConstantSeconds(dto.getConstantSeconds());
+                break;
+            case THROUGHPUT_RATE:
+                if (dto.getThroughputUnitsPerSec() == null) {
+                    throw new IllegalArgumentException("La tasa de rendimiento no puede ser nula para el modelo THROUGHPUT_RATE");
+                }
+                proceso.setThroughputUnitsPerSec(dto.getThroughputUnitsPerSec());
+                break;
+            case PER_UNIT:
+                if (dto.getSecondsPerUnit() == null) {
+                    throw new IllegalArgumentException("El tiempo por unidad no puede ser nulo para el modelo PER_UNIT");
+                }
+                proceso.setSecondsPerUnit(dto.getSecondsPerUnit());
+                break;
+            case PER_BATCH:
+                if (dto.getSecondsPerBatch() == null || dto.getBatchSize() == null) {
+                    throw new IllegalArgumentException("El tiempo por lote y el tamaño del lote no pueden ser nulos para el modelo PER_BATCH");
+                }
+                proceso.setSecondsPerBatch(dto.getSecondsPerBatch());
+                proceso.setBatchSize(dto.getBatchSize());
+                break;
+            default:
+                throw new IllegalArgumentException("Modelo de tiempo no soportado: " + dto.getModel());
+        }
 
         // Guardar los cambios básicos
         proceso = procesoProduccionRepo.save(proceso);

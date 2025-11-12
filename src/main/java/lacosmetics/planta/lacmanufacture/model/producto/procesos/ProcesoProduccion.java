@@ -32,9 +32,37 @@ public class ProcesoProduccion {
     @OneToMany(mappedBy = "proceso", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProcesoRecurso> recursosRequeridos;
 
+    @Enumerated(EnumType.STRING)
+    private TimeModelType model;
+
     // modelamiento de tiempos
     private double setUpTime; // tiempo de preparacion
 
-    private double processTime; // tiempo de ejecucion
+    // CONSTANT
+    private double constantSeconds;       // si model = CONSTANT
+
+    // THROUGHPUT_RATE (unidades/segundo)
+    private double throughputUnitsPerSec; // si model = THROUGHPUT_RATE
+
+    // PER_UNIT
+    private double secondsPerUnit;        // si model = PER_UNIT
+
+    // PER_BATCH
+    private double secondsPerBatch;       // si model = PER_BATCH
+    private double batchSize;            // tamaño de lote
+
+    /**
+     * Para modelar el tiempo de proceso. por ejemplo el enfriamiento es el mismo tiempo
+     * independiente del numero de unidades a producir. mientras que un procesos de llenado
+     * de botellas de tratamiento si depende del numero de unidades. por ahora solo usare
+     * los modelos Throughput y Constant pero agrego de una vez los atributos para soportar
+     * los 4 modelos en caso de uso futuro.
+     */
+    public enum TimeModelType {
+        CONSTANT,           // total = setup + constante
+        THROUGHPUT_RATE,    // total = setup + (N / throughput)
+        PER_UNIT,           // total = setup + (N * secondsPerUnit)
+        PER_BATCH           // total = setup + ceil(N/batchSize) * secondsPerBatch
+    }
 
 }

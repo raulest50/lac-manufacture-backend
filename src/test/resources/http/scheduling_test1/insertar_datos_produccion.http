@@ -31,7 +31,10 @@ Authorization: Bearer {{auth_token}}
 
 {
   "nombre": "PROC-MARM",
-  "descripcion": "Marmitas base neutra"
+  "setUpTime": 30.0,
+  "model": "CONSTANT",
+  "constantSeconds": 120.0,
+  "nivelAcceso": 1
 }
 
 ### Proceso 2: Mezcla concentrados
@@ -41,7 +44,10 @@ Authorization: Bearer {{auth_token}}
 
 {
   "nombre": "PROC-MIX",
-  "descripcion": "Mezcla concentrados"
+  "setUpTime": 15.0,
+  "model": "CONSTANT",
+  "constantSeconds": 60.0,
+  "nivelAcceso": 1
 }
 
 ### Proceso 3: Ensamble empaque
@@ -51,7 +57,10 @@ Authorization: Bearer {{auth_token}}
 
 {
   "nombre": "PROC-EMP",
-  "descripcion": "Ensamble empaque"
+  "setUpTime": 20.0,
+  "model": "PER_UNIT",
+  "secondsPerUnit": 5.0,
+  "nivelAcceso": 1
 }
 
 ### Proceso 4: Producción completa
@@ -61,7 +70,10 @@ Authorization: Bearer {{auth_token}}
 
 {
   "nombre": "PROC-PROD",
-  "descripcion": "Producción completa"
+  "setUpTime": 45.0,
+  "model": "THROUGHPUT_RATE",
+  "throughputUnitsPerSec": 0.1,
+  "nivelAcceso": 1
 }
 
 ### Insertar Materiales
