@@ -18,6 +18,14 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompraMateriales, In
             Pageable pageable
     );
 
+    Page<OrdenCompraMateriales> findByFechaEmisionBetweenAndEstadoInAndProveedor_Id(
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            List<Integer> estados,
+            Integer proveedorId,
+            Pageable pageable
+    );
+
     Optional<OrdenCompraMateriales> findByOrdenCompraIdAndEstado(Integer ordenCompraId, int estado);
 
     /**
