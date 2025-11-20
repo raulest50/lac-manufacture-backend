@@ -4,6 +4,7 @@ import lacosmetics.planta.lacmanufacture.model.compras.FacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemFacturaCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.compras.dto.UpdateEstadoOrdenCompraRequest;
+import lacosmetics.planta.lacmanufacture.model.compras.dto.search.SearchOrdenCompraRequest;
 import lacosmetics.planta.lacmanufacture.service.compras.ComprasService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/compras")
@@ -62,14 +64,15 @@ public class ComprasResource {
      * Example: /compras/ordenes?date1=2025-02-01&date2=2025-02-10&estados=0,1,2&page=0&size=10
      */
     @GetMapping("/search_ordenes_by_date_estado")
-    public ResponseEntity<Page<OrdenCompraMateriales>> getOrdenesCompra(
-            @RequestParam String date1,
-            @RequestParam String date2,
-            @RequestParam String estados,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
-    ) {
-        Page<OrdenCompraMateriales> ordenes = compraService.getOrdenesCompraByDateAndEstado(date1, date2, estados, page, size);
+    public ResponseEntity<Page<OrdenCompraMateriales>> getOrdenesCompra(@Valid @ModelAttribute SearchOrdenCompraRequest request) {
+        Page<OrdenCompraMateriales> ordenes = compraService.getOrdenesCompraByDateAndEstado(
+                request.getDate1(),
+                request.getDate2(),
+                request.getEstados(),
+                request.getPage(),
+                request.getSize(),
+                request.getProveedorId()
+        );
         return ResponseEntity.ok(ordenes);
     }
 
