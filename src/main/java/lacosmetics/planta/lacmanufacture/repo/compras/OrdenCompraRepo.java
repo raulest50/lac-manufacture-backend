@@ -4,6 +4,8 @@ import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,11 +20,18 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompraMateriales, In
             Pageable pageable
     );
 
-    Page<OrdenCompraMateriales> findByFechaEmisionBetweenAndEstadoInAndProveedor_Id(
-            LocalDateTime startDate,
-            LocalDateTime endDate,
-            List<Integer> estados,
-            Integer proveedorId,
+    @Query("""
+            SELECT orden
+            FROM OrdenCompraMateriales orden
+            WHERE orden.fechaEmision BETWEEN :startDate AND :endDate
+            AND orden.estado IN :estados
+            AND (:proveedorId IS NULL OR orden.proveedor.id = :proveedorId)
+            """)
+    Page<OrdenCompraMateriales> findByFechaEmisionBetweenAndEstadoInAndProveedor(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("estados") List<Integer> estados,
+            @Param("proveedorId") Integer proveedorId,
             Pageable pageable
     );
 

@@ -111,7 +111,7 @@ public class ComprasService {
 
         Pageable pageable = PageRequest.of(page, size);
         if (proveedorId != null) {
-            return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoInAndProveedor_Id(startDate, endDate, estadoList,
+            return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoInAndProveedor(startDate, endDate, estadoList,
                     proveedorId, pageable);
         }
 
