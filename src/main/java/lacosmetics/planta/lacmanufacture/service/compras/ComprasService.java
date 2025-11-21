@@ -59,7 +59,7 @@ public class ComprasService {
 
 
 
-    public Page<FacturaCompra> getComprasByProveedorAndDate(int proveedorId, String date1, String date2, int page, int size) {
+    public Page<FacturaCompra> getComprasByProveedorAndDate(String proveedorId, String date1, String date2, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         LocalDateTime startDate = LocalDate.parse(date1).atStartOfDay();
         LocalDateTime endDate = LocalDate.parse(date2).atTime(LocalTime.MAX);
@@ -98,7 +98,7 @@ public class ComprasService {
     }
 
     public Page<OrdenCompraMateriales> getOrdenesCompraByDateAndEstado(String date1, String date2, String estados, int page, int size,
-                                                                       Integer proveedorId) {
+                                                                       String proveedorId) {
         // Parse the date strings
         LocalDateTime startDate = LocalDate.parse(date1).atStartOfDay();
         LocalDateTime endDate = LocalDate.parse(date2).atTime(LocalTime.MAX);
@@ -110,9 +110,11 @@ public class ComprasService {
                 .collect(Collectors.toList());
 
         Pageable pageable = PageRequest.of(page, size);
-        if (proveedorId != null) {
+        String proveedorIdFilter = (proveedorId != null && !proveedorId.isBlank()) ? proveedorId : null;
+
+        if (proveedorIdFilter != null) {
             return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoInAndProveedor(startDate, endDate, estadoList,
-                    proveedorId, pageable);
+                    proveedorIdFilter, pageable);
         }
 
         return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoIn(startDate, endDate, estadoList, pageable);
