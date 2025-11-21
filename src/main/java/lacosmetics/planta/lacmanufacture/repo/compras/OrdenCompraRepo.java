@@ -31,7 +31,7 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompraMateriales, In
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("estados") List<Integer> estados,
-            @Param("proveedorId") Integer proveedorId,
+            @Param("proveedorId") String proveedorId,
             Pageable pageable
     );
 

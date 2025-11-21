@@ -31,7 +31,7 @@ public class ComprasResource {
 
     @GetMapping("/byProveedorAndDate")
     public ResponseEntity<Page<FacturaCompra>> getComprasByProveedorAndDate(
-            @RequestParam int proveedorId,
+            @RequestParam String proveedorId,
             @RequestParam String date1,
             @RequestParam String date2,
             @RequestParam(value = "page", defaultValue = "0") int page,

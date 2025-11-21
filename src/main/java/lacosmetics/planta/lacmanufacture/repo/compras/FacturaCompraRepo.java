@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public interface FacturaCompraRepo extends JpaRepository<FacturaCompra, Integer> {
 
     Page<FacturaCompra> findByProveedorIdAndFechaCompraBetween(
-            int proveedorId,
+            String proveedorId,
             LocalDateTime startDate,
             LocalDateTime endDate,
             Pageable pageable
