@@ -31,7 +31,7 @@ public interface ProveedorRepo extends JpaRepository<Proveedor, UUID> {
     /**
      * Find providers whose business identifier starts with the given prefix
      */
-    @Query("SELECT p FROM Proveedor p WHERE p.id LIKE :idPrefix%")
+    @Query("SELECT p FROM Proveedor p WHERE p.id LIKE CONCAT(:idPrefix, '%')")
     Page<Proveedor> findByIdStartingWith(@Param("idPrefix") String idPrefix, Pageable pageable);
 
     /**

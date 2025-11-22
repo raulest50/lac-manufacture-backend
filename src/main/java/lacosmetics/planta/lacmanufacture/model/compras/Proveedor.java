@@ -27,7 +27,7 @@ public class Proveedor {
     @Column(name = "uuid", updatable = false, nullable = false)
     private UUID uuid;
     
-    @Column(name = "id", unique = true, updatable = false, nullable = false)
+    @Column(name = "id", unique = true, updatable = true, nullable = false)
     private String id; // Nit
 
     /**
