@@ -32,7 +32,7 @@ public class OrdenCompraMateriales {
     private LocalDateTime fechaVencimiento;
 
     @ManyToOne
-    @JoinColumn(name = "proveedor_id", referencedColumnName = "id")
+    @JoinColumn(name = "proveedor_uuid", referencedColumnName = "uuid")
     private Proveedor proveedor;
 
     @OneToMany(mappedBy = "ordenCompraMateriales", cascade = CascadeType.ALL, orphanRemoval = true)

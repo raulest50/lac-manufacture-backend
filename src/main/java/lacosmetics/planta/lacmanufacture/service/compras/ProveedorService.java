@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -48,12 +50,15 @@ public class ProveedorService {
                                             MultipartFile rutFile,
                                             MultipartFile camaraFile) throws IOException {
 
-        // se revisa que no existe previamente el proveedor que se desea registrar.
-        if(proveedorRepo.existsById(proveedor.getId())) throw new IllegalArgumentException("Ya existe un Proveedor con el Id" + proveedor.getId());
+        // Check if a provider with the same business ID already exists
+        if(proveedorRepo.findById(proveedor.getId()).isPresent()) {
+            throw new IllegalArgumentException("Ya existe un Proveedor con el Id " + proveedor.getId());
+        }
 
         // Save files if provided using the file storage service.
         if (rutFile != null && !rutFile.isEmpty()) {
             // Save file to /data/proveedores/{proveedorId}/rut.pdf and update the URL.
+            // We use the business ID for file naming for user readability
             String rutPath = fileStorageService.storeFileProveedor(proveedor.getId(), rutFile, "rut.pdf");
             proveedor.setRutUrl(rutPath);
         }
@@ -82,13 +87,9 @@ public class ProveedorService {
         Pageable pageable = PageRequest.of(page, size);
         if ("nombre".equalsIgnoreCase(searchType)) {
             return proveedorRepo.findByNombreContainingIgnoreCase(searchText, pageable);
-        } else if ("nit".equalsIgnoreCase(searchType)) {
-            try {
-                int nit = Integer.parseInt(searchText);
-                return proveedorRepo.findById(nit, pageable);
-            } catch (NumberFormatException e) {
-                return Page.empty(pageable);
-            }
+        } else if ("nit".equalsIgnoreCase(searchType) || "id".equalsIgnoreCase(searchType)) {
+            // Use the business identifier search method
+            return proveedorRepo.findByBusinessId(searchText, pageable);
         } else {
             return Page.empty(pageable);
         }
@@ -108,12 +109,13 @@ public class ProveedorService {
         // Verificar si la cadena de búsqueda está vacía o solo contiene espacios en blanco
         // Si es así, devolver todos los proveedores
 
-        // 1. Buscar por ID (prefijo)
+        // 1. Buscar por ID (business identifier) (prefijo)
         if (searchDTO.getSearchType() == DTO_SearchProveedor.SearchType.ID && searchDTO.getId() != null) {
             // Si el ID está vacío o solo contiene espacios en blanco, devolver todos los proveedores
             if (isBlank(searchDTO.getId())) {
                 return proveedorRepo.findAll(pageable);
             }
+            // Use the method that searches by business identifier prefix
             return proveedorRepo.findByIdStartingWith(searchDTO.getId(), pageable);
         }
 
@@ -171,14 +173,14 @@ public class ProveedorService {
             throw new IllegalArgumentException("El ID en la URL no coincide con el ID en el cuerpo de la solicitud");
         }
 
-        // Verificar que el proveedor existe
-        if (!proveedorRepo.existsById(id)) {
+        // Verificar que el proveedor existe usando el business identifier
+        Optional<Proveedor> optionalProveedor = proveedorRepo.findById(id);
+        if (optionalProveedor.isEmpty()) {
             throw new IllegalArgumentException("No existe un Proveedor con el Id: " + id);
         }
 
         // Obtener el proveedor original para preservar campos que no deben modificarse
-        Proveedor proveedorOriginal = proveedorRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado: " + id));
+        Proveedor proveedorOriginal = optionalProveedor.get();
 
         // Validar archivos si se proporcionan
         if (rutFile != null && !rutFile.isEmpty() && !rutFile.getContentType().equals("application/pdf")) {

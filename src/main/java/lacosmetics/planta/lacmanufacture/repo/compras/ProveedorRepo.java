@@ -8,18 +8,28 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-public interface ProveedorRepo extends JpaRepository<Proveedor, String> {
+public interface ProveedorRepo extends JpaRepository<Proveedor, UUID> {
 
     List<Proveedor> findByNombreContainingIgnoreCase(String nombre);
 
     Page<Proveedor> findByNombreContainingIgnoreCase(String nombre, Pageable pageable);
 
-    @Query("SELECT p FROM Proveedor p WHERE p.id = :id")
-    Page<Proveedor> findById(@Param("id") int id, Pageable pageable);
+    /**
+     * Find a provider by its business identifier
+     */
+    Optional<Proveedor> findById(String id);
 
     /**
-     * Find providers whose ID starts with the given prefix
+     * Find providers whose business identifier equals the given id
+     */
+    @Query("SELECT p FROM Proveedor p WHERE p.id = :id")
+    Page<Proveedor> findByBusinessId(@Param("id") String id, Pageable pageable);
+
+    /**
+     * Find providers whose business identifier starts with the given prefix
      */
     @Query("SELECT p FROM Proveedor p WHERE p.id LIKE :idPrefix%")
     Page<Proveedor> findByIdStartingWith(@Param("idPrefix") String idPrefix, Pageable pageable);

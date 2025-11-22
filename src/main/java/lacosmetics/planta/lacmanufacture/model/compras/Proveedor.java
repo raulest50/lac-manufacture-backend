@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Entity
 @Table(name = "proveedores")
@@ -22,6 +23,10 @@ import java.util.Map;
 public class Proveedor {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "uuid", updatable = false, nullable = false)
+    private UUID uuid;
+    
     @Column(name = "id", unique = true, updatable = false, nullable = false)
     private String id; // Nit
 

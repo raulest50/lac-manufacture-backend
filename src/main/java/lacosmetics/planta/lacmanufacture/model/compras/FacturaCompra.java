@@ -26,7 +26,7 @@ public class FacturaCompra {
     private int facturaCompraId;
 
     @ManyToOne
-    @JoinColumn(name = "proveedor_id", referencedColumnName = "id")
+    @JoinColumn(name = "proveedor_uuid", referencedColumnName = "uuid")
     private Proveedor proveedor;
 
     @CreationTimestamp
