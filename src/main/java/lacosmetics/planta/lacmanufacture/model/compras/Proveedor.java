@@ -23,9 +23,9 @@ import java.util.UUID;
 public class Proveedor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "uuid", updatable = false, nullable = false)
-    private UUID uuid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "pk", updatable = false, nullable = false)
+    private Long pk; // internal surrogate key
     
     @Column(name = "id", unique = true, updatable = true, nullable = false)
     private String id; // Nit
