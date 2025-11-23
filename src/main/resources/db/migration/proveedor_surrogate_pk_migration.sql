@@ -1,4 +1,23 @@
 
+/*
+ * Migration script for implementing surrogate key pattern in Proveedor model
+ * 
+ * This migration addresses the following issues:
+ * 1. Using business IDs (NIT) as primary keys makes it difficult to handle cases 
+ *    where business IDs were stored incorrectly
+ * 2. Changing a business ID requires updating all foreign key references
+ * 
+ * The migration:
+ * 1. Drops existing foreign key constraints that reference proveedores.id
+ * 2. Adds a surrogate primary key (pk) to the proveedores table
+ * 3. Updates all related tables to reference the new surrogate key
+ * 4. Re-establishes constraints using the surrogate key
+ * 
+ * After this migration, the business ID (NIT) remains unique but is no longer
+ * used as the primary key, allowing for corrections without breaking relationships.
+ */
+
+-- Query to list foreign key constraints before migration
 -- para listar las restricciones de llave foranea del modelo antes de la mejora de uuid
 SELECT
     tc.table_schema,
@@ -38,6 +57,3 @@ ALTER TABLE public.orden_compra
 -- Disable constraint on orden_compra_activo table
 ALTER TABLE public.orden_compra_activo
     DROP CONSTRAINT "FKef1x43u8kv6i8w5abrx276msh";
-
-
-

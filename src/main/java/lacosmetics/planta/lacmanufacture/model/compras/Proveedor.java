@@ -14,6 +14,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Entity representing a supplier (Proveedor) in the system.
+ * <p>
+ * This entity uses a surrogate key pattern where:
+ * - The primary key (pk) is an auto-incremented Long used for internal database relationships
+ * - The business identifier (id) is a unique String (NIT) used for business operations and API interactions
+ * <p>
+ * This design separates internal database concerns from business logic, allowing:
+ * - Correction of business IDs without breaking database relationships
+ * - Consistent API interfaces that use business identifiers
+ * - Improved data integrity and maintainability
+ */
 @Entity
 @Table(name = "proveedores")
 @Getter
@@ -22,13 +34,26 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Proveedor {
 
+    /**
+     * Internal surrogate primary key.
+     * <p>
+     * This auto-incremented value is used for all database relationships instead of the business ID.
+     * It should never be exposed in APIs or to end users.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pk", updatable = false, nullable = false)
-    private Long pk; // internal surrogate key
-    
+    private Long pk;
+
+    /**
+     * Business identifier (NIT or identification number).
+     * <p>
+     * This is the natural key used for business operations and API interactions.
+     * While unique, it is not used as the primary key to allow for corrections
+     * without breaking database relationships.
+     */
     @Column(name = "id", unique = true, updatable = true, nullable = false)
-    private String id; // Nit
+    private String id;
 
     /**
      * 0: cedula de ciudadania

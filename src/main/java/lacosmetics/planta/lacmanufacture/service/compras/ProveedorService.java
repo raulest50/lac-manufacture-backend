@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -38,7 +37,10 @@ public class ProveedorService {
     /**
      * Saves a Proveedor and its optional files (RUT and Cámara).
      * The method is transactional so that if any part fails, the whole transaction is rolled back.
-     *
+     * <p>
+     * Note: While this method uses the business identifier (id) for validation and file storage,
+     * the entity is saved with a surrogate key (pk) that is used for all database relationships.
+     * 
      * @param proveedor The Proveedor entity populated from the request.
      * @param rutFile   The optional RUT file.
      * @param camaraFile The optional Cámara file.
@@ -153,8 +155,12 @@ public class ProveedorService {
     /**
      * Actualiza un proveedor existente y sus archivos opcionales (RUT y Cámara).
      * El método es transaccional para que si alguna parte falla, toda la transacción se revierta.
+     * <p>
+     * Note: This method uses the business identifier (id) to look up the Proveedor entity,
+     * demonstrating the advantage of the surrogate key pattern - the business ID can be used
+     * for API operations while the surrogate key (pk) maintains database relationships.
      *
-     * @param id El ID del proveedor a actualizar
+     * @param id El ID del proveedor a actualizar (business identifier)
      * @param proveedor La entidad Proveedor con los datos actualizados
      * @param rutFile El archivo RUT opcional
      * @param camaraFile El archivo Cámara opcional

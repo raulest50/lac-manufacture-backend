@@ -35,8 +35,13 @@ public class OrdenCompraActivo {
 
     private LocalDateTime fechaVencimiento;
 
+    /**
+     * Reference to the supplier (Proveedor) using the surrogate key.
+     * This relationship uses the internal pk field rather than the business identifier
+     * to maintain referential integrity even if the business ID changes.
+     */
     @ManyToOne
-    @JoinColumn(name = "proveedor_uuid", referencedColumnName = "uuid")
+    @JoinColumn(name = "proveedor_pk", referencedColumnName = "pk")
     private Proveedor proveedor;
 
     private double subTotal;

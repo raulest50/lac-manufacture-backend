@@ -11,14 +11,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ProveedorRepo extends JpaRepository<Proveedor, UUID> {
+/**
+ * Repository for Proveedor entities.
+ * <p>
+ * This repository extends JpaRepository with Long as the primary key type,
+ * corresponding to the surrogate key (pk) in the Proveedor entity.
+ * <p>
+ * Note that while the repository uses the surrogate key internally,
+ * several methods are provided to find Proveedor entities by their
+ * business identifier (id) to maintain API compatibility.
+ */
+public interface ProveedorRepo extends JpaRepository<Proveedor, Long> {
 
     List<Proveedor> findByNombreContainingIgnoreCase(String nombre);
 
     Page<Proveedor> findByNombreContainingIgnoreCase(String nombre, Pageable pageable);
 
     /**
-     * Find a provider by its business identifier
+     * Find a provider by its business identifier (NIT).
+     * <p>
+     * Note: This method overrides the standard JpaRepository findById method
+     * which would normally search by the surrogate key (pk).
+     * 
+     * @param id The business identifier (NIT)
+     * @return An Optional containing the Proveedor if found
      */
     Optional<Proveedor> findById(String id);
 
