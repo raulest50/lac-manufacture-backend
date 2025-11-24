@@ -120,9 +120,29 @@ public class ComprasService {
         return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoIn(startDate, endDate, estadoList, pageable);
     }
 
+    @Transactional
     public OrdenCompraMateriales cancelOrdenCompra(int ordenCompraId) {
         OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId)
                 .orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with id: " + ordenCompraId));
+
+        // Verificar si la orden ya fue enviada al proveedor (estado 2)
+        if (orden.getEstado() == 2) {
+            try {
+                // Enviar correo de notificación de cancelación al proveedor con copia a usuarios nivel 2
+                List<String> ccEmails = getEmailsUsuariosProduccionNivel2();
+                if (ccEmails.isEmpty()) {
+                    enviarCorreoCancelacionOrdenCompra(orden);
+                } else {
+                    enviarCorreoCancelacionOrdenCompra_wCC(orden, ccEmails);
+                }
+                log.info("Correo de cancelación enviado al proveedor para la orden ID: {}", ordenCompraId);
+            } catch (Exception e) {
+                log.error("Error al enviar correo de cancelación al proveedor: {}", e.getMessage(), e);
+                // Continuamos con la cancelación pero registramos el error
+            }
+        }
+
+        // Cambiar el estado a cancelado
         orden.setEstado(-1);
         return ordenCompraRepo.save(orden);
     }
@@ -355,6 +375,118 @@ public class ComprasService {
         // Actualizar el estado solo después de que todo el proceso haya sido exitoso
         orden.setEstado(ue.getNewEstado());
         return ordenCompraRepo.save(orden);
+    }
+
+    /**
+     * Envía un correo electrónico al proveedor notificando la cancelación de la orden de compra.
+     * 
+     * @param orden La orden de compra cancelada
+     * @throws MessagingException Si hay un error al enviar el correo
+     * @throws RuntimeException Si no se encuentra un email para el proveedor
+     */
+    public void enviarCorreoCancelacionOrdenCompra(OrdenCompraMateriales orden) 
+            throws MessagingException {
+        log.info("Iniciando envío de correo de cancelación para orden ID: {}, Proveedor: {}", 
+                 orden.getOrdenCompraId(), orden.getProveedor().getNombre());
+
+        // Obtener el proveedor y su información de contacto
+        Proveedor proveedor = orden.getProveedor();
+        log.info("Datos del proveedor - ID: {}, Nombre: {}", 
+                 proveedor.getId(), proveedor.getNombre());
+
+        // Buscar el email del proveedor en la lista de contactos
+        String emailProveedor = null;
+        for (Map<String, Object> contacto : proveedor.getContactos()) {
+            if (contacto.containsKey("email")) {
+                emailProveedor = (String) contacto.get("email");
+                log.info("Email encontrado para el proveedor: {}", emailProveedor);
+                break;
+            }
+        }
+
+        if (emailProveedor == null) {
+            log.error("No se encontró email para el proveedor ID: {}, Nombre: {}", 
+                     proveedor.getId(), proveedor.getNombre());
+            throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
+        }
+
+        // Preparar el asunto y cuerpo del correo
+        String subject = "Cancelación - Orden de Compra Exotic Expert #" + orden.getOrdenCompraId();
+        String text = "Estimado proveedor: " + orden.getProveedor().getNombre() + ",\n\n" +
+                "Por medio de la presente le informamos que la orden de compra #" + orden.getOrdenCompraId() +
+                " ha sido cancelada.\n\n" +
+                "Lamentamos cualquier inconveniente que esto pueda causar. Si tiene alguna consulta o requiere " +
+                "información adicional, no dude en contactarnos.\n\n" +
+                "Saludos cordiales,\n" +
+                "Exotic Expert - Departamento de Compras";
+
+        // Enviar el correo
+        emailService.sendSimpleEmail(
+                emailProveedor,
+                subject,
+                text
+        );
+
+        log.info("Email de cancelación enviado al proveedor {} para orden ID: {}", emailProveedor, orden.getOrdenCompraId());
+    }
+
+    /**
+     * Envía un correo electrónico al proveedor notificando la cancelación de la orden de compra,
+     * con copia a los usuarios especificados.
+     * 
+     * @param orden La orden de compra cancelada
+     * @param ccEmails Lista de correos electrónicos que recibirán copia
+     * @throws MessagingException Si hay un error al enviar el correo
+     * @throws IOException Si hay un error al procesar el correo
+     * @throws RuntimeException Si no se encuentra un email para el proveedor
+     */
+    public void enviarCorreoCancelacionOrdenCompra_wCC(OrdenCompraMateriales orden, List<String> ccEmails) 
+            throws MessagingException, IOException {
+        log.info("Iniciando envío de correo de cancelación con CC para orden ID: {}, Proveedor: {}, CC: {}", 
+                 orden.getOrdenCompraId(), orden.getProveedor().getNombre(), ccEmails);
+
+        // Obtener el proveedor y su información de contacto
+        Proveedor proveedor = orden.getProveedor();
+        log.info("Datos del proveedor - ID: {}, Nombre: {}", 
+                 proveedor.getId(), proveedor.getNombre());
+
+        // Buscar el email del proveedor en la lista de contactos
+        String emailProveedor = null;
+        for (Map<String, Object> contacto : proveedor.getContactos()) {
+            if (contacto.containsKey("email")) {
+                emailProveedor = (String) contacto.get("email");
+                log.info("Email encontrado para el proveedor: {}", emailProveedor);
+                break;
+            }
+        }
+
+        if (emailProveedor == null) {
+            log.error("No se encontró email para el proveedor ID: {}, Nombre: {}", 
+                     proveedor.getId(), proveedor.getNombre());
+            throw new RuntimeException("No se encontró email para el proveedor con ID: " + proveedor.getId());
+        }
+
+        // Preparar el asunto y cuerpo del correo
+        String subject = "Cancelación - Orden de Compra Exotic Expert #" + orden.getOrdenCompraId();
+        String text = "Estimado proveedor: " + orden.getProveedor().getNombre() + ",\n\n" +
+                "Por medio de la presente le informamos que la orden de compra #" + orden.getOrdenCompraId() +
+                " ha sido cancelada.\n\n" +
+                "Lamentamos cualquier inconveniente que esto pueda causar. Si tiene alguna consulta o requiere " +
+                "información adicional, no dude en contactarnos.\n\n" +
+                "Saludos cordiales,\n" +
+                "Exotic Expert - Departamento de Compras";
+
+        // Enviar el correo con copia (sin adjunto)
+        emailService.sendEmailWithAttachmentAndCC(
+                emailProveedor,
+                ccEmails.toArray(new String[0]),
+                subject,
+                text,
+                null
+        );
+
+        log.info("Email de cancelación enviado al proveedor {} con CC {} para orden ID: {}", 
+                emailProveedor, ccEmails, orden.getOrdenCompraId());
     }
 
     public OrdenCompraMateriales getOrdenCompraByOrdenCompraIdAndEstado(Integer ordenCompraId, int estado) {
