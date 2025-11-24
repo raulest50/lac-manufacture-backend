@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -87,6 +88,24 @@ public class ProcesoProduccionResource {
             return ResponseEntity
                     .internalServerError()
                     .body(new ErrorResponse("Error interno del servidor", "Ocurrió un error inesperado"));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ErrorResponse> deleteProcesoProduccion(@PathVariable Integer id) {
+        log.info("REST request para eliminar proceso de producción con ID: {}", id);
+
+        if (!procesoProduccionService.getProcesoProduccionById(id).isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            procesoProduccionService.deleteProcesoProduccion(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            log.warn("No se puede eliminar el proceso de producción con ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ErrorResponse("No se puede eliminar el proceso de producción", e.getMessage()));
         }
     }
 }

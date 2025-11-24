@@ -5,14 +5,20 @@ import lacosmetics.planta.lacmanufacture.dto.RecursoProduccionDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccion;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoRecurso;
 import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
+import lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo.ProcesoProduccionNode;
+import lacosmetics.planta.lacmanufacture.repo.producto.procesos.ProcesoProduccionCompletoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.procesos.ProcesoProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.procesos.RecursoProduccionRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.criteria.Join;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +30,7 @@ import java.util.Optional;
 public class ProcesoProduccionService {
 
     private final ProcesoProduccionRepo procesoProduccionRepo;
+    private final ProcesoProduccionCompletoRepo procesoProduccionCompletoRepo;
     private final RecursoProduccionRepo recursoProduccionRepo;
     private final ProcesoRecursoService procesoRecursoService;
 
@@ -43,6 +50,30 @@ public class ProcesoProduccionService {
     public Optional<ProcesoProduccion> getProcesoProduccionById(Integer id) {
         log.info("Buscando proceso de producción con ID: {}", id);
         return procesoProduccionRepo.findById(id);
+    }
+
+    @Transactional
+    public void deleteProcesoProduccion(Integer id) {
+        log.info("Eliminando proceso de producción con ID: {}", id);
+
+        if (!procesoProduccionRepo.existsById(id)) {
+            log.warn("No se encontró proceso de producción con ID: {}", id);
+            throw new IllegalArgumentException("No se encontró el proceso de producción con ID: " + id);
+        }
+
+        Specification<ProcesoProduccionCompleto> referencedInProcesoCompleto = (root, query, cb) -> {
+            query.distinct(true);
+            Join<ProcesoProduccionCompleto, ProcesoProduccionNode> nodeJoin = root.join("procesosProduccion");
+            return cb.equal(nodeJoin.get("procesoProduccion").get("procesoId"), id);
+        };
+
+        long references = procesoProduccionCompletoRepo.count(referencedInProcesoCompleto);
+        if (references > 0) {
+            log.warn("No se puede eliminar el proceso de producción con ID: {} porque está referenciado en {} procesos completos", id, references);
+            throw new IllegalStateException("El proceso de producción está siendo utilizado en uno o más procesos completos");
+        }
+
+        procesoProduccionRepo.deleteById(id);
     }
 
     /**
