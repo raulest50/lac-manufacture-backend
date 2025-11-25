@@ -17,6 +17,23 @@ public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Inte
 
     List<OrdenProduccion> findByEstadoOrden(int estadoOrden);
 
+    /**
+     * Counts the number of production orders for a specific product with a specific status
+     * 
+     * @param productoId ID of the product
+     * @param estadoOrden Status of the order (0: in production, 1: finished)
+     * @return Count of orders
+     */
+    long countByProducto_ProductoIdAndEstadoOrden(String productoId, int estadoOrden);
+
+    /**
+     * Finds all production orders related to a specific product
+     * 
+     * @param productoId ID of the product
+     * @return List of production orders
+     */
+    List<OrdenProduccion> findByProducto_ProductoId(String productoId);
+
 
     /**
      * Finds OrdenProduccion within a date range and estadoOrden.

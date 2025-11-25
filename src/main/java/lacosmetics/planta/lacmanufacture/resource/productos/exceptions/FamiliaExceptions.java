@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.resource.productos;
+package lacosmetics.planta.lacmanufacture.resource.productos.exceptions;
 
 import lombok.Getter;
 import java.time.LocalDateTime;

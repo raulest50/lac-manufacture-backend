@@ -1,11 +1,11 @@
 package lacosmetics.planta.lacmanufacture.resource.productos;
 
 import lacosmetics.planta.lacmanufacture.model.producto.Familia;
-import lacosmetics.planta.lacmanufacture.resource.productos.FamiliaExceptions.DuplicateIdException;
-import lacosmetics.planta.lacmanufacture.resource.productos.FamiliaExceptions.DuplicateNameException;
-import lacosmetics.planta.lacmanufacture.resource.productos.FamiliaExceptions.EmptyFieldException;
-import lacosmetics.planta.lacmanufacture.resource.productos.FamiliaExceptions.ValidationException;
-import lacosmetics.planta.lacmanufacture.resource.productos.FamiliaExceptions.ErrorResponse;
+import lacosmetics.planta.lacmanufacture.resource.productos.exceptions.FamiliaExceptions.DuplicateIdException;
+import lacosmetics.planta.lacmanufacture.resource.productos.exceptions.FamiliaExceptions.DuplicateNameException;
+import lacosmetics.planta.lacmanufacture.resource.productos.exceptions.FamiliaExceptions.EmptyFieldException;
+import lacosmetics.planta.lacmanufacture.resource.productos.exceptions.FamiliaExceptions.ValidationException;
+import lacosmetics.planta.lacmanufacture.resource.productos.exceptions.FamiliaExceptions.ErrorResponse;
 import lacosmetics.planta.lacmanufacture.service.productos.FamiliaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
