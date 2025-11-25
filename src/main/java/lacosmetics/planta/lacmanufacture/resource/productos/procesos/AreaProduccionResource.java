@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lacosmetics.planta.lacmanufacture.dto.AreaProduccionDTO;
 import lacosmetics.planta.lacmanufacture.dto.ErrorResponse;
 import lacosmetics.planta.lacmanufacture.dto.SearchAreaProduccionDTO;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.AreaProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.AreaProduccion;
 import lacosmetics.planta.lacmanufacture.service.productos.procesos.AreaProduccionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

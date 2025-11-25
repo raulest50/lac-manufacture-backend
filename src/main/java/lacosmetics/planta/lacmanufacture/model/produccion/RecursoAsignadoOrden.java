@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.model.produccion;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.RecursoProduccion;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

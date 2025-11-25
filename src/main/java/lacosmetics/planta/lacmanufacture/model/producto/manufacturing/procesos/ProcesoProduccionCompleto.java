@@ -1,12 +1,11 @@
-package lacosmetics.planta.lacmanufacture.model.producto.procesos;
+package lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo.ProcesoProduccionNode;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.AreaProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.nodo.ProcesoProduccionNode;
 import lombok.*;
 
 import java.util.List;

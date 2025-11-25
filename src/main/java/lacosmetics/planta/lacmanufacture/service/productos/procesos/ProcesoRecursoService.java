@@ -1,7 +1,7 @@
 package lacosmetics.planta.lacmanufacture.service.productos.procesos;
 
 import jakarta.validation.Valid;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoRecurso;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoRecurso;
 import lacosmetics.planta.lacmanufacture.repo.producto.procesos.ProcesoRecursoRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

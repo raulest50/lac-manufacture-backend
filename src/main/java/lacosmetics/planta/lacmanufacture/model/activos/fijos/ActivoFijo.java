@@ -3,12 +3,11 @@ package lacosmetics.planta.lacmanufacture.model.activos.fijos;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.*;
 import lacosmetics.planta.lacmanufacture.model.personal.IntegrantePersonal;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.RecursoProduccion;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lacosmetics.planta.lacmanufacture.model.contabilidad.CuentaContable;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.math.BigDecimal;

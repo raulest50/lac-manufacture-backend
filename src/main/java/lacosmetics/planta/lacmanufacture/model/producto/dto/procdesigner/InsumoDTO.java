@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model.producto.dto.procdesigner;
 
-import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

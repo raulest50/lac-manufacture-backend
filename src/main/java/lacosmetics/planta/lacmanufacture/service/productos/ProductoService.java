@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.service.productos;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.transaction.annotation.Transactional;
-import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.ProductoStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.search.ProductoSearchCriteria;

@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.service.productos.procesos;
 
 import lacosmetics.planta.lacmanufacture.dto.AreaProduccionDTO;
 import lacosmetics.planta.lacmanufacture.dto.SearchAreaProduccionDTO;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.AreaProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.AreaProduccion;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.producto.procesos.AreaProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;

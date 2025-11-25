@@ -4,7 +4,7 @@ import lacosmetics.planta.lacmanufacture.model.activos.fijos.dto.DTO_SearchActiv
 import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.procdef.ReProdModDto;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.search.DTO_SearchRecursoProduccion;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.RecursoProduccion;
 import lacosmetics.planta.lacmanufacture.service.activos.fijos.ActivoFijoService;
 import lacosmetics.planta.lacmanufacture.service.productos.procesos.RecursoProduccionService;
 import lombok.RequiredArgsConstructor;

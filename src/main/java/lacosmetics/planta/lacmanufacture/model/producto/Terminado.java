@@ -2,9 +2,9 @@ package lacosmetics.planta.lacmanufacture.model.producto;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.producto.packaging.CasePack;
-import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.packaging.CasePack;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccionCompleto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

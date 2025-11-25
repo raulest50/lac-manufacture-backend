@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.producto.procesos;
+package lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

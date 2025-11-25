@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.service.inventarios;
 
 import org.springframework.transaction.annotation.Transactional;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
-import lacosmetics.planta.lacmanufacture.model.producto.receta.Insumo;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;

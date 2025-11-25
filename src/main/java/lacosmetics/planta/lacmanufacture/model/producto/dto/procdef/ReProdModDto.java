@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.model.producto.dto.procdef;
 
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.RecursoProduccion;
 import lombok.Data;
 
 @Data

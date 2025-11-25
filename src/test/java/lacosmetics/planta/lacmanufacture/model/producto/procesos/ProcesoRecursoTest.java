@@ -1,5 +1,8 @@
 package lacosmetics.planta.lacmanufacture.model.producto.procesos;
 
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoRecurso;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.RecursoProduccion;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

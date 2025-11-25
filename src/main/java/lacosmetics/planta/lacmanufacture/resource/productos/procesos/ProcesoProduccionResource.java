@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.resource.productos.procesos;
 import jakarta.validation.Valid;
 import lacosmetics.planta.lacmanufacture.dto.ErrorResponse;
 import lacosmetics.planta.lacmanufacture.dto.ProcesoProduccionDTO;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccion;
 import lacosmetics.planta.lacmanufacture.service.productos.procesos.ProcesoProduccionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/procesos-produccion")
@@ -52,7 +53,7 @@ public class ProcesoProduccionResource {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/update_proc_produccion/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateProcesoProduccion(
             @PathVariable Integer id,
             @Valid @RequestBody ProcesoProduccionDTO procesoProduccionDTO) {
@@ -92,7 +93,7 @@ public class ProcesoProduccionResource {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<ErrorResponse> deleteProcesoProduccion(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteProcesoProduccion(@PathVariable Integer id) {
         log.info("REST request para eliminar proceso de producción con ID: {}", id);
 
         if (!procesoProduccionService.getProcesoProduccionById(id).isPresent()) {
@@ -107,5 +108,19 @@ public class ProcesoProduccionResource {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ErrorResponse("No se puede eliminar el proceso de producción", e.getMessage()));
         }
+    }
+
+    /**
+     * Verifica si un proceso de producción puede ser eliminado
+     * 
+     * @param id El ID del proceso de producción a verificar
+     * @return Respuesta con información sobre si el proceso es eliminable
+     */
+    @GetMapping("/is-deletable/{id}")
+    public ResponseEntity<?> isProcesoProduccionDeletable(@PathVariable Integer id) {
+        log.info("REST request para verificar si el proceso de producción con ID: {} es eliminable", id);
+
+        Map<String, Object> result = procesoProduccionService.isProcesoProduccionDeletable(id);
+        return ResponseEntity.ok(result);
     }
 }

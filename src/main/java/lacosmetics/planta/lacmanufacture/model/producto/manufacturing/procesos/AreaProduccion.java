@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.producto.procesos;
+package lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.users.User;

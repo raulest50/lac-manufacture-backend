@@ -1,6 +1,6 @@
 package lacosmetics.planta.lacmanufacture.resource.productos.procesos;
 
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoRecurso;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoRecurso;
 import lacosmetics.planta.lacmanufacture.service.productos.procesos.ProcesoRecursoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

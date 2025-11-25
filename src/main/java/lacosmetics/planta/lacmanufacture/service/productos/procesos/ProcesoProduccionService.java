@@ -2,11 +2,11 @@ package lacosmetics.planta.lacmanufacture.service.productos.procesos;
 
 import lacosmetics.planta.lacmanufacture.dto.ProcesoProduccionDTO;
 import lacosmetics.planta.lacmanufacture.dto.RecursoProduccionDTO;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccion;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoRecurso;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo.ProcesoProduccionNode;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoRecurso;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.RecursoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccionCompleto;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.nodo.ProcesoProduccionNode;
 import lacosmetics.planta.lacmanufacture.repo.producto.procesos.ProcesoProduccionCompletoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.procesos.ProcesoProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.procesos.RecursoProduccionRepo;
@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.criteria.Join;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -74,6 +76,44 @@ public class ProcesoProduccionService {
         }
 
         procesoProduccionRepo.deleteById(id);
+    }
+
+    /**
+     * Verifica si un proceso de producción puede ser eliminado
+     * 
+     * @param id El ID del proceso de producción a verificar
+     * @return Un objeto con información sobre si el proceso es eliminable y la razón si no lo es
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> isProcesoProduccionDeletable(Integer id) {
+        log.info("Verificando si el proceso de producción con ID: {} es eliminable", id);
+        Map<String, Object> result = new HashMap<>();
+
+        // Verificar que el proceso existe
+        if (!procesoProduccionRepo.existsById(id)) {
+            result.put("deletable", false);
+            result.put("reason", "No se encontró el proceso de producción con ID: " + id);
+            return result;
+        }
+
+        // Verificar si está referenciado en algún proceso completo
+        Specification<ProcesoProduccionCompleto> referencedInProcesoCompleto = (root, query, cb) -> {
+            query.distinct(true);
+            Join<ProcesoProduccionCompleto, ProcesoProduccionNode> nodeJoin = root.join("procesosProduccion");
+            return cb.equal(nodeJoin.get("procesoProduccion").get("procesoId"), id);
+        };
+
+        long references = procesoProduccionCompletoRepo.count(referencedInProcesoCompleto);
+        if (references > 0) {
+            result.put("deletable", false);
+            result.put("reason", "El proceso de producción está siendo utilizado en " + references + " proceso(s) completo(s)");
+            result.put("referencesCount", references);
+            return result;
+        }
+
+        // Si no hay problemas, el proceso es eliminable
+        result.put("deletable", true);
+        return result;
     }
 
     /**

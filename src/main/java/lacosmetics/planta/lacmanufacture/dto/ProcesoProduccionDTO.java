@@ -3,7 +3,7 @@ package lacosmetics.planta.lacmanufacture.dto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccion.TimeModelType;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccion.TimeModelType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

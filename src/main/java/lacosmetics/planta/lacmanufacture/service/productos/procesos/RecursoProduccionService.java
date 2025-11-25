@@ -2,7 +2,7 @@ package lacosmetics.planta.lacmanufacture.service.productos.procesos;
 
 import lacosmetics.planta.lacmanufacture.model.producto.dto.procdef.ReProdModDto;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.search.DTO_SearchRecursoProduccion;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.RecursoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.RecursoProduccion;
 import lacosmetics.planta.lacmanufacture.repo.producto.procesos.RecursoProduccionRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

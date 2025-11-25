@@ -1,8 +1,8 @@
-package lacosmetics.planta.lacmanufacture.model.producto.procesos.nodo;
+package lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.nodo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccion;
 import lombok.Getter;
 import lombok.Setter;
 

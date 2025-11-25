@@ -4,7 +4,7 @@ package lacosmetics.planta.lacmanufacture.model.produccion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
-import lacosmetics.planta.lacmanufacture.model.producto.procesos.ProcesoProduccionCompleto;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccionCompleto;
 import lacosmetics.planta.lacmanufacture.model.ventas.Vendedor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

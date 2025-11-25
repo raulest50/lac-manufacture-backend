@@ -1,4 +1,4 @@
-package lacosmetics.planta.lacmanufacture.model.producto.packaging;
+package lacosmetics.planta.lacmanufacture.model.producto.manufacturing.packaging;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;

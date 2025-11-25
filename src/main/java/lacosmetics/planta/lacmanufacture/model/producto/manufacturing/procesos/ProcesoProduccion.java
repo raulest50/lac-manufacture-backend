@@ -1,7 +1,6 @@
-package lacosmetics.planta.lacmanufacture.model.producto.procesos;
+package lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos;
 
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.activos.fijos.ActivoFijo;
 import lombok.*;
 
 import java.util.List;
