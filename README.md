@@ -69,3 +69,37 @@ Ejemplo de fila usando gramos:
 | descripcion        | unidadMedida | stock | productoId | iva | puntoReorden | costoUnitario |
 |--------------------|--------------|-------|------------|-----|--------------|---------------|
 | Polvo de Colágeno  | G            | 500   | MP004      | 19  | 50           | 35000         |
+
+## Ajustes de inventario
+
+El endpoint `POST /movimientos/ajustes` permite registrar ajustes positivos o negativos, con soporte opcional de lotes y documento de soporte.
+
+Ejemplo de carga útil:
+
+```json
+{
+  "usuarioId": 12,
+  "observaciones": "Ajuste mensual de stock",
+  "urlDocSoporte": "https://example.com/ajuste-septiembre.pdf",
+  "items": [
+    {
+      "productoId": "MP001",
+      "cantidad": 15.5,
+      "almacen": "GENERAL",
+      "motivo": "COMPRA"
+    },
+    {
+      "productoId": "PT-123",
+      "cantidad": -3,
+      "almacen": "PERDIDAS",
+      "loteId": 45,
+      "motivo": "PERDIDA"
+    }
+  ]
+}
+```
+
+- Las cantidades positivas incrementan el inventario y se clasifican como `COMPRA` por defecto.
+- Las cantidades negativas disminuyen el inventario y se clasifican como `BAJA` si no se envía otro motivo válido.
+- El campo `motivo` acepta valores de `Movimiento.TipoMovimiento` para forzar el tipo de movimiento.
+- `loteId` es opcional y permite asociar el ajuste a un lote específico.
