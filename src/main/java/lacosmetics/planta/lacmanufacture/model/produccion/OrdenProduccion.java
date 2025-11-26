@@ -45,7 +45,7 @@ public class OrdenProduccion {
     @JsonManagedReference
     private List<OrdenSeguimiento> ordenesSeguimiento = new ArrayList<>();
 
-    // 0: en produccion, 1:terminada
+    // 0: abierta, 1:en curso 2:terminada, -1: cancelada
     private int estadoOrden;
 
     private String observaciones;

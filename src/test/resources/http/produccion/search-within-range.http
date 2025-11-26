@@ -4,12 +4,12 @@
 
 # Obtén {{auth_token}} ejecutando previamente ../users/auth.http
 # Ajusta el rango de fechas y los parámetros según tu entorno
-@startDate = 2024-01-01T00:00:00
-@endDate = 2024-12-31T23:59:59
-@estadoOrden = 1
+@startDate = 2025-11-01T00:00:00
+@endDate = 2025-12-31T23:59:59
+@estadoOrden = 0
 @page = 0
 @size = 10
-@productoId = PROD-001
+@productoId = T2
 
 ### Buscar todas las órdenes de producción en el rango sin filtro de producto
 GET {{host}}/produccion/search_within_range?startDate={{startDate}}&endDate={{endDate}}&estadoOrden={{estadoOrden}}&productoId=&page={{page}}&size={{size}}

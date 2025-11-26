@@ -26,7 +26,6 @@ public class ComprasResource {
     /**
      * Compras
      */
-
     private final ComprasService compraService;
 
     @GetMapping("/byProveedorAndDate")
