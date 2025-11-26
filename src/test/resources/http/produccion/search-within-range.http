@@ -1,0 +1,22 @@
+### Variables globales
+@host = {{host}}
+@contentType = {{contentType}}
+
+# Obtén {{auth_token}} ejecutando previamente ../users/auth.http
+# Ajusta el rango de fechas y los parámetros según tu entorno
+@startDate = 2024-01-01T00:00:00
+@endDate = 2024-12-31T23:59:59
+@estadoOrden = 1
+@page = 0
+@size = 10
+@productoId = PROD-001
+
+### Buscar todas las órdenes de producción en el rango sin filtro de producto
+GET {{host}}/produccion/search_within_range?startDate={{startDate}}&endDate={{endDate}}&estadoOrden={{estadoOrden}}&productoId=&page={{page}}&size={{size}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+### Buscar órdenes de producción filtrando por producto específico
+GET {{host}}/produccion/search_within_range?startDate={{startDate}}&endDate={{endDate}}&estadoOrden={{estadoOrden}}&productoId={{productoId}}&page={{page}}&size={{size}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
