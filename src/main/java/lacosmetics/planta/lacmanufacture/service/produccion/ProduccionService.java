@@ -332,6 +332,30 @@ public class ProduccionService {
     }
 
     /**
+     * Cancela una orden de producción si se encuentra en estado abierto (0).
+     *
+     * @param ordenId identificador de la orden a cancelar
+     * @return DTO actualizado de la orden cancelada
+     */
+    @Transactional
+    public OrdenProduccionDTO cancelarOrdenProduccion(int ordenId) {
+        OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenId)
+            .orElseThrow(() -> new IllegalArgumentException("Orden de producción no encontrada con ID: " + ordenId));
+
+        if (ordenProduccion.getEstadoOrden() != 0) {
+            throw new IllegalStateException("Solo se pueden cancelar órdenes en estado abierto (0). Estado actual: " + ordenProduccion.getEstadoOrden());
+        }
+
+        ordenProduccion.setEstadoOrden(-1);
+        if (ordenProduccion.getFechaFinal() == null) {
+            ordenProduccion.setFechaFinal(LocalDateTime.now());
+        }
+
+        ordenProduccionRepo.save(ordenProduccion);
+        return convertToDto(ordenProduccion);
+    }
+
+    /**
      * Get the inputs (insumos) needed for a production order.
      * Includes recommended batches for each input, prioritizing those with closest expiration date.
      */

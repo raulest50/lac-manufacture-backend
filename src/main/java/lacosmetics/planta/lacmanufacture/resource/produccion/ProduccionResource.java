@@ -15,12 +15,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/produccion")
@@ -96,6 +98,21 @@ public class ProduccionResource {
     ) {
         OrdenProduccionDTO updatedOrden = produccionService.updateEstadoOrdenProduccion(id, estadoOrden);
         return ResponseEntity.ok(updatedOrden);
+    }
+
+    /**
+     * Cancela una orden de producción siempre que esté en estado abierto (0).
+     */
+    @PutMapping("/orden_produccion/{id}/cancel")
+    public ResponseEntity<?> cancelOrdenProduccion(@PathVariable int id) {
+        try {
+            OrdenProduccionDTO ordenCancelada = produccionService.cancelarOrdenProduccion(id);
+            return ResponseEntity.ok(ordenCancelada);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
 
