@@ -7,6 +7,8 @@ import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Ins
 import lacosmetics.planta.lacmanufacture.model.compras.ItemOrdenCompra;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.contabilidad.AsientoContable;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.AjusteInventarioDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.AjusteItemDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushNoPlanificadoDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushNoPlanificadoItemDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushMultipleNoPlanificadoDTO;
@@ -156,6 +158,47 @@ public class MovimientosService {
     public Page<Movimiento> getMovimientosByProductoId(String productoId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return transaccionAlmacenRepo.findByProducto_ProductoIdOrderByFechaMovimientoDesc(productoId, pageable);
+    }
+
+
+    public TransaccionAlmacen createAjusteInventario(AjusteInventarioDTO ajusteInventarioDTO) {
+        TransaccionAlmacen transaccion = new TransaccionAlmacen();
+        transaccion.setTipoEntidadCausante(TransaccionAlmacen.TipoEntidadCausante.OAA);
+        transaccion.setIdEntidadCausante(0);
+        transaccion.setObservaciones(ajusteInventarioDTO.getObservaciones());
+        transaccion.setUrlDocSoporte(ajusteInventarioDTO.getUrlDocSoporte());
+
+        if (ajusteInventarioDTO.getUsuarioId() != null) {
+            User user = userRepository.findById(ajusteInventarioDTO.getUsuarioId().longValue())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + ajusteInventarioDTO.getUsuarioId()));
+            transaccion.setUser(user);
+        }
+
+        List<Movimiento> movimientos = new ArrayList<>();
+        if (ajusteInventarioDTO.getItems() != null) {
+            for (AjusteItemDTO item : ajusteInventarioDTO.getItems()) {
+                Producto producto = productoRepo.findByProductoId(item.getProductoId())
+                        .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + item.getProductoId()));
+
+                Movimiento movimiento = new Movimiento();
+                movimiento.setCantidad(item.getCantidad());
+                movimiento.setProducto(producto);
+                movimiento.setAlmacen(Optional.ofNullable(item.getAlmacen()).orElse(Movimiento.Almacen.GENERAL));
+                movimiento.setTipoMovimiento(resolveTipoMovimiento(item));
+
+                if (item.getLoteId() != null) {
+                    Lote lote = loteRepo.findById(item.getLoteId().longValue())
+                            .orElseThrow(() -> new RuntimeException("Lote no encontrado con ID: " + item.getLoteId()));
+                    movimiento.setLote(lote);
+                }
+
+                movimiento.setTransaccionAlmacen(transaccion);
+                movimientos.add(movimiento);
+            }
+        }
+
+        transaccion.setMovimientosTransaccion(movimientos);
+        return transaccionAlmacenHeaderRepo.save(transaccion);
     }
 
 
@@ -952,6 +995,18 @@ public class MovimientosService {
 
         responseDTO.setLotesDisponibles(lotesDisponibles);
         return responseDTO;
+    }
+
+    private Movimiento.TipoMovimiento resolveTipoMovimiento(AjusteItemDTO item) {
+        if (item.getMotivo() != null) {
+            try {
+                return Movimiento.TipoMovimiento.valueOf(item.getMotivo().toUpperCase());
+            } catch (IllegalArgumentException ignored) {
+                // fallback basado en el signo de la cantidad
+            }
+        }
+
+        return item.getCantidad() >= 0 ? Movimiento.TipoMovimiento.COMPRA : Movimiento.TipoMovimiento.BAJA;
     }
 
     public byte[] generateMovimientosExcel(MovimientoExcelRequestDTO dto) {

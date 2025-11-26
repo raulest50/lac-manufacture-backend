@@ -1,6 +1,7 @@
 package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.AjusteInventarioDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushNoPlanificadoDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.BackflushMultipleNoPlanificadoDTO;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.DispensacionDTO;
@@ -83,6 +84,13 @@ public class MovimientosResource {
     ) {
         Page<Movimiento> movimientos = movimientoService.getMovimientosByProductoId(productoId, page, size);
         return ResponseEntity.ok().body(movimientos);
+    }
+
+    @PostMapping("/ajustes")
+    public ResponseEntity<TransaccionAlmacen> createAjusteInventario(@RequestBody AjusteInventarioDTO ajusteInventarioDTO) {
+        TransaccionAlmacen transaccion = movimientoService.createAjusteInventario(ajusteInventarioDTO);
+        return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
+                .body(transaccion);
     }
 
     /**
