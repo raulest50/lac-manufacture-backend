@@ -20,7 +20,7 @@ public class OrdenProduccionDTO {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaLanzamiento; // fecha planeada de autorización
     private LocalDateTime fechaFinalPlanificada; // fecha objetivo para terminar
-    private int estadoOrden;        // 0: en produccion, 1: terminada, -1: cancelada
+    private int estadoOrden;        // 0: abierta, 1: en curso, 2: terminada, -1: cancelada
     private String observaciones;
     private double cantidadProducir = 1.0; // Cantidad planificada a producir (mínimo 1.0)
     private String numeroPedidoComercial; // pedido comercial origen
