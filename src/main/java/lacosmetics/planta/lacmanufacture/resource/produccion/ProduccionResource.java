@@ -100,6 +100,16 @@ public class ProduccionResource {
         return ResponseEntity.ok(updatedOrden);
     }
 
+    @GetMapping("/orden_produccion/{id}/is_deletable")
+    public ResponseEntity<?> isOrdenProduccionCancelable(@PathVariable int id) {
+        try {
+            boolean cancelable = produccionService.isOrdenProduccionCancelable(id);
+            return ResponseEntity.ok(Map.of("cancelable", cancelable));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     /**
      * Cancela una orden de producción siempre que esté en estado abierto (0).
      */

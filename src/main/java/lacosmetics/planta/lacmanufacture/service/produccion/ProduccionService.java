@@ -342,7 +342,7 @@ public class ProduccionService {
         OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenId)
             .orElseThrow(() -> new IllegalArgumentException("Orden de producción no encontrada con ID: " + ordenId));
 
-        if (ordenProduccion.getEstadoOrden() != 0) {
+        if (!isOrdenProduccionCancelable(ordenProduccion)) {
             throw new IllegalStateException("Solo se pueden cancelar órdenes en estado abierto (0). Estado actual: " + ordenProduccion.getEstadoOrden());
         }
 
@@ -353,6 +353,17 @@ public class ProduccionService {
 
         ordenProduccionRepo.save(ordenProduccion);
         return convertToDto(ordenProduccion);
+    }
+
+    public boolean isOrdenProduccionCancelable(int ordenId) {
+        OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenId)
+            .orElseThrow(() -> new IllegalArgumentException("Orden de producción no encontrada con ID: " + ordenId));
+
+        return isOrdenProduccionCancelable(ordenProduccion);
+    }
+
+    private boolean isOrdenProduccionCancelable(OrdenProduccion ordenProduccion) {
+        return ordenProduccion.getEstadoOrden() == 0;
     }
 
     /**
