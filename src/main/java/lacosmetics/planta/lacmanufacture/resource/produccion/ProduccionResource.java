@@ -47,11 +47,18 @@ public class ProduccionResource {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam int estadoOrden,
+            @RequestParam(required = false) String productoId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("fechaCreacion").ascending());
-        Page<OrdenProduccionDTO> resultados = produccionService.searchOrdenesProduccionByDateRangeAndEstadoOrden(startDate, endDate, estadoOrden, pageable);
+        Page<OrdenProduccionDTO> resultados = produccionService.searchOrdenesProduccionByDateRangeAndEstadoOrden(
+                startDate,
+                endDate,
+                estadoOrden,
+                productoId,
+                pageable
+        );
         return ResponseEntity.ok(resultados);
     }
 

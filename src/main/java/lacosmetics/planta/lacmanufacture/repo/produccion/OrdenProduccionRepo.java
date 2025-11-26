@@ -38,20 +38,25 @@ public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Inte
     /**
      * Finds OrdenProduccion within a date range and estadoOrden.
      * If estadoOrden is 2, it ignores the estadoOrden filter.
+     * If productoId is provided, it filters by the given product.
      *
      * @param startDate   Start of the date range.
      * @param endDate     End of the date range.
      * @param estadoOrden Estado of the orden.
+     * @param productoId  Optional product identifier to filter by.
      * @param pageable    Pagination information.
      * @return Page of OrdenProduccion matching the criteria.
      */
     @EntityGraph(attributePaths = {"ordenesSeguimiento", "producto"})
     @Query("SELECT o FROM OrdenProduccion o WHERE o.fechaCreacion BETWEEN :startDate AND :endDate " +
-            "AND (:estadoOrden = 2 OR o.estadoOrden = :estadoOrden) ORDER BY o.fechaCreacion")
+            "AND (:estadoOrden = 2 OR o.estadoOrden = :estadoOrden) " +
+            "AND (:productoId IS NULL OR :productoId = '' OR o.producto.productoId = :productoId) " +
+            "ORDER BY o.fechaCreacion")
     Page<OrdenProduccion> findByFechaCreacionBetweenAndEstadoOrden(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("estadoOrden") int estadoOrden,
+            @Param("productoId") String productoId,
             Pageable pageable
     );
 
