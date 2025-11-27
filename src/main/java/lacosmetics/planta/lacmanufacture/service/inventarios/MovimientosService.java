@@ -190,6 +190,14 @@ public class MovimientosService {
                     Lote lote = loteRepo.findById(item.getLoteId().longValue())
                             .orElseThrow(() -> new RuntimeException("Lote no encontrado con ID: " + item.getLoteId()));
                     movimiento.setLote(lote);
+                } else {
+                    Lote nuevoLote = new Lote();
+                    nuevoLote.setBatchNumber(generateBatchNumber(producto));
+                    nuevoLote.setProductionDate(LocalDate.now());
+                    nuevoLote.setExpirationDate(LocalDate.now().plusMonths(6));
+
+                    nuevoLote = loteRepo.save(nuevoLote);
+                    movimiento.setLote(nuevoLote);
                 }
 
                 movimiento.setTransaccionAlmacen(transaccion);
