@@ -53,7 +53,7 @@ public class ProcesoProduccionResource {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update_proc_produccion/{id}")
     public ResponseEntity<?> updateProcesoProduccion(
             @PathVariable Integer id,
             @Valid @RequestBody ProcesoProduccionDTO procesoProduccionDTO) {
