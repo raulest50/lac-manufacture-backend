@@ -88,6 +88,7 @@ public class MovimientosResource {
 
     @PostMapping("/ajustes")
     public ResponseEntity<TransaccionAlmacen> createAjusteInventario(@RequestBody AjusteInventarioDTO ajusteInventarioDTO) {
+        // Llamar directamente al servicio con el DTO original
         TransaccionAlmacen transaccion = movimientoService.createAjusteInventario(ajusteInventarioDTO);
         return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
                 .body(transaccion);

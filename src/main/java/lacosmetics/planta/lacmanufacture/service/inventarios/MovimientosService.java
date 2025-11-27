@@ -168,10 +168,14 @@ public class MovimientosService {
         transaccion.setObservaciones(ajusteInventarioDTO.getObservaciones());
         transaccion.setUrlDocSoporte(ajusteInventarioDTO.getUrlDocSoporte());
 
-        if (ajusteInventarioDTO.getUsuarioId() != null) {
-            User user = userRepository.findById(ajusteInventarioDTO.getUsuarioId().longValue())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + ajusteInventarioDTO.getUsuarioId()));
-            transaccion.setUser(user);
+        if (ajusteInventarioDTO.getUsername() != null && !ajusteInventarioDTO.getUsername().isEmpty()) {
+            Optional<User> userOpt = userRepository.findByUsername(ajusteInventarioDTO.getUsername());
+            if (userOpt.isPresent()) {
+                transaccion.setUser(userOpt.get());
+            } else {
+                // Si no se encuentra el usuario, registramos un warning pero continuamos
+                log.warn("Usuario no encontrado con username: " + ajusteInventarioDTO.getUsername());
+            }
         }
 
         List<Movimiento> movimientos = new ArrayList<>();

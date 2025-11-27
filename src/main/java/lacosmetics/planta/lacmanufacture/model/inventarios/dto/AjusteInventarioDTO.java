@@ -16,8 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 public class AjusteInventarioDTO {
 
-    /** ID del usuario que realiza el ajuste. */
-    private Integer usuarioId;
+    /** Username del usuario que realiza el ajuste. */
+    private String username;
 
     /** Observaciones generales del ajuste. */
     private String observaciones;
