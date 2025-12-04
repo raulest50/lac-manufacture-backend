@@ -66,4 +66,13 @@ public interface OrdenProduccionRepo extends JpaRepository<OrdenProduccion, Inte
     @Query("UPDATE OrdenProduccion o SET o.estadoOrden = :estadoOrden, o.fechaFinal = CURRENT_TIMESTAMP WHERE o.ordenId = :id")
     void updateEstadoOrdenById(@Param("id") int id, @Param("estadoOrden") int estadoOrden);
 
+    /**
+     * Encuentra todas las órdenes de producción en estado abierto (0) o en curso (1)
+     * 
+     * @param pageable Información de paginación
+     * @return Página de órdenes de producción
+     */
+    @EntityGraph(attributePaths = {"ordenesSeguimiento", "producto"})
+    @Query("SELECT o FROM OrdenProduccion o WHERE o.estadoOrden = 0 OR o.estadoOrden = 1 ORDER BY o.fechaCreacion DESC")
+    Page<OrdenProduccion> findByEstadoOrdenOpenOrInProgress(Pageable pageable);
 }

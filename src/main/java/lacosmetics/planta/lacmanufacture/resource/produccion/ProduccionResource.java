@@ -139,4 +139,22 @@ public class ProduccionResource {
         return ResponseEntity.ok(data);
     }
 
+    /**
+     * Obtiene todas las órdenes de producción en estado abierto (0) o en curso (1)
+     * utilizando paginación.
+     * 
+     * @param page Número de página (por defecto 0)
+     * @param size Tamaño de página (por defecto 10)
+     * @return Página de DTOs de órdenes de producción
+     */
+    @GetMapping("/dispensacion_odp_consulta")
+    public ResponseEntity<Page<OrdenProduccionDTO>> getOrdenesProduccionOpenOrInProgress(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaCreacion").descending());
+        Page<OrdenProduccionDTO> resultados = produccionService.getOrdenesProduccionOpenOrInProgress(pageable);
+        return ResponseEntity.ok(resultados);
+    }
+
 }

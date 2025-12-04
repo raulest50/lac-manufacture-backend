@@ -154,6 +154,18 @@ public class ProduccionService {
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 
+    /**
+     * Obtiene todas las órdenes de producción en estado abierto (0) o en curso (1)
+     * 
+     * @param pageable Información de paginación
+     * @return Página de DTOs de órdenes de producción
+     */
+    public Page<OrdenProduccionDTO> getOrdenesProduccionOpenOrInProgress(Pageable pageable) {
+        Page<OrdenProduccion> ordenesPage = ordenProduccionRepo.findByEstadoOrdenOpenOrInProgress(pageable);
+        // No need to initialize associations as EntityGraph is used in the repository method
+        return ordenesPage.map(this::convertToDto);
+    }
+
     // Helper method to map OrdenProduccion to OrdenProduccionDTO
     private OrdenProduccionDTO convertToDto(OrdenProduccion orden) {
         OrdenProduccionDTO dto = new OrdenProduccionDTO();
