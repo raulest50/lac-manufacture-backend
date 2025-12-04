@@ -2,6 +2,7 @@ package lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta;
 
 import jakarta.persistence.*;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.ManufacturingVersion;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,10 @@ public class Insumo {
     @ManyToOne
     @JoinColumn(name = "input_producto_id")
     private Producto producto;
+
+    @ManyToOne
+    @JoinColumn(name = "version_id")
+    private ManufacturingVersion manufacturingVersion;
 
     private double cantidadRequerida;
 

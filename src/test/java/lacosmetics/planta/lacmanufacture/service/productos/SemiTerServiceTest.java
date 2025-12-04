@@ -15,9 +15,11 @@ import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.manufacturing.ManufacturingVersionRepo;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,6 +55,7 @@ class SemiTerServiceTest {
         OrdenProduccion op1 = new OrdenProduccion();
         OrdenProduccion op2 = new OrdenProduccion();
         Insumo insumo1 = new Insumo();
+        Insumo insumoByVersion = new Insumo();
         ManufacturingVersion manufacturingVersion1 = new ManufacturingVersion();
         ManufacturingVersion manufacturingVersion2 = new ManufacturingVersion();
 
@@ -60,6 +63,7 @@ class SemiTerServiceTest {
         when(transaccionAlmacenRepo.findByProducto_ProductoId("S-001")).thenReturn(List.of(mov1, mov2));
         when(ordenProduccionRepo.findByProducto_ProductoId("S-001")).thenReturn(List.of(op1, op2));
         when(insumoRepo.findByProducto_ProductoId("S-001")).thenReturn(List.of(insumo1));
+        when(insumoRepo.findByManufacturingVersion_Producto_ProductoId("S-001")).thenReturn(List.of(insumoByVersion));
         when(manufacturingVersionRepo.findByProducto_ProductoId("S-001")).thenReturn(List.of(manufacturingVersion1, manufacturingVersion2));
 
         Map<String, Object> result = service.forceDeleteProducto("S-001");
@@ -68,12 +72,13 @@ class SemiTerServiceTest {
         assertEquals("Producto eliminado correctamente", result.get("message"));
         assertEquals(2, result.get("deletedMovimientos"));
         assertEquals(2, result.get("deletedOrdenesProduccion"));
-        assertEquals(1, result.get("deletedInsumos"));
+        assertEquals(2, result.get("deletedInsumos"));
         assertEquals(2, result.get("deletedManufacturingVersions"));
 
+        Set<Insumo> expectedDeletedInsumos = new HashSet<>(List.of(insumo1, insumoByVersion));
         verify(transaccionAlmacenRepo).deleteAll(List.of(mov1, mov2));
         verify(ordenProduccionRepo).deleteAll(List.of(op1, op2));
-        verify(insumoRepo).deleteAll(List.of(insumo1));
+        verify(insumoRepo).deleteAll(expectedDeletedInsumos);
         verify(manufacturingVersionRepo).deleteAll(List.of(manufacturingVersion1, manufacturingVersion2));
         verify(semiTerminadoRepo).deleteById("S-001");
         verifyNoInteractions(terminadoRepo);
@@ -109,7 +114,10 @@ class SemiTerServiceTest {
         when(productoRepo.findById("T-001")).thenReturn(Optional.of(terminado));
         when(transaccionAlmacenRepo.findByProducto_ProductoId("T-001")).thenReturn(List.of(movimiento));
         when(ordenProduccionRepo.findByProducto_ProductoId("T-001")).thenReturn(List.of(ordenProduccion));
+        Insumo insumoByVersion = new Insumo();
+
         when(insumoRepo.findByProducto_ProductoId("T-001")).thenReturn(List.of());
+        when(insumoRepo.findByManufacturingVersion_Producto_ProductoId("T-001")).thenReturn(List.of(insumoByVersion));
         when(manufacturingVersionRepo.findByProducto_ProductoId("T-001")).thenReturn(List.of(manufacturingVersion));
 
         Map<String, Object> result = service.forceDeleteProducto("T-001");
@@ -118,12 +126,13 @@ class SemiTerServiceTest {
         assertEquals("Producto eliminado correctamente", result.get("message"));
         assertEquals(1, result.get("deletedMovimientos"));
         assertEquals(1, result.get("deletedOrdenesProduccion"));
-        assertEquals(0, result.get("deletedInsumos"));
+        assertEquals(1, result.get("deletedInsumos"));
         assertEquals(1, result.get("deletedManufacturingVersions"));
 
+        Set<Insumo> expectedDeletedInsumos = new HashSet<>(List.of(insumoByVersion));
         verify(transaccionAlmacenRepo).deleteAll(List.of(movimiento));
         verify(ordenProduccionRepo).deleteAll(List.of(ordenProduccion));
-        verify(insumoRepo, never()).deleteAll(any());
+        verify(insumoRepo).deleteAll(expectedDeletedInsumos);
         verify(manufacturingVersionRepo).deleteAll(List.of(manufacturingVersion));
         verify(terminadoRepo).deleteById("T-001");
         verifyNoInteractions(semiTerminadoRepo);
