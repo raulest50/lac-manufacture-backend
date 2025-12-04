@@ -20,9 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -171,11 +173,14 @@ public class SemiTerService {
             ordenProduccionRepo.deleteAll(ordenes);
         }
 
-        List<Insumo> insumos = insumoRepo.findByProducto_ProductoId(productoId);
-        int deletedInsumos = insumos.size();
-        if (!insumos.isEmpty()) {
-            log.info("Eliminando {} insumos que referencian al producto {}", deletedInsumos, productoId);
-            insumoRepo.deleteAll(insumos);
+        List<Insumo> insumosByProducto = insumoRepo.findByProducto_ProductoId(productoId);
+        List<Insumo> insumosByManufacturingVersion = insumoRepo.findByManufacturingVersion_Producto_ProductoId(productoId);
+        Set<Insumo> insumosToDelete = new HashSet<>(insumosByProducto);
+        insumosToDelete.addAll(insumosByManufacturingVersion);
+        int deletedInsumos = insumosToDelete.size();
+        if (!insumosToDelete.isEmpty()) {
+            log.info("Eliminando {} insumos que referencian al producto {} o sus versiones", deletedInsumos, productoId);
+            insumoRepo.deleteAll(insumosToDelete);
         }
 
         List<ManufacturingVersion> manufacturingVersions = manufacturingVersionRepo.findByProducto_ProductoId(productoId);
