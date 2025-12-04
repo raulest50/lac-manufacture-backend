@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.service.productos;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.ManufacturingVersion;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
@@ -11,6 +12,7 @@ import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.InsumoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.manufacturing.ManufacturingVersionRepo;
 import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class SemiTerService {
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
     private final InsumoRepo insumoRepo;
+    private final ManufacturingVersionRepo manufacturingVersionRepo;
     private final TransaccionAlmacenRepo transaccionAlmacenRepo;
     private final OrdenProduccionRepo ordenProduccionRepo;
 
@@ -175,6 +178,13 @@ public class SemiTerService {
             insumoRepo.deleteAll(insumos);
         }
 
+        List<ManufacturingVersion> manufacturingVersions = manufacturingVersionRepo.findByProducto_ProductoId(productoId);
+        int deletedManufacturingVersions = manufacturingVersions.size();
+        if (!manufacturingVersions.isEmpty()) {
+            log.info("Eliminando {} versiones de manufactura asociadas al producto {}", deletedManufacturingVersions, productoId);
+            manufacturingVersionRepo.deleteAll(manufacturingVersions);
+        }
+
         if (producto instanceof SemiTerminado) {
             log.info("Eliminando Semiterminado con ID: {}", productoId);
             semiTerminadoRepo.deleteById(productoId);
@@ -188,6 +198,7 @@ public class SemiTerService {
         result.put("deletedMovimientos", deletedMovimientos);
         result.put("deletedOrdenesProduccion", deletedOrdenes);
         result.put("deletedInsumos", deletedInsumos);
+        result.put("deletedManufacturingVersions", deletedManufacturingVersions);
 
         return result;
     }

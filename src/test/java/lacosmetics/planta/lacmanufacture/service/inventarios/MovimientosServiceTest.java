@@ -16,6 +16,7 @@ import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
 import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lacosmetics.planta.lacmanufacture.repo.master.configs.MasterDirectiveRepo;
 import lacosmetics.planta.lacmanufacture.service.contabilidad.ContabilidadService;
+import lacosmetics.planta.lacmanufacture.service.produccion.ProduccionService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -39,13 +40,14 @@ class MovimientosServiceTest {
         LoteRepo loteRepo = Mockito.mock(LoteRepo.class);
         UserRepository userRepo = Mockito.mock(UserRepository.class);
         ContabilidadService contService = Mockito.mock(ContabilidadService.class);
+        ProduccionService produccionService = Mockito.mock(ProduccionService.class);
         OrdenProduccionRepo ordenProduccionRepo = Mockito.mock(OrdenProduccionRepo.class);
         OrdenSeguimientoRepo ordenSeguimientoRepo = Mockito.mock(OrdenSeguimientoRepo.class);
         MasterDirectiveRepo masterDirectiveRepo = Mockito.mock(MasterDirectiveRepo.class);
 
         MovimientosService service = new MovimientosService(transRepo, prodRepo, headerRepo,
                 ordenRepo, semiRepo, termRepo, materialRepo,
-                loteRepo, userRepo, contService, ordenProduccionRepo, ordenSeguimientoRepo, masterDirectiveRepo);
+                loteRepo, userRepo, contService, produccionService, ordenProduccionRepo, ordenSeguimientoRepo, masterDirectiveRepo);
 
         Material producto = new Material();
         producto.setProductoId("P1");
