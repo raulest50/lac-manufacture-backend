@@ -4,11 +4,14 @@ import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
+import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.InsumoRepo;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ public class SemiTerService {
     private final ProductoRepo productoRepo;
     private final SemiTerminadoRepo semiTerminadoRepo;
     private final TerminadoRepo terminadoRepo;
+    private final InsumoRepo insumoRepo;
     private final TransaccionAlmacenRepo transaccionAlmacenRepo;
     private final OrdenProduccionRepo ordenProduccionRepo;
 
@@ -127,6 +131,64 @@ public class SemiTerService {
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         result.put("message", "Producto eliminado correctamente");
+        return result;
+    }
+
+    /**
+     * Fuerza la eliminación de un Semiterminado o Terminado junto con sus dependencias directas
+     * para evitar bloqueos por integridad referencial.
+     *
+     * @param productoId ID del producto a eliminar
+     * @return Mapa con el resultado de la operación y conteos de entidades eliminadas
+     */
+    @Transactional
+    public Map<String, Object> forceDeleteProducto(String productoId) {
+        log.info("Forzando eliminación del producto con ID: {}", productoId);
+
+        Producto producto = productoRepo.findById(productoId)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el producto con ID: " + productoId));
+
+        if (!(producto instanceof SemiTerminado) && !(producto instanceof Terminado)) {
+            throw new IllegalStateException("Solo se pueden eliminar productos Semiterminados o Terminados");
+        }
+
+        Map<String, Object> result = new HashMap<>();
+
+        List<Movimiento> movimientos = transaccionAlmacenRepo.findByProducto_ProductoId(productoId);
+        int deletedMovimientos = movimientos.size();
+        if (!movimientos.isEmpty()) {
+            log.info("Eliminando {} movimientos de inventario asociados al producto {}", deletedMovimientos, productoId);
+            transaccionAlmacenRepo.deleteAll(movimientos);
+        }
+
+        List<OrdenProduccion> ordenes = ordenProduccionRepo.findByProducto_ProductoId(productoId);
+        int deletedOrdenes = ordenes.size();
+        if (!ordenes.isEmpty()) {
+            log.info("Eliminando {} órdenes de producción asociadas al producto {}", deletedOrdenes, productoId);
+            ordenProduccionRepo.deleteAll(ordenes);
+        }
+
+        List<Insumo> insumos = insumoRepo.findByProducto_ProductoId(productoId);
+        int deletedInsumos = insumos.size();
+        if (!insumos.isEmpty()) {
+            log.info("Eliminando {} insumos que referencian al producto {}", deletedInsumos, productoId);
+            insumoRepo.deleteAll(insumos);
+        }
+
+        if (producto instanceof SemiTerminado) {
+            log.info("Eliminando Semiterminado con ID: {}", productoId);
+            semiTerminadoRepo.deleteById(productoId);
+        } else {
+            log.info("Eliminando Terminado con ID: {}", productoId);
+            terminadoRepo.deleteById(productoId);
+        }
+
+        result.put("success", true);
+        result.put("message", "Producto eliminado correctamente");
+        result.put("deletedMovimientos", deletedMovimientos);
+        result.put("deletedOrdenesProduccion", deletedOrdenes);
+        result.put("deletedInsumos", deletedInsumos);
+
         return result;
     }
 }
