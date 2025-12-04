@@ -14,6 +14,7 @@ import lacosmetics.planta.lacmanufacture.model.inventarios.dto.MovimientoExcelRe
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.ProductoStockDTO;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.DispensacionFormularioDTO;
 import lacosmetics.planta.lacmanufacture.service.inventarios.MovimientosService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -84,6 +85,21 @@ public class MovimientosResource {
     ) {
         Page<Movimiento> movimientos = movimientoService.getMovimientosByProductoId(productoId, page, size);
         return ResponseEntity.ok().body(movimientos);
+    }
+
+    /**
+     * Obtiene el formulario sugerido para la dispensación de una orden de producción.
+     * Este formulario incluye los materiales requeridos y los lotes recomendados para cada uno.
+     *
+     * @param ordenProduccionId identificador de la orden de producción
+     * @return formulario de dispensación sugerido para la orden
+     */
+    @GetMapping("/dispensacion_sugerida")
+    public ResponseEntity<DispensacionFormularioDTO> getDispensacionSugerida(
+            @RequestParam int ordenProduccionId) {
+        DispensacionFormularioDTO formulario = movimientoService.getFormularioDispensacion(ordenProduccionId);
+        // Ejemplo de respuesta: {"ordenProduccionId":101,"productoNombre":"Crema Facial","dispensaciones":[{"productoId":"MAT-001","nombreProducto":"Alcohol 70%","lotesRecomendados":[{"loteId":10,"batchNumber":"L001","cantidadRecomendada":5.0}]}]}
+        return ResponseEntity.ok(formulario);
     }
 
     @PostMapping("/ajustes")
