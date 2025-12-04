@@ -29,6 +29,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenSeguimiento;
+import lacosmetics.planta.lacmanufacture.model.produccion.dto.DispensacionFormularioDTO;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenSeguimientoRepo;
 import lacosmetics.planta.lacmanufacture.model.users.User;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
@@ -44,6 +45,7 @@ import lacosmetics.planta.lacmanufacture.repo.usuarios.UserRepository;
 import lacosmetics.planta.lacmanufacture.repo.master.configs.MasterDirectiveRepo;
 import lacosmetics.planta.lacmanufacture.model.master.configs.MasterDirective;
 import lacosmetics.planta.lacmanufacture.service.contabilidad.ContabilidadService;
+import lacosmetics.planta.lacmanufacture.service.produccion.ProduccionService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -91,9 +93,20 @@ public class MovimientosService {
     private final LoteRepo loteRepo;
     private final UserRepository userRepository;
     private final ContabilidadService contabilidadService;
+    private final ProduccionService produccionService;
     private final OrdenProduccionRepo ordenProduccionRepo;
     private final OrdenSeguimientoRepo ordenSeguimientoRepo;
     private final MasterDirectiveRepo masterDirectiveRepo;
+
+    /**
+     * Obtiene el formulario sugerido de dispensación delegando al servicio de producción.
+     *
+     * @param ordenProduccionId identificador de la orden de producción
+     * @return formulario con materiales y lotes recomendados
+     */
+    public DispensacionFormularioDTO getFormularioDispensacion(int ordenProduccionId) {
+        return produccionService.getFormularioDispensacion(ordenProduccionId);
+    }
 
     @Transactional
     public Movimiento saveMovimiento(Movimiento movimientoReal){
