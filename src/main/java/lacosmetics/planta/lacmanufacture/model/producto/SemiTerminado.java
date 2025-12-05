@@ -1,14 +1,16 @@
 package lacosmetics.planta.lacmanufacture.model.producto;
 
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.ManufacturingVersion;
 import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.procesos.ProcesoProduccionCompleto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import java.util.List;
 
@@ -20,13 +22,22 @@ import java.util.List;
 @AllArgsConstructor
 public class SemiTerminado extends Producto{
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "output_producto_id")
-    private List<Insumo> insumos;
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
+    @OrderBy("version DESC")
+    @LazyCollection(LazyCollectionOption.EXTRA)
+    private List<ManufacturingVersion> manufacturingVersions;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "proceso_prod_id")
-    @JsonManagedReference("producto-proceso")
-    private ProcesoProduccionCompleto procesoProduccionCompleto;
+    @OneToOne
+    @JoinColumn(name = "current_version_id")
+    private ManufacturingVersion currentVersion;
 
+    // Métodos de conveniencia para mantener la compatibilidad con el código existente
+
+    public List<Insumo> getInsumos() {
+        return currentVersion != null ? currentVersion.getInsumos() : null;
+    }
+
+    public ProcesoProduccionCompleto getProcesoProduccionCompleto() {
+        return currentVersion != null ? currentVersion.getProcesoProduccionCompleto() : null;
+    }
 }

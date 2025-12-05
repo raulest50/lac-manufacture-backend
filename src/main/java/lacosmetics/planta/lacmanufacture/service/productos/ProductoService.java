@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.service.productos;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.transaction.annotation.Transactional;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.ManufacturingVersion;
 import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.InsumoWithStockDTO;
 import lacosmetics.planta.lacmanufacture.model.producto.dto.ProductoStockDTO;
@@ -13,6 +14,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.*;
+import lacosmetics.planta.lacmanufacture.repo.producto.manufacturing.ManufacturingVersionRepo;
 import lacosmetics.planta.lacmanufacture.service.commons.FileStorageService;
 import lacosmetics.planta.lacmanufacture.repo.compras.ItemOrdenCompraRepo;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +53,8 @@ public class ProductoService {
 
     private final FileStorageService fileStorageService;
 
+    private final ManufacturingVersionRepo manufacturingVersionRepo;
+
     // fetch all products para el producto picker component en frontend
     public Page<Producto> getAllProductos(int page, int size){
         return productoRepo.findAll(PageRequest.of(page, size));
@@ -62,15 +66,89 @@ public class ProductoService {
     }
 
     /**
-     * no longer to be used to save a materia prima
-     * @param producto
-     * @return
+     * Guarda un producto en la base de datos.
+     * Para SemiTerminado y Terminado, crea una versión inicial de manufactura.
+     * @param producto El producto a guardar
+     * @return El producto guardado
      */
     @Transactional
     public Producto saveProducto(Producto producto){
+        // Caso especial para SemiTerminado
         if (producto instanceof SemiTerminado semiTerminado) {
-            return productoRepo.save(semiTerminado);
-        } else{
+            // Verificar si ya tiene manufacturingVersions
+            if (semiTerminado.getManufacturingVersions() == null) {
+                semiTerminado.setManufacturingVersions(new ArrayList<>());
+            }
+
+            // Crear nueva versión de manufactura
+            ManufacturingVersion version = new ManufacturingVersion();
+            version.setVersion(1.0); // Primera versión
+            version.setActivo(true);
+            version.setDescripcionCambio("Versión inicial");
+            version.setProducto(semiTerminado);
+
+            // Transferir insumos a la versión
+            if (semiTerminado.getInsumos() != null) {
+                version.setInsumos(semiTerminado.getInsumos());
+            }
+
+            // Transferir proceso de producción a la versión
+            if (semiTerminado.getProcesoProduccionCompleto() != null) {
+                version.setProcesoProduccionCompleto(semiTerminado.getProcesoProduccionCompleto());
+            }
+
+            // Guardar el SemiTerminado primero para obtener ID
+            SemiTerminado saved = (SemiTerminado) productoRepo.save(semiTerminado);
+
+            // Establecer la relación bidireccional
+            version.setProducto(saved);
+
+            // Guardar la versión
+            manufacturingVersionRepo.save(version);
+
+            // Actualizar la versión actual
+            saved.getManufacturingVersions().add(version);
+            saved.setCurrentVersion(version);
+
+            return productoRepo.save(saved);
+        } 
+        // Caso especial para Terminado
+        else if (producto instanceof Terminado terminado) {
+            // Lógica similar a SemiTerminado pero incluyendo CasePack
+            if (terminado.getManufacturingVersions() == null) {
+                terminado.setManufacturingVersions(new ArrayList<>());
+            }
+
+            ManufacturingVersion version = new ManufacturingVersion();
+            version.setVersion(1.0);
+            version.setActivo(true);
+            version.setDescripcionCambio("Versión inicial");
+            version.setProducto(terminado);
+
+            if (terminado.getInsumos() != null) {
+                version.setInsumos(terminado.getInsumos());
+            }
+
+            if (terminado.getProcesoProduccionCompleto() != null) {
+                version.setProcesoProduccionCompleto(terminado.getProcesoProduccionCompleto());
+            }
+
+            if (terminado.getCasePack() != null) {
+                version.setCasePack(terminado.getCasePack());
+            }
+
+            Terminado saved = (Terminado) productoRepo.save(terminado);
+
+            version.setProducto(saved);
+            manufacturingVersionRepo.save(version);
+
+            saved.getManufacturingVersions().add(version);
+            saved.setCurrentVersion(version);
+
+            return productoRepo.save(saved);
+        } 
+        // Caso para otros tipos de productos
+        else {
             return productoRepo.save(producto);
         }
     }

@@ -15,7 +15,8 @@ import java.util.List;
 @Repository
 public interface SemiTerminadoRepo extends JpaRepository<SemiTerminado, String>, JpaSpecificationExecutor<SemiTerminado> {
 
-    List<SemiTerminado> findByInsumos_Producto(Producto producto);
+    @Query("SELECT s FROM SemiTerminado s JOIN s.currentVersion v JOIN v.insumos i WHERE i.producto = :producto")
+    List<SemiTerminado> findByInsumos_Producto(@Param("producto") Producto producto);
 
     @Query(value = """
             SELECT * FROM productos p
