@@ -1,16 +1,20 @@
 package lacosmetics.planta.lacmanufacture.service.productos;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.snapshots.ManufacturingVersion;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.InsumoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.manufacturing.snapshots.ManufacturingVersionRepo;
 import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.receta.Insumo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +37,8 @@ public class SemiTerService {
     private final InsumoRepo insumoRepo;
     private final TransaccionAlmacenRepo transaccionAlmacenRepo;
     private final OrdenProduccionRepo ordenProduccionRepo;
+    private final ManufacturingVersionRepo manufacturingVersionRepo;
+    private final ObjectMapper objectMapper;
 
     /**
      * Verifica si un Semiterminado o Terminado puede ser eliminado.
@@ -190,5 +196,57 @@ public class SemiTerService {
         result.put("deletedInsumos", deletedInsumos);
 
         return result;
+    }
+
+    @Transactional
+    public Producto saveManufacturingVersion(Producto productoData) {
+        if (productoData == null || productoData.getProductoId() == null) {
+            throw new IllegalArgumentException("El producto y su ID no pueden ser nulos");
+        }
+
+        Producto existingProducto = productoRepo.findById(productoData.getProductoId())
+                .orElseThrow(() -> new IllegalArgumentException("No se encontró el producto con ID: " + productoData.getProductoId()));
+
+        if (!(existingProducto instanceof SemiTerminado) && !(existingProducto instanceof Terminado)) {
+            throw new IllegalArgumentException("Solo se pueden modificar productos Semiterminados o Terminados");
+        }
+
+        try {
+            ManufacturingVersion version = new ManufacturingVersion();
+            version.setProducto(existingProducto);
+
+            int nextVersion = manufacturingVersionRepo.findTopByProductoOrderByVersionNumberDesc(existingProducto)
+                    .map(v -> v.getVersionNumber() + 1)
+                    .orElse(1);
+            version.setVersionNumber(nextVersion);
+
+            if (productoData instanceof Terminado terminadoData) {
+                version.setInsumosJson(objectMapper.writeValueAsString(terminadoData.getInsumos()));
+                version.setProcesoProduccionJson(objectMapper.writeValueAsString(terminadoData.getProcesoProduccionCompleto()));
+                version.setCasePackJson(objectMapper.writeValueAsString(terminadoData.getCasePack()));
+
+                Terminado existingTerminado = (Terminado) existingProducto;
+                existingTerminado.setInsumos(terminadoData.getInsumos());
+                existingTerminado.setProcesoProduccionCompleto(terminadoData.getProcesoProduccionCompleto());
+                existingTerminado.setCasePack(terminadoData.getCasePack());
+
+                manufacturingVersionRepo.save(version);
+                return productoRepo.save(existingTerminado);
+            }
+
+            SemiTerminado semiData = (SemiTerminado) productoData;
+            version.setInsumosJson(objectMapper.writeValueAsString(semiData.getInsumos()));
+            version.setProcesoProduccionJson(objectMapper.writeValueAsString(semiData.getProcesoProduccionCompleto()));
+            version.setCasePackJson(null);
+
+            SemiTerminado existingSemi = (SemiTerminado) existingProducto;
+            existingSemi.setInsumos(semiData.getInsumos());
+            existingSemi.setProcesoProduccionCompleto(semiData.getProcesoProduccionCompleto());
+
+            manufacturingVersionRepo.save(version);
+            return productoRepo.save(existingSemi);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Error serializando la información de manufactura: " + e.getMessage(), e);
+        }
     }
 }
