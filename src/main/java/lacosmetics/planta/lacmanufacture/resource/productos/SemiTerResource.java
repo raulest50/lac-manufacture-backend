@@ -1,5 +1,6 @@
 package lacosmetics.planta.lacmanufacture.resource.productos;
 
+import lacosmetics.planta.lacmanufacture.model.producto.Producto;
 import lacosmetics.planta.lacmanufacture.service.productos.SemiTerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Map;
 
 @RestController
@@ -111,6 +113,23 @@ public class SemiTerResource {
                             "message", "Error interno al eliminar el producto",
                             "reason", e.getMessage()
                     ));
+        }
+    }
+
+    @PostMapping("/mod_mnfacturing_semiter")
+    public ResponseEntity<Producto> modificarManufacturaSemiter(@RequestBody Producto producto) {
+        log.info("REST request para modificar manufactura de producto: {}", producto);
+
+        try {
+            Producto savedProducto = semiTerService.saveManufacturingVersion(producto);
+            URI location = URI.create("/productos/" + savedProducto.getProductoId());
+            return ResponseEntity.created(location).body(savedProducto);
+        } catch (IllegalArgumentException e) {
+            log.warn("No se encontró el producto o tipo no soportado: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            log.error("Error al modificar manufactura del producto {}: {}", producto.getProductoId(), e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

@@ -11,6 +11,8 @@ import lacosmetics.planta.lacmanufacture.repo.producto.InsumoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.TerminadoRepo;
+import lacosmetics.planta.lacmanufacture.repo.producto.manufacturing.snapshots.ManufacturingVersionRepo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -31,6 +33,8 @@ class SemiTerServiceTest {
         InsumoRepo insumoRepo = mock(InsumoRepo.class);
         TransaccionAlmacenRepo transaccionAlmacenRepo = mock(TransaccionAlmacenRepo.class);
         OrdenProduccionRepo ordenProduccionRepo = mock(OrdenProduccionRepo.class);
+        ManufacturingVersionRepo manufacturingVersionRepo = mock(ManufacturingVersionRepo.class);
+        ObjectMapper objectMapper = new ObjectMapper();
 
         SemiTerService service = new SemiTerService(
                 productoRepo,
@@ -38,7 +42,9 @@ class SemiTerServiceTest {
                 terminadoRepo,
                 insumoRepo,
                 transaccionAlmacenRepo,
-                ordenProduccionRepo
+                ordenProduccionRepo,
+                manufacturingVersionRepo,
+                objectMapper
         );
 
         SemiTerminado semiTerminado = new SemiTerminado();
@@ -78,6 +84,8 @@ class SemiTerServiceTest {
         InsumoRepo insumoRepo = mock(InsumoRepo.class);
         TransaccionAlmacenRepo transaccionAlmacenRepo = mock(TransaccionAlmacenRepo.class);
         OrdenProduccionRepo ordenProduccionRepo = mock(OrdenProduccionRepo.class);
+        ManufacturingVersionRepo manufacturingVersionRepo = mock(ManufacturingVersionRepo.class);
+        ObjectMapper objectMapper = new ObjectMapper();
 
         SemiTerService service = new SemiTerService(
                 productoRepo,
@@ -85,7 +93,9 @@ class SemiTerServiceTest {
                 terminadoRepo,
                 insumoRepo,
                 transaccionAlmacenRepo,
-                ordenProduccionRepo
+                ordenProduccionRepo,
+                manufacturingVersionRepo,
+                objectMapper
         );
 
         Terminado terminado = new Terminado();
