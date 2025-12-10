@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface TransaccionAlmacenHeaderRepo extends JpaRepository<TransaccionAlmacen, Integer> {
 
@@ -44,5 +45,10 @@ public interface TransaccionAlmacenHeaderRepo extends JpaRepository<TransaccionA
         @Param("fechaInicio") LocalDateTime fechaInicio,
         @Param("fechaFin") LocalDateTime fechaFin,
         Pageable pageable
+    );
+
+    List<TransaccionAlmacen> findByTipoEntidadCausanteAndIdEntidadCausante(
+        TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
+        int idEntidadCausante
     );
 }
