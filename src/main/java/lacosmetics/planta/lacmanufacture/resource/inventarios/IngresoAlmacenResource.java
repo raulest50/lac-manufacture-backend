@@ -29,4 +29,14 @@ public class IngresoAlmacenResource {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/consulta_ocm_recepciones")
+    public ResponseEntity<Page<OCMReceptionInfoDTO>> consultaOcmRecepciones(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestBody SearchOCMFilterDTO filter
+    ) {
+        Page<OCMReceptionInfoDTO> result = ingresoAlmacenService.consultaOCMConRecepciones(filter, page, size);
+        return ResponseEntity.ok(result);
+    }
+
 }
