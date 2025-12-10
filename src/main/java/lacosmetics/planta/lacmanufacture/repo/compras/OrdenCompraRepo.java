@@ -23,7 +23,8 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompraMateriales, In
     @Query("""
             SELECT orden
             FROM OrdenCompraMateriales orden
-            WHERE orden.fechaEmision BETWEEN :startDate AND :endDate
+            WHERE (:startDate IS NULL OR orden.fechaEmision >= :startDate)
+            AND (:endDate IS NULL OR orden.fechaEmision <= :endDate)
             AND orden.estado IN :estados
             AND (:proveedorId IS NULL OR orden.proveedor.id = :proveedorId)
             """)

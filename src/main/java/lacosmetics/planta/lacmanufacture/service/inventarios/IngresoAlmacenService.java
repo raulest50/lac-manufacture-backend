@@ -47,8 +47,8 @@ public class IngresoAlmacenService {
     }
 
     public Page<OCMReceptionInfoDTO> consultaOCMConRecepciones(SearchOCMFilterDTO filter, int page, int size) {
-        LocalDateTime fechaInicio = filter.getFechaInicio() != null ? filter.getFechaInicio() : LocalDateTime.MIN;
-        LocalDateTime fechaFin = filter.getFechaFin() != null ? filter.getFechaFin() : LocalDateTime.now();
+        LocalDateTime fechaInicio = filter.getFechaInicio();
+        LocalDateTime fechaFin = filter.getFechaFin();
         String proveedorId = filter.getProveedorId() != null ? String.valueOf(filter.getProveedorId()) : null;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("fechaEmision").descending());
