@@ -7,7 +7,7 @@ import lacosmetics.planta.lacmanufacture.model.producto.SemiTerminado;
 import lacosmetics.planta.lacmanufacture.model.producto.Terminado;
 import lacosmetics.planta.lacmanufacture.model.produccion.OrdenProduccion;
 import lacosmetics.planta.lacmanufacture.model.inventarios.Movimiento;
-import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.snapshots.ManufacturingVersion;
+import lacosmetics.planta.lacmanufacture.model.producto.manufacturing.snapshots.ManufacturingVersions;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.produccion.OrdenProduccionRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.ProductoRepo;
@@ -212,7 +212,7 @@ public class SemiTerService {
         }
 
         try {
-            ManufacturingVersion version = new ManufacturingVersion();
+            ManufacturingVersions version = new ManufacturingVersions();
             version.setProducto(existingProducto);
 
             int nextVersion = manufacturingVersionRepo.findTopByProductoOrderByVersionNumberDesc(existingProducto)

@@ -105,7 +105,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class ManufacturingVersion {
+@Table(name = "manufacturing_versions")
+public class ManufacturingVersions {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
