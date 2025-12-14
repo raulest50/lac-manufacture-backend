@@ -21,10 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -226,7 +228,24 @@ public class SemiTerService {
                 version.setCasePackJson(objectMapper.writeValueAsString(terminadoData.getCasePack()));
 
                 Terminado existingTerminado = (Terminado) existingProducto;
-                existingTerminado.setInsumos(terminadoData.getInsumos());
+                List<Insumo> updatedInsumos = Optional.ofNullable(terminadoData.getInsumos()).orElse(List.of())
+                        .stream()
+                        .map(insumo -> {
+                            Producto inputProducto = insumo.getProducto();
+                            if (inputProducto != null && inputProducto.getProductoId() != null) {
+                                insumo.setProducto(productoRepo.getReferenceById(inputProducto.getProductoId()));
+                            }
+                            return insumo;
+                        })
+                        .collect(Collectors.toList());
+
+                List<Insumo> managedInsumos = existingTerminado.getInsumos();
+                if (managedInsumos == null) {
+                    managedInsumos = new ArrayList<>();
+                    existingTerminado.setInsumos(managedInsumos);
+                }
+                managedInsumos.clear();
+                managedInsumos.addAll(updatedInsumos);
                 existingTerminado.setProcesoProduccionCompleto(terminadoData.getProcesoProduccionCompleto());
                 existingTerminado.setCasePack(terminadoData.getCasePack());
 
@@ -240,7 +259,24 @@ public class SemiTerService {
             version.setCasePackJson(null);
 
             SemiTerminado existingSemi = (SemiTerminado) existingProducto;
-            existingSemi.setInsumos(semiData.getInsumos());
+            List<Insumo> updatedInsumos = Optional.ofNullable(semiData.getInsumos()).orElse(List.of())
+                    .stream()
+                    .map(insumo -> {
+                        Producto inputProducto = insumo.getProducto();
+                        if (inputProducto != null && inputProducto.getProductoId() != null) {
+                            insumo.setProducto(productoRepo.getReferenceById(inputProducto.getProductoId()));
+                        }
+                        return insumo;
+                    })
+                    .collect(Collectors.toList());
+
+            List<Insumo> managedInsumos = existingSemi.getInsumos();
+            if (managedInsumos == null) {
+                managedInsumos = new ArrayList<>();
+                existingSemi.setInsumos(managedInsumos);
+            }
+            managedInsumos.clear();
+            managedInsumos.addAll(updatedInsumos);
             existingSemi.setProcesoProduccionCompleto(semiData.getProcesoProduccionCompleto());
 
             manufacturingVersionRepo.save(version);
