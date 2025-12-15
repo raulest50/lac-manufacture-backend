@@ -1,0 +1,37 @@
+### Variables globales
+@host = {{host}}
+@contentType = {{contentType}}
+
+# Nota: Para usar este archivo, primero ejecuta el login en auth.http
+# El token JWT se guardará automáticamente y estará disponible para todas las peticiones
+
+### Consulta de OCM pendientes con todos los filtros
+# Incluye proveedor, rango de fechas y paginación personalizada
+POST {{host}}/ingresos_almacen/consulta_ocm_pendientes?page=0&size=5
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{
+  "fechaInicio": "2024-01-01T00:00:00",
+  "fechaFin": "2024-12-31T23:59:59",
+  "proveedorId": 3
+}
+
+### Consulta de OCM pendientes solo por rango de fechas
+# Envía un rango de fechas y usa la paginación por defecto
+POST {{host}}/ingresos_almacen/consulta_ocm_pendientes
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{
+  "fechaInicio": "2024-06-01T00:00:00",
+  "fechaFin": "2024-06-30T23:59:59"
+}
+
+### Consulta de OCM pendientes sin filtros
+# Solicita la primera página con tamaño de página personalizado sin filtros adicionales
+POST {{host}}/ingresos_almacen/consulta_ocm_pendientes?page=0&size=10
+Content-Type: {{contentType}}
+Authorization: Bearer {{auth_token}}
+
+{}
