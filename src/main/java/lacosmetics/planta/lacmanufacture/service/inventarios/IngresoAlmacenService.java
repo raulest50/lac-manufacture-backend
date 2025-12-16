@@ -1,11 +1,10 @@
 package lacosmetics.planta.lacmanufacture.service.inventarios;
 
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
-import lacosmetics.planta.lacmanufacture.model.compras.dto.recepcion.OCMReceptionInfoDTO;
+import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import lacosmetics.planta.lacmanufacture.model.compras.dto.recepcion.SearchOCMFilterDTO;
-import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
-import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
+import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,59 +14,65 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class IngresoAlmacenService {
 
-    private final TransaccionAlmacenHeaderRepo transaccionAlmacenHeaderRepo;
     private final OrdenCompraRepo ordenCompraRepo;
+    private final ProveedorRepo proveedorRepo;
 
-    public Page<OCMReceptionInfoDTO> consultaOCMPendientes(SearchOCMFilterDTO filter, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaTransaccion").descending());
+    private static final int ESTADO_PENDIENTE_INGRESO_ALMACEN = 2;
 
-        Page<TransaccionAlmacen> transacciones = transaccionAlmacenHeaderRepo.findByFilters(
-                TransaccionAlmacen.EstadoContable.PENDIENTE,
-                TransaccionAlmacen.TipoEntidadCausante.OCM,
-                null,
-                null,
-                pageable
-        );
-
-        return transacciones.map(transaccion -> {
-            OCMReceptionInfoDTO dto = new OCMReceptionInfoDTO();
-            OrdenCompraMateriales ordenCompra = ordenCompraRepo.findById(transaccion.getIdEntidadCausante())
-                    .orElse(null);
-
-            dto.ordenCompraMateriales = ordenCompra;
-            dto.transaccionesAlmacen = Collections.singletonList(transaccion);
-            return dto;
-        });
-    }
-
-    public Page<OCMReceptionInfoDTO> consultaOCMConRecepciones(SearchOCMFilterDTO filter, int page, int size) {
-        LocalDateTime fechaInicio = filter.getFechaInicio();
-        LocalDateTime fechaFin = filter.getFechaFin();
-        String proveedorId = filter.getProveedorId() != null ? String.valueOf(filter.getProveedorId()) : null;
-
+    public Page<OrdenCompraMateriales> consultarOCMsPendientesRecepcion(
+            SearchOCMFilterDTO filterDTO,
+            int page,
+            int size
+    ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("fechaEmision").descending());
-        List<Integer> estados = Collections.singletonList(2);
 
-        Page<OrdenCompraMateriales> ordenesCompra = ordenCompraRepo
-                .findByFechaEmisionBetweenAndEstadoInAndProveedor(fechaInicio, fechaFin, estados, proveedorId, pageable);
+        LocalDateTime fechaInicio = filterDTO.getFechaInicio();
+        LocalDateTime fechaFin = filterDTO.getFechaFin();
+        String proveedorId = filterDTO.getProveedorId();
 
-        return ordenesCompra.map(ordenCompra -> {
-            List<TransaccionAlmacen> transacciones = transaccionAlmacenHeaderRepo
-                    .findByTipoEntidadCausanteAndIdEntidadCausante(
-                            TransaccionAlmacen.TipoEntidadCausante.OCM,
-                            ordenCompra.getOrdenCompraId()
-                    );
-
-            OCMReceptionInfoDTO dto = new OCMReceptionInfoDTO();
-            dto.ordenCompraMateriales = ordenCompra;
-            dto.transaccionesAlmacen = transacciones;
-            return dto;
-        });
+        // If both dates and proveedor are provided
+        if (fechaInicio != null && fechaFin != null && proveedorId != null && !proveedorId.trim().isEmpty()) {
+            // Load Proveedor entity by business id (String)
+            Proveedor proveedor = proveedorRepo.findById(proveedorId)
+                    .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado con id: " + proveedorId));
+            
+            return ordenCompraRepo.findByEstadoAndProveedorAndFechaEmisionBetween(
+                    ESTADO_PENDIENTE_INGRESO_ALMACEN,
+                    proveedor,
+                    fechaInicio,
+                    fechaFin,
+                    pageable
+            );
+        }
+        // If only dates are provided
+        else if (fechaInicio != null && fechaFin != null) {
+            return ordenCompraRepo.findByFechaEmisionBetweenAndEstadoIn(
+                    fechaInicio,
+                    fechaFin,
+                    Collections.singletonList(ESTADO_PENDIENTE_INGRESO_ALMACEN),
+                    pageable
+            );
+        }
+        // If only proveedor is provided
+        else if (proveedorId != null && !proveedorId.trim().isEmpty()) {
+            return ordenCompraRepo.findByProveedorIdAndEstado(
+                    proveedorId,
+                    ESTADO_PENDIENTE_INGRESO_ALMACEN,
+                    pageable
+            );
+        }
+        // If neither is provided (or dates are null)
+        else {
+            return ordenCompraRepo.findByEstado(
+                    ESTADO_PENDIENTE_INGRESO_ALMACEN,
+                    pageable
+            );
+        }
     }
+
 }

@@ -1,6 +1,7 @@
 package lacosmetics.planta.lacmanufacture.repo.compras;
 
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
+import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,11 +21,29 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompraMateriales, In
             Pageable pageable
     );
 
+    Page<OrdenCompraMateriales> findByEstado(
+            int estado,
+            Pageable pageable
+    );
+
+    Page<OrdenCompraMateriales> findByProveedorIdAndEstado(
+            String proveedorId,
+            int estado,
+            Pageable pageable
+    );
+
+    Page<OrdenCompraMateriales> findByEstadoAndProveedorAndFechaEmisionBetween(
+            int estado,
+            Proveedor proveedor,
+            LocalDateTime fechaEmisionAfter,
+            LocalDateTime fechaEmisionBefore,
+            Pageable pageable
+    );
+
     @Query("""
             SELECT orden
             FROM OrdenCompraMateriales orden
-            WHERE (:startDate IS NULL OR orden.fechaEmision >= :startDate)
-            AND (:endDate IS NULL OR orden.fechaEmision <= :endDate)
+            WHERE orden.fechaEmision BETWEEN :startDate AND :endDate
             AND orden.estado IN :estados
             AND (:proveedorId IS NULL OR orden.proveedor.id = :proveedorId)
             """)
