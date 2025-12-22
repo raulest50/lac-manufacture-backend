@@ -7,6 +7,8 @@ import lacosmetics.planta.lacmanufacture.model.compras.dto.UpdateEstadoOrdenComp
 import lacosmetics.planta.lacmanufacture.model.compras.dto.search.SearchOrdenCompraRequest;
 import lacosmetics.planta.lacmanufacture.service.compras.ComprasService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.logging.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +23,14 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/compras")
 @RequiredArgsConstructor
+@Slf4j
 public class ComprasResource {
 
     /**
      * Compras
      */
     private final ComprasService compraService;
+
 
     @GetMapping("/byProveedorAndDate")
     public ResponseEntity<Page<FacturaCompra>> getComprasByProveedorAndDate(
@@ -114,7 +118,8 @@ public class ComprasResource {
         }
     }
 
-@PutMapping("/update_orden_compra/{ordenCompraId}")
+
+    @PutMapping("/update_orden_compra/{ordenCompraId}")
     public ResponseEntity<?> updateOrdenCompra(
             @PathVariable int ordenCompraId,
             @RequestBody OrdenCompraMateriales ordenCompraMateriales) {
@@ -133,5 +138,15 @@ public class ComprasResource {
     }
 
 
+    @PutMapping("/orden_compra/{ordenCompraId}/close")
+    public ResponseEntity<?> closeOrdenCompra(@PathVariable int ordenCompraId) {
+        try {
+            OrdenCompraMateriales ordenCerrada = compraService.closeOrdenCompra(ordenCompraId);
+            return ResponseEntity.ok(ordenCerrada);
+        } catch (RuntimeException e) {
+            log.error("Error al cerrar orden de compra ID {}: {}", ordenCompraId, e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 
 }

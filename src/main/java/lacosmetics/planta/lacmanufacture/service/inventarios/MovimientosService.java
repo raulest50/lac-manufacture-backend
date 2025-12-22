@@ -307,10 +307,10 @@ public class MovimientosService {
             // Persist the entity.
             transaccionAlmacenHeaderRepo.save(ingresoOCM);
 
-            // se actualiza el estado de la orden de compra a cerrado exitosamente
+            // Ya no se cierra la orden para permitir recepciones parciales.
             OrdenCompraMateriales oc = ingresoOCM_dta.getOrdenCompraMateriales();
-            oc.setEstado(3);
-            ordenCompraRepo.save(oc);
+            //oc.setEstado(3);
+            //ordenCompraRepo.save(oc);
 
             // Para transacciones de tipo OCM (ingreso de materiales por orden de compra)
             // NO crear asiento automático, se hará manualmente desde el módulo de pagos

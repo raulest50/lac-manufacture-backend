@@ -4,10 +4,12 @@ import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lacosmetics.planta.lacmanufacture.model.compras.*;
 import lacosmetics.planta.lacmanufacture.model.compras.dto.UpdateEstadoOrdenCompraRequest;
+import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.producto.Material;
 import lacosmetics.planta.lacmanufacture.repo.compras.FacturaCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.MaterialRepo;
 import lacosmetics.planta.lacmanufacture.repo.producto.SemiTerminadoRepo;
@@ -50,6 +52,8 @@ public class ComprasService {
     private final EmailService emailService;
 
     private final UserRepository userRepository;
+
+    private final TransaccionAlmacenHeaderRepo transaccionAlmacenHeaderRepo;
 
     /**
      *
@@ -377,6 +381,10 @@ public class ComprasService {
         return ordenCompraRepo.save(orden);
     }
 
+
+
+
+
     /**
      * Envía un correo electrónico al proveedor notificando la cancelación de la orden de compra.
      * 
@@ -559,6 +567,54 @@ public class ComprasService {
 
         // Guardar y retornar la orden actualizada
         return ordenCompraRepo.save(ordenExistente);
+    }
+
+
+    /**
+     * Cierra una orden de compra (establece estado 3).
+     * Solo se puede cerrar si:
+     * - La orden está en estado 2 (pendiente ingreso almacén)
+     * - Tiene al menos una transacción de almacén de ingreso asociada
+     *
+     * @param ordenCompraId ID de la orden de compra a cerrar
+     * @return La orden de compra cerrada
+     * @throws RuntimeException Si la orden no existe, no está en estado 2, o no tiene transacciones
+     */
+    @Transactional
+    public OrdenCompraMateriales closeOrdenCompra(int ordenCompraId) {
+        log.info("Iniciando cierre de orden de compra ID: {}", ordenCompraId);
+
+        OrdenCompraMateriales orden = ordenCompraRepo.findById(ordenCompraId)
+                .orElseThrow(() -> new RuntimeException("OrdenCompraMateriales not found with id: " + ordenCompraId));
+
+        // Verificar que la orden esté en estado 2 (pendiente ingreso almacén)
+        if (orden.getEstado() != 2) {
+            throw new RuntimeException("No se puede cerrar la orden de compra ID: " + ordenCompraId +
+                    " porque no está en estado 2 (pendiente ingreso almacén). Estado actual: " + orden.getEstado());
+        }
+
+        // Verificar que existe al menos una transacción de almacén asociada
+        List<TransaccionAlmacen> transacciones = transaccionAlmacenHeaderRepo
+                .findByTipoEntidadCausanteAndIdEntidadCausante(
+                        TransaccionAlmacen.TipoEntidadCausante.OCM,
+                        ordenCompraId
+                );
+
+        if (transacciones.isEmpty()) {
+            throw new RuntimeException("No se puede cerrar la orden de compra ID: " + ordenCompraId +
+                    " porque no tiene ninguna transacción de almacén de ingreso registrada.");
+        }
+
+        log.info("Orden ID: {} tiene {} transacción(es) de almacén. Procediendo a cerrar la orden.",
+                ordenCompraId, transacciones.size());
+
+        // Cambiar el estado a cerrado exitosamente (3)
+        orden.setEstado(3);
+        OrdenCompraMateriales ordenCerrada = ordenCompraRepo.save(orden);
+
+        log.info("Orden de compra ID: {} cerrada exitosamente.", ordenCompraId);
+
+        return ordenCerrada;
     }
 
 }

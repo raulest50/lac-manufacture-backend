@@ -3,8 +3,10 @@ package lacosmetics.planta.lacmanufacture.service.inventarios;
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.compras.Proveedor;
 import lacosmetics.planta.lacmanufacture.model.compras.dto.recepcion.SearchOCMFilterDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.repo.compras.OrdenCompraRepo;
 import lacosmetics.planta.lacmanufacture.repo.compras.ProveedorRepo;
+import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class IngresoAlmacenService {
 
     private final OrdenCompraRepo ordenCompraRepo;
     private final ProveedorRepo proveedorRepo;
+    private final TransaccionAlmacenHeaderRepo transaccionAlmacenHeaderRepo;
 
     private static final int ESTADO_PENDIENTE_INGRESO_ALMACEN = 2;
 
@@ -75,4 +80,11 @@ public class IngresoAlmacenService {
         }
     }
 
+    public List<TransaccionAlmacen> consultarTransaccionesAlmacenDeOCM(
+            int ordenCompraId, int page, int size) {
+        return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteAndIdEntidadCausante(
+                TransaccionAlmacen.TipoEntidadCausante.OCM,
+                ordenCompraId
+        );
+    }
 }
