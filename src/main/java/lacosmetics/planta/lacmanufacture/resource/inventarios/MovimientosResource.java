@@ -87,20 +87,7 @@ public class MovimientosResource {
         return ResponseEntity.ok().body(movimientos);
     }
 
-    /**
-     * Obtiene el formulario sugerido para la dispensación de una orden de producción.
-     * Este formulario incluye los materiales requeridos y los lotes recomendados para cada uno.
-     *
-     * @param ordenProduccionId identificador de la orden de producción
-     * @return formulario de dispensación sugerido para la orden
-     */
-    @GetMapping("/dispensacion_sugerida")
-    public ResponseEntity<DispensacionFormularioDTO> getDispensacionSugerida(
-            @RequestParam int ordenProduccionId) {
-        DispensacionFormularioDTO formulario = movimientoService.getFormularioDispensacion(ordenProduccionId);
-        // Ejemplo de respuesta: {"ordenProduccionId":101,"productoNombre":"Crema Facial","dispensaciones":[{"productoId":"MAT-001","nombreProducto":"Alcohol 70%","lotesRecomendados":[{"loteId":10,"batchNumber":"L001","cantidadRecomendada":5.0}]}]}
-        return ResponseEntity.ok(formulario);
-    }
+
 
     @PostMapping("/ajustes")
     public ResponseEntity<TransaccionAlmacen> createAjusteInventario(@RequestBody AjusteInventarioDTO ajusteInventarioDTO) {
@@ -125,30 +112,7 @@ public class MovimientosResource {
         return movimientoService.createDocIngreso(docIngresoDTO, file);
     }
 
-    /**
-     * Endpoint para crear una dispensación asociada a una orden de producción.
-     * Este endpoint maneja la salida de materiales del almacén para ejecutar órdenes de producción.
-     * 
-     * @param dispensacionDTO Datos de la dispensación a crear
-     * @return La transacción de almacén creada
-     */
-    @PostMapping("/dispensacion")
-    public ResponseEntity<?> createDispensacion(@RequestBody DispensacionDTO dispensacionDTO) {
-        TransaccionAlmacen transaccion = movimientoService.createDispensacion(dispensacionDTO);
-        return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
-            .body(transaccion);
-    }
 
-    /**
-     * Endpoint para crear una dispensación no planificada (sin orden de producción).
-     * Verifica la directiva "Permitir Consumo No Planificado" antes de permitir la operación.
-     */
-    @PostMapping("/dispensacion-no-planificada")
-    public ResponseEntity<?> createDispensacionNoPlanificada(@RequestBody DispensacionNoPlanificadaDTO dispensacionDTO) {
-        TransaccionAlmacen transaccion = movimientoService.createDispensacionNoPlanificada(dispensacionDTO);
-        return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
-            .body(transaccion);
-    }
 
     /**
      * Endpoint para crear un backflush no planificado (sin orden de producción).
@@ -161,29 +125,6 @@ public class MovimientosResource {
             .body(transaccion);
     }
 
-    /**
-     * Endpoint para obtener recomendaciones de lotes para dispensación.
-     * Recibe un producto y cantidad, y devuelve los lotes recomendados para tomar.
-     */
-    @PostMapping("/recomendar-lotes")
-    public ResponseEntity<DispensacionNoPlanificadaDTO> recomendarLotes(
-            @RequestBody RecomendacionLotesRequestDTO requestDTO) {
-        DispensacionNoPlanificadaDTO recomendacion = movimientoService.recomendarLotesParaDispensacion(
-                requestDTO.getProductoId(), requestDTO.getCantidad());
-        return ResponseEntity.ok(recomendacion);
-    }
-
-    /**
-     * Endpoint para obtener recomendaciones de lotes para múltiples productos.
-     * Recibe una lista de productos y cantidades, y devuelve los lotes recomendados para todos ellos.
-     */
-    @PostMapping("/recomendar-lotes-multiple")
-    public ResponseEntity<DispensacionNoPlanificadaDTO> recomendarLotesMultiple(
-            @RequestBody RecomendacionLotesMultipleRequestDTO requestDTO) {
-        DispensacionNoPlanificadaDTO recomendacion = movimientoService.recomendarLotesParaDispensacionMultiple(
-                requestDTO.getItems());
-        return ResponseEntity.ok(recomendacion);
-    }
 
     /**
      * Endpoint para crear múltiples backflush no planificados (sin orden de producción).
@@ -196,20 +137,6 @@ public class MovimientosResource {
         TransaccionAlmacen transaccion = movimientoService.createBackflushMultipleNoPlanificado(backflushDTO);
         return ResponseEntity.created(java.net.URI.create("/movimientos/transaccion/" + transaccion.getTransaccionId()))
             .body(transaccion);
-    }
-
-    /**
-     * Endpoint para obtener los lotes disponibles de un producto específico.
-     * Devuelve información detallada de cada lote, incluyendo fecha de vencimiento y cantidad disponible.
-     * 
-     * @param productoId ID del producto para consultar sus lotes
-     * @return Información de lotes disponibles con sus cantidades
-     */
-    @GetMapping("/lotes-disponibles")
-    public ResponseEntity<LoteDisponibleResponseDTO> getLotesDisponibles(
-            @RequestParam String productoId) {
-        LoteDisponibleResponseDTO lotesDisponibles = movimientoService.getLotesDisponiblesByProductoId(productoId);
-        return ResponseEntity.ok(lotesDisponibles);
     }
 
 

@@ -8,7 +8,6 @@ import lacosmetics.planta.lacmanufacture.model.compras.dto.search.SearchOrdenCom
 import lacosmetics.planta.lacmanufacture.service.compras.ComprasService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
