@@ -269,7 +269,17 @@ public class MovimientosService {
 
                     // Crear un nuevo lote para este movimiento
                     Lote lote = new Lote();
-                    lote.setBatchNumber(generateBatchNumber(movimiento.getProducto()));
+                    
+                    // Verificar si el movimiento ya tiene un lote con batchNumber especificado
+                    if (movimiento.getLote() != null && 
+                        movimiento.getLote().getBatchNumber() != null && 
+                        !movimiento.getLote().getBatchNumber().trim().isEmpty()) {
+                        // Si se proporcionó un batchNumber, usarlo
+                        lote.setBatchNumber(movimiento.getLote().getBatchNumber().trim());
+                    } else {
+                        // Si no se proporcionó batchNumber, generar uno automáticamente
+                        lote.setBatchNumber(generateBatchNumber(movimiento.getProducto()));
+                    }
 
                     // Verificar si el movimiento ya tiene un lote con fecha de fabricación especificada
                     if (movimiento.getLote() != null && movimiento.getLote().getProductionDate() != null) {

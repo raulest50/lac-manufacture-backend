@@ -3,6 +3,7 @@ package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 import lacosmetics.planta.lacmanufacture.model.inventarios.TransaccionAlmacen;
 import lacosmetics.planta.lacmanufacture.model.inventarios.dto.*;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.LoteDisponiblePageResponseDTO;
 import lacosmetics.planta.lacmanufacture.model.produccion.dto.DispensacionFormularioDTO;
 import lacosmetics.planta.lacmanufacture.service.inventarios.SalidaAlmacenService;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,25 @@ public class SalidaAlmacenResource {
     public ResponseEntity<LoteDisponibleResponseDTO> getLotesDisponibles(
             @RequestParam String productoId) {
         LoteDisponibleResponseDTO lotesDisponibles = salidaAlmacenService.getLotesDisponiblesByProductoId(productoId);
+        return ResponseEntity.ok(lotesDisponibles);
+    }
+
+    /**
+     * Endpoint para obtener los lotes disponibles de un producto específico con paginación.
+     * Devuelve información detallada de cada lote, incluyendo fecha de vencimiento y cantidad disponible.
+     * Solo retorna lotes con stock disponible mayor a 0.
+     *
+     * @param productoId ID del producto para consultar sus lotes
+     * @param page Número de página (base 0, por defecto 0)
+     * @param size Tamaño de página (por defecto 10)
+     * @return Información paginada de lotes disponibles con sus cantidades
+     */
+    @GetMapping("/lotes-disponibles-paginados")
+    public ResponseEntity<LoteDisponiblePageResponseDTO> getLotesDisponiblesPaginados(
+            @RequestParam String productoId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        LoteDisponiblePageResponseDTO lotesDisponibles = salidaAlmacenService.getLotesDisponiblesByProductoIdPaginated(productoId, page, size);
         return ResponseEntity.ok(lotesDisponibles);
     }
 

@@ -341,6 +341,132 @@ public class SalidaAlmacenService {
         return responseDTO;
     }
 
+    /**
+     * Obtiene los lotes disponibles para un producto específico con paginación.
+     * Incluye información de fecha de vencimiento y cantidad disponible para cada lote.
+     * Solo retorna lotes con stock disponible mayor a 0.
+     *
+     * @param productoId ID del producto
+     * @param page Número de página (base 0)
+     * @param size Tamaño de página
+     * @return DTO paginado con la información de lotes disponibles
+     */
+    public LoteDisponiblePageResponseDTO getLotesDisponiblesByProductoIdPaginated(String productoId, int page, int size) {
+        // Verificar que el producto existe
+        Producto producto = productoRepo.findById(productoId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productoId));
+
+        // Obtener todos los lotes con stock disponible para este producto
+        List<Object[]> todosLotesConStock;
+        try {
+            // Intentar primero con la consulta JPQL
+            todosLotesConStock = transaccionAlmacenRepo.findLotesWithStockByProductoIdOrderByExpirationDate(productoId);
+        } catch (Exception e) {
+            // Si falla, usar la consulta SQL nativa como alternativa
+            log.warn("Error al ejecutar consulta JPQL para lotes, usando SQL nativo: " + e.getMessage());
+            todosLotesConStock = transaccionAlmacenRepo.findLotesWithStockByProductoIdNative(productoId);
+        }
+
+        // Crear el DTO de respuesta
+        LoteDisponiblePageResponseDTO responseDTO = new LoteDisponiblePageResponseDTO();
+        responseDTO.setProductoId(productoId);
+        responseDTO.setNombreProducto(producto.getNombre());
+
+        List<LoteRecomendadoDTO> todosLotesDisponibles = new ArrayList<>();
+
+        // Procesar cada lote con stock y filtrar solo los que tienen cantidad > 0
+        for (Object[] result : todosLotesConStock) {
+            try {
+                Lote lote;
+                Double stockDisponible;
+
+                // Intentar procesar como resultado de consulta JPQL
+                if (result[0] instanceof Lote) {
+                    lote = (Lote) result[0];
+                    stockDisponible = (Double) result[1];
+                }
+                // Procesar como resultado de consulta SQL nativa
+                else {
+                    // Para SQL nativo, necesitamos buscar el lote por ID
+                    Long loteId = null;
+
+                    // El primer elemento podría ser un número (ID del lote)
+                    if (result[0] instanceof Number) {
+                        loteId = ((Number) result[0]).longValue();
+                    }
+                    // O podría ser un mapa con los valores de las columnas
+                    else if (result[0] instanceof Map) {
+                        Map<String, Object> map = (Map<String, Object>) result[0];
+                        loteId = ((Number) map.get("id")).longValue();
+                    }
+
+                    // Si no pudimos obtener el ID del lote, continuamos con el siguiente
+                    if (loteId == null) {
+                        log.warn("No se pudo obtener el ID del lote del resultado de la consulta");
+                        continue;
+                    }
+
+                    // Buscar el lote por ID
+                    Optional<Lote> optionalLote = loteRepo.findById(loteId);
+                    if (!optionalLote.isPresent()) {
+                        log.warn("No se encontró el lote con ID: " + loteId);
+                        continue;
+                    }
+
+                    lote = optionalLote.get();
+
+                    // El stock disponible podría estar en diferentes posiciones según la consulta
+                    if (result.length > 1 && result[1] instanceof Number) {
+                        stockDisponible = ((Number) result[1]).doubleValue();
+                    } else {
+                        log.warn("No se pudo obtener el stock disponible del resultado de la consulta");
+                        continue;
+                    }
+                }
+
+                // Filtrar solo lotes con stock disponible mayor a 0 (doble verificación)
+                if (stockDisponible == null || stockDisponible <= 0) {
+                    continue;
+                }
+
+                // Crear DTO para este lote
+                LoteRecomendadoDTO loteDTO = new LoteRecomendadoDTO();
+                loteDTO.setLoteId(lote.getId());
+                loteDTO.setBatchNumber(lote.getBatchNumber());
+                loteDTO.setProductionDate(lote.getProductionDate());
+                loteDTO.setExpirationDate(lote.getExpirationDate());
+                loteDTO.setCantidadDisponible(stockDisponible);
+                loteDTO.setCantidadRecomendada(0); // No estamos recomendando cantidades
+
+                todosLotesDisponibles.add(loteDTO);
+            } catch (Exception e) {
+                log.error("Error al procesar lote disponible: " + e.getMessage(), e);
+                // Continuamos con el siguiente lote
+            }
+        }
+
+        // Calcular información de paginación
+        long totalElements = todosLotesDisponibles.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        
+        // Aplicar paginación manual
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, todosLotesDisponibles.size());
+        
+        List<LoteRecomendadoDTO> lotesPaginados = startIndex < todosLotesDisponibles.size() 
+            ? todosLotesDisponibles.subList(startIndex, endIndex)
+            : new ArrayList<>();
+
+        // Configurar respuesta paginada
+        responseDTO.setLotesDisponibles(lotesPaginados);
+        responseDTO.setTotalPages(totalPages);
+        responseDTO.setTotalElements(totalElements);
+        responseDTO.setCurrentPage(page);
+        responseDTO.setSize(size);
+
+        return responseDTO;
+    }
+
 
     /*  PARA DISPENSACIONES NO PLANIFICADAS. Durante una etapa de desarrollo mas temprana se contemplo brindar
      * soporte para transacciones de almacen planificadas y no planificadas, es decir ingresos y salidas de

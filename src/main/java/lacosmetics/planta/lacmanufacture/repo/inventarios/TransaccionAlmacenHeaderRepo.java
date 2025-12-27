@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface TransaccionAlmacenHeaderRepo extends JpaRepository<TransaccionAlmacen, Integer> {
 
@@ -50,5 +51,38 @@ public interface TransaccionAlmacenHeaderRepo extends JpaRepository<TransaccionA
     List<TransaccionAlmacen> findByTipoEntidadCausanteAndIdEntidadCausante(
         TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
         int idEntidadCausante
+    );
+
+    /**
+     * Busca una transacción por ID cargando sus movimientos con fetch join.
+     * Incluye las relaciones de producto y lote para evitar N+1 queries.
+     *
+     * @param transaccionId ID de la transacción
+     * @return Transacción con movimientos cargados
+     */
+    @Query("SELECT DISTINCT t FROM TransaccionAlmacen t " +
+           "LEFT JOIN FETCH t.movimientosTransaccion m " +
+           "LEFT JOIN FETCH m.producto p " +
+           "LEFT JOIN FETCH m.lote l " +
+           "WHERE t.transaccionId = :transaccionId")
+    Optional<TransaccionAlmacen> findByIdWithMovimientos(@Param("transaccionId") int transaccionId);
+
+    /**
+     * Busca transacciones por tipo y entidad causante cargando movimientos con fetch join.
+     * Incluye las relaciones de producto y lote para evitar N+1 queries.
+     *
+     * @param tipoEntidadCausante Tipo de entidad causante
+     * @param idEntidadCausante ID de la entidad causante
+     * @return Lista de transacciones con movimientos cargados
+     */
+    @Query("SELECT DISTINCT t FROM TransaccionAlmacen t " +
+           "LEFT JOIN FETCH t.movimientosTransaccion m " +
+           "LEFT JOIN FETCH m.producto p " +
+           "LEFT JOIN FETCH m.lote l " +
+           "WHERE t.tipoEntidadCausante = :tipoEntidadCausante " +
+           "AND t.idEntidadCausante = :idEntidadCausante")
+    List<TransaccionAlmacen> findByTipoEntidadCausanteAndIdEntidadCausanteWithMovimientos(
+        @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
+        @Param("idEntidadCausante") int idEntidadCausante
     );
 }

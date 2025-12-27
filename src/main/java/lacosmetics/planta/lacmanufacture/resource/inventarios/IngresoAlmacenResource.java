@@ -2,6 +2,8 @@ package lacosmetics.planta.lacmanufacture.resource.inventarios;
 
 import lacosmetics.planta.lacmanufacture.model.compras.OrdenCompraMateriales;
 import lacosmetics.planta.lacmanufacture.model.compras.dto.recepcion.SearchOCMFilterDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.ConsolidadoOCMResponseDTO;
+import lacosmetics.planta.lacmanufacture.model.inventarios.dto.MovimientoDetalleDTO;
 import lacosmetics.planta.lacmanufacture.repo.inventarios.TransaccionAlmacenHeaderRepo;
 import lacosmetics.planta.lacmanufacture.service.inventarios.IngresoAlmacenService;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +76,44 @@ public class IngresoAlmacenResource {
     ){
         UnsupportedOperationException unsupportedOperationException = new UnsupportedOperationException();
         return ResponseEntity.status(405).body(unsupportedOperationException.getMessage());
+    }
+
+    /**
+     * Obtiene los movimientos/items de una transacción de almacén específica.
+     * Incluye información detallada del producto y lote asociados.
+     *
+     * @param transaccionId ID de la transacción de almacén
+     * @return Lista de movimientos con sus detalles
+     */
+    @GetMapping("/transaccion/{transaccionId}/movimientos")
+    public ResponseEntity<List<MovimientoDetalleDTO>> obtenerMovimientosPorTransaccion(
+            @PathVariable int transaccionId) {
+        try {
+            List<MovimientoDetalleDTO> movimientos = ingresoAlmacenService.obtenerMovimientosPorTransaccion(transaccionId);
+            return ResponseEntity.ok(movimientos);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    /**
+     * Obtiene el consolidado de todos los materiales recibidos para una OCM.
+     * Agrupa materiales por producto y suma cantidades, manteniendo información de lotes.
+     *
+     * @param ordenCompraId ID de la orden de compra
+     * @return Consolidado de materiales con sus lotes
+     */
+    @GetMapping("/ocm/{ordenCompraId}/consolidado-materiales")
+    public ResponseEntity<ConsolidadoOCMResponseDTO> obtenerConsolidadoMaterialesPorOCM(
+            @PathVariable int ordenCompraId) {
+        try {
+            ConsolidadoOCMResponseDTO consolidado = ingresoAlmacenService.obtenerConsolidadoMaterialesPorOCM(ordenCompraId);
+            return ResponseEntity.ok(consolidado);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
 }

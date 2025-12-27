@@ -63,4 +63,47 @@ public interface OrdenCompraRepo extends JpaRepository<OrdenCompraMateriales, In
      * @return true si existe al menos una orden con ese estado, false en caso contrario
      */
     boolean existsByEstado(int estado);
+
+    /**
+     * Calcula el porcentaje de materiales recibidos para múltiples órdenes de compra en batch.
+     * 
+     * Esta query SQL nativa optimiza el cálculo de porcentajes recibidos haciendo una sola
+     * consulta para todas las órdenes, en lugar de hacer una query por cada orden.
+     * 
+     * Lógica del cálculo:
+     * - Suma todas las cantidades ordenadas (item_orden_compra.cantidad) agrupadas por orden_compra_id
+     * - Suma todas las cantidades recibidas (movimientos.cantidad) de las transacciones asociadas
+     * - Calcula: (cantidad_recibida / cantidad_ordenada) * 100
+     * 
+     * Notas importantes:
+     * - Si no hay items ordenados, retorna 0.0
+     * - Si se recibió más de lo ordenado, el porcentaje puede ser > 100% (válido)
+     * - Usa LEFT JOINs para incluir órdenes sin transacciones (retornará 0.0)
+     * - El valor 0 en tipo_entidad_causante corresponde al ordinal del enum TipoEntidadCausante.OCM
+     *   (el campo se almacena como smallint en la base de datos, no como string)
+     * 
+     * @param ordenIds Lista de IDs de órdenes de compra para calcular porcentajes
+     * @return Lista de arrays [ordenCompraId, porcentajeRecibido] donde:
+     *         - ordenCompraId (Integer): ID de la orden de compra
+     *         - porcentajeRecibido (Double): Porcentaje calculado (0.0 a N, donde N puede ser > 100)
+     * 
+     * @see IngresoAlmacenService#consultarOCMsPendientesRecepcion
+     * @see TransaccionAlmacen.TipoEntidadCausante#OCM (ordinal = 0)
+     */
+    @Query(value = """
+        SELECT 
+            oc.orden_compra_id as ordenCompraId,
+            CASE 
+                WHEN COALESCE(SUM(ioc.cantidad), 0) = 0 THEN 0.0
+                ELSE (COALESCE(SUM(m.cantidad), 0.0) / SUM(ioc.cantidad)) * 100.0
+            END as porcentajeRecibido
+        FROM orden_compra oc
+        LEFT JOIN item_orden_compra ioc ON ioc.orden_compra_id = oc.orden_compra_id
+        LEFT JOIN transaccion_almacen ta ON ta.tipo_entidad_causante = 0 
+            AND ta.id_entidad_causante = oc.orden_compra_id
+        LEFT JOIN movimientos m ON m.transaccion_id = ta.transaccion_id
+        WHERE oc.orden_compra_id IN :ordenIds
+        GROUP BY oc.orden_compra_id
+        """, nativeQuery = true)
+    List<Object[]> calcularPorcentajesRecibidos(@Param("ordenIds") List<Integer> ordenIds);
 }

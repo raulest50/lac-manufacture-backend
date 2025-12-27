@@ -79,4 +79,24 @@ public class OrdenCompraMateriales {
     @Column(name = "observaciones")
     private String observaciones;
 
+    /**
+     * Porcentaje estimado de materiales recibidos para esta orden de compra.
+     * Este campo es calculado dinámicamente y no se persiste en la base de datos.
+     * 
+     * El porcentaje se calcula como: (Total cantidad recibida / Total cantidad ordenada) * 100
+     * 
+     * Valores posibles:
+     * - 0.0: No se ha recibido nada
+     * - 0.0 a 100.0: Porcentaje de recepción normal
+     * - > 100.0: Se ha recibido más de lo ordenado (caso válido y aceptable)
+     * - null: No se ha calculado aún (cuando la orden se obtiene de otros endpoints)
+     * 
+     * Este campo solo se calcula y asigna cuando se consultan OCMs pendientes a través
+     * del endpoint /ingresos_almacen/ocms_pendientes_ingreso
+     * 
+     * @see IngresoAlmacenService#consultarOCMsPendientesRecepcion
+     */
+    @Transient
+    private Double porcentajeRecibido;
+
 }
