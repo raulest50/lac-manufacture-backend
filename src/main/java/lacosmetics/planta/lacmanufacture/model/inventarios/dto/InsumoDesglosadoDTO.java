@@ -15,5 +15,12 @@ public class InsumoDesglosadoDTO {
     private double cantidadTotalRequerida;
     private String tipoUnidades;
     private String tipoProducto; // "MATERIAL" o "SEMITERMINADO"
+    
+    /**
+     * ID del seguimiento de orden de producción asociado a este insumo.
+     * Puede ser null si el insumo no está asociado a un seguimiento específico.
+     * Se usa para vincular el material dispensado con un paso específico en la orden de producción.
+     */
+    private Integer seguimientoId;
 }
 

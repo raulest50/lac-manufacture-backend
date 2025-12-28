@@ -29,8 +29,22 @@ public class DispensacionDTO {
 
     /**
      * ID del usuario que realiza la operación.
+     * Se mantiene para compatibilidad. Si se proporciona usuarioRealizadorIds, 
+     * se usa el primer ID de esa lista.
      */
     private int usuarioId;
+
+    /**
+     * Lista de IDs de usuarios responsables de realizar la dispensación.
+     * Puede ser null o vacía. Si se proporciona, debe tener al menos un usuario.
+     */
+    private List<Integer> usuarioRealizadorIds;
+
+    /**
+     * ID del usuario que aprueba la dispensación.
+     * Puede ser null si no hay aprobador asignado.
+     */
+    private Integer usuarioAprobadorId;
 
     /**
      * Lista de ítems a dispensar, cada uno asociado a un seguimiento de la orden.

@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,22 +85,77 @@ public class SalidaAlmacenService {
         transaccion.setIdEntidadCausante(ordenProduccion.getOrdenId());
         transaccion.setObservaciones(dispensacionDTO.getObservaciones());
 
-        // Get the current user (this will depend on how authentication is handled)
-        User user = userRepository.findById(Long.valueOf(dispensacionDTO.getUsuarioId()))
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dispensacionDTO.getUsuarioId()));
-        transaccion.setUser(user);
+        // Asignar usuarios responsables si se proporcionan
+        if (dispensacionDTO.getUsuarioRealizadorIds() != null && !dispensacionDTO.getUsuarioRealizadorIds().isEmpty()) {
+            List<Long> usuarioIds = dispensacionDTO.getUsuarioRealizadorIds().stream()
+                    .map(Integer::longValue)
+                    .collect(Collectors.toList());
+            List<User> usuariosRealizadores = userRepository.findAllById(usuarioIds);
+            if (usuariosRealizadores.size() != dispensacionDTO.getUsuarioRealizadorIds().size()) {
+                log.warn("Algunos usuarios realizadores no fueron encontrados. Esperados: {}, Encontrados: {}", 
+                        dispensacionDTO.getUsuarioRealizadorIds().size(), usuariosRealizadores.size());
+            }
+            transaccion.setUsuariosResponsables(usuariosRealizadores);
+            
+            // Para compatibilidad, usar el primer usuario realizador como user
+            if (!usuariosRealizadores.isEmpty()) {
+                transaccion.setUser(usuariosRealizadores.get(0));
+            }
+        } else {
+            // Si no hay usuarios realizadores, usar el usuarioId para compatibilidad
+            User user = userRepository.findById(Long.valueOf(dispensacionDTO.getUsuarioId()))
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dispensacionDTO.getUsuarioId()));
+            transaccion.setUser(user);
+        }
+
+        // Asignar usuario aprobador si se proporciona
+        if (dispensacionDTO.getUsuarioAprobadorId() != null) {
+            User usuarioAprobador = userRepository.findById(Long.valueOf(dispensacionDTO.getUsuarioAprobadorId()))
+                    .orElseThrow(() -> new RuntimeException("Usuario aprobador no encontrado con ID: " + dispensacionDTO.getUsuarioAprobadorId()));
+            transaccion.setUsuarioAprobador(usuarioAprobador);
+        }
 
         // Create the movements
         List<Movimiento> movimientos = new ArrayList<>();
         for (DispensacionItemDTO item : dispensacionDTO.getItems()) {
-            // Get the tracking
-            OrdenSeguimiento seguimiento = ordenSeguimientoRepo.findById(item.getSeguimientoId())
-                    .orElseThrow(() -> new RuntimeException("Seguimiento no encontrado con ID: " + item.getSeguimientoId()));
+            // Get the product - from seguimiento if available, otherwise from lote or direct lookup
+            Producto producto = null;
+            OrdenSeguimiento seguimiento = null;
+            
+            // Try to get the seguimiento if seguimientoId is provided and valid (> 0)
+            if (item.getSeguimientoId() > 0) {
+                Optional<OrdenSeguimiento> seguimientoOpt = ordenSeguimientoRepo.findById(item.getSeguimientoId());
+                if (seguimientoOpt.isPresent()) {
+                    seguimiento = seguimientoOpt.get();
+                    producto = seguimiento.getInsumo().getProducto();
+                } else {
+                    log.warn("Seguimiento no encontrado con ID: {}. Se buscará el producto por otros medios.", item.getSeguimientoId());
+                }
+            }
+            
+            // If producto is still null, try to get it from productoId (when seguimientoId is 0)
+            if (producto == null && (item.getSeguimientoId() == 0 || item.getSeguimientoId() < 0)) {
+                if (item.getProductoId() != null && !item.getProductoId().isEmpty()) {
+                    Optional<Producto> productoOpt = productoRepo.findById(item.getProductoId());
+                    if (productoOpt.isPresent()) {
+                        producto = productoOpt.get();
+                    } else {
+                        throw new RuntimeException("Producto no encontrado con ID: " + item.getProductoId());
+                    }
+                } else {
+                    throw new RuntimeException("No se pudo determinar el producto para el item. Se requiere seguimientoId válido (> 0) o productoId válido cuando seguimientoId es 0.");
+                }
+            }
+            
+            // If still null, we need to throw an error
+            if (producto == null) {
+                throw new RuntimeException("No se pudo determinar el producto para el item. Se requiere seguimientoId válido (> 0) o productoId válido.");
+            }
 
             // Create the movement
             Movimiento movimiento = new Movimiento();
             movimiento.setCantidad(-item.getCantidad()); // Negative because it's an output
-            movimiento.setProducto(seguimiento.getInsumo().getProducto());
+            movimiento.setProducto(producto);
             movimiento.setTipoMovimiento(Movimiento.TipoMovimiento.CONSUMO);
             movimiento.setAlmacen(Movimiento.Almacen.GENERAL);
             movimiento.setTransaccionAlmacen(transaccion);
@@ -113,8 +169,8 @@ public class SalidaAlmacenService {
 
             movimientos.add(movimiento);
 
-            // Update the tracking status if necessary
-            if (item.isCompletarSeguimiento()) {
+            // Update the tracking status if necessary and seguimiento exists
+            if (seguimiento != null && item.isCompletarSeguimiento()) {
                 seguimiento.setEstado(1); // Finished
                 seguimiento.setFechaFinalizacion(LocalDateTime.now());
                 ordenSeguimientoRepo.save(seguimiento);

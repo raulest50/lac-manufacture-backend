@@ -73,6 +73,30 @@
 
         private String observaciones;
 
+        /**
+         * Lista de usuarios responsables de realizar la dispensación.
+         * Puede ser null si no hay usuarios asignados.
+         * Se usa principalmente para dispensaciones donde múltiples usuarios participan.
+         */
+        @ManyToMany
+        @JoinTable(
+                name = "transaccion_almacen_usuarios_realizadores",
+                joinColumns = @JoinColumn(name = "transaccion_id"),
+                inverseJoinColumns = @JoinColumn(name = "usuario_id")
+        )
+        @JsonManagedReference
+        private List<User> usuariosResponsables;
+
+        /**
+         * Usuario que aprueba la dispensación.
+         * Puede ser null si no hay aprobador asignado.
+         * Generalmente es el supervisor o responsable del almacén.
+         */
+        @ManyToOne
+        @JoinColumn(name = "usuario_aprobador_id")
+        @JsonBackReference
+        private User usuarioAprobador;
+
         public TransaccionAlmacen(IngresoOCM_DTA ingresoOCM_dta) {
             this.movimientosTransaccion = ingresoOCM_dta.getTransaccionAlmacen().getMovimientosTransaccion();
             this.tipoEntidadCausante = TipoEntidadCausante.OCM;

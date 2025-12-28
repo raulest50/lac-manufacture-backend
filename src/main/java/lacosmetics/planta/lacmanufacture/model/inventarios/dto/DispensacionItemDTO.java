@@ -17,8 +17,16 @@ public class DispensacionItemDTO {
     /**
      * ID del seguimiento de orden de producción asociado a este ítem.
      * Vincula el material dispensado con un paso específico en la orden de producción.
+     * Puede ser 0 si no hay seguimiento disponible.
      */
     private int seguimientoId;
+    
+    /**
+     * ID del producto a dispensar (opcional).
+     * Se usa cuando no hay seguimientoId disponible (seguimientoId = 0).
+     * Debe especificarse si seguimientoId es 0.
+     */
+    private String productoId;
 
     /**
      * Cantidad del material a dispensar.
