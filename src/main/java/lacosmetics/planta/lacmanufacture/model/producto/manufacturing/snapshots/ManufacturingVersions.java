@@ -121,15 +121,12 @@ public class ManufacturingVersions {
     private int versionNumber;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
     private String insumosJson;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
     private String procesoProduccionJson;
 
     @Lob
-    @Column(columnDefinition = "TEXT")
     private String casePackJson;
 
 }
