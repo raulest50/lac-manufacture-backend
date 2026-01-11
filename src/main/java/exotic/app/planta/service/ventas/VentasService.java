@@ -3,7 +3,6 @@ package exotic.app.planta.service.ventas;
 import exotic.app.planta.model.ventas.FacturaVenta;
 import exotic.app.planta.model.ventas.OrdenVenta;
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.ventas.*;
 import exotic.app.planta.repo.ventas.FacturaVentaRepo;
 import exotic.app.planta.repo.ventas.OrdenVentaRepo;
 import lombok.RequiredArgsConstructor;

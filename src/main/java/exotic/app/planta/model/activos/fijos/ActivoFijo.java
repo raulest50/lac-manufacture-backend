@@ -2,7 +2,6 @@ package exotic.app.planta.model.activos.fijos;
 
 import exotic.app.planta.model.activos.fijos.gestion.*;
 import jakarta.persistence.*;
-import lacosmetics.planta.lacmanufacture.model.activos.fijos.gestion.*;
 import exotic.app.planta.model.personal.IntegrantePersonal;
 import exotic.app.planta.model.producto.manufacturing.procesos.RecursoProduccion;
 import lombok.AllArgsConstructor;

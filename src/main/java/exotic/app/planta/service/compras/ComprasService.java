@@ -3,7 +3,6 @@ package exotic.app.planta.service.compras;
 import exotic.app.planta.model.compras.*;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
-import lacosmetics.planta.lacmanufacture.model.compras.*;
 import exotic.app.planta.model.compras.dto.UpdateEstadoOrdenCompraRequest;
 import exotic.app.planta.model.inventarios.TransaccionAlmacen;
 import exotic.app.planta.model.producto.Material;

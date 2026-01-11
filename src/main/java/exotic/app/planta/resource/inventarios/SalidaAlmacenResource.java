@@ -3,7 +3,7 @@ package exotic.app.planta.resource.inventarios;
 
 import exotic.app.planta.model.inventarios.TransaccionAlmacen;
 import exotic.app.planta.model.inventarios.dto.*;
-import lacosmetics.planta.lacmanufacture.model.inventarios.dto.*;
+
 import exotic.app.planta.model.produccion.dto.DispensacionFormularioDTO;
 import exotic.app.planta.service.inventarios.SalidaAlmacenService;
 import lombok.RequiredArgsConstructor;

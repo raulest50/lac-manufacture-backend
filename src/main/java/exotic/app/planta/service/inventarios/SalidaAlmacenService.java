@@ -7,7 +7,6 @@ import exotic.app.planta.model.inventarios.Movimiento;
 import exotic.app.planta.model.inventarios.TransaccionAlmacen;
 import exotic.app.planta.model.inventarios.dto.*;
 import exotic.app.planta.model.producto.Terminado;
-import lacosmetics.planta.lacmanufacture.model.inventarios.dto.*;
 import exotic.app.planta.model.master.configs.MasterDirective;
 import exotic.app.planta.model.produccion.OrdenProduccion;
 import exotic.app.planta.model.produccion.OrdenSeguimiento;
