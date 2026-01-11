@@ -60,3 +60,5 @@ entity-summary.txt
 /.junie/temp/
 
 *.patch
+
+.cursor

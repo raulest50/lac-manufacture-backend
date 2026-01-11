@@ -1,1 +1,1 @@
-rootProject.name = "lac-manufacture"
+rootProject.name = "exotic-app"

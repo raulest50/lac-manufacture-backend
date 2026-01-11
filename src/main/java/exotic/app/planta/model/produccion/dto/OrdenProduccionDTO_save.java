@@ -1,0 +1,27 @@
+package exotic.app.planta.model.produccion.dto;
+
+import java.time.LocalDateTime;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class OrdenProduccionDTO_save {
+    private String productoId;
+    private String observaciones;
+    private double cantidadProducir = 1.0; // Valor por defecto: 1.0 unidades a producir
+
+    private LocalDateTime fechaLanzamiento;
+    private LocalDateTime fechaFinalPlanificada;
+
+    private String numeroPedidoComercial;
+    private String areaOperativa;
+    private String departamentoOperativo;
+
+    private Long vendedorResponsableId;
+
+    private String loteBatchNumber;
+}

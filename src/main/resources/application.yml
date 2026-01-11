@@ -1,7 +1,7 @@
 
 spring:
   application:
-    name: lac-manufacture
+    name: exotic-app
 
   config:
     additional-location: classpath:application-secrets.properties

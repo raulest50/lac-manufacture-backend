@@ -4,7 +4,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.4"
 }
 // fast1dev
-group = "lac-manufacture-plant"
+group = "exotic-app"
 version = "v1"
 
 java {

@@ -35,7 +35,7 @@ FROM amazoncorretto:21
 WORKDIR /app
 
 # Copy only the built JAR from the builder stage
-COPY --from=builder /app/build/libs/lac-manufacture-v1.jar app.jar
+COPY --from=builder /app/build/libs/exotic-app.jar app.jar
 
 # Expose the port the app runs on
 EXPOSE 8080
