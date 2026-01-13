@@ -85,4 +85,32 @@ public interface TransaccionAlmacenHeaderRepo extends JpaRepository<TransaccionA
         @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
         @Param("idEntidadCausante") int idEntidadCausante
     );
+
+    /**
+     * Busca dispensaciones (transacciones tipo OP) con filtros dinámicos.
+     * Permite filtrar por ID de transacción, ID de orden de producción, y fechas.
+     * Los parámetros opcionales se manejan con condiciones NULL-safe.
+     *
+     * @param transaccionId ID de la transacción (opcional)
+     * @param ordenProduccionId ID de la orden de producción (opcional)
+     * @param fechaInicio Fecha inicial del rango (opcional, inicio del día)
+     * @param fechaFin Fecha final del rango (opcional, fin del día)
+     * @param pageable Configuración de paginación
+     * @return Página de transacciones que cumplen con los filtros
+     */
+    @Query("SELECT t FROM TransaccionAlmacen t WHERE " +
+           "t.tipoEntidadCausante = :tipoEntidadCausante AND " +
+           "(:transaccionId IS NULL OR t.transaccionId = :transaccionId) AND " +
+           "(:ordenProduccionId IS NULL OR t.idEntidadCausante = :ordenProduccionId) AND " +
+           "(:fechaInicio IS NULL OR t.fechaTransaccion >= :fechaInicio) AND " +
+           "(:fechaFin IS NULL OR t.fechaTransaccion <= :fechaFin) " +
+           "ORDER BY t.fechaTransaccion DESC")
+    Page<TransaccionAlmacen> findDispensacionesFiltradas(
+        @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
+        @Param("transaccionId") Integer transaccionId,
+        @Param("ordenProduccionId") Integer ordenProduccionId,
+        @Param("fechaInicio") LocalDateTime fechaInicio,
+        @Param("fechaFin") LocalDateTime fechaFin,
+        Pageable pageable
+    );
 }

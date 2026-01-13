@@ -8,6 +8,7 @@ import exotic.app.planta.model.produccion.dto.DispensacionFormularioDTO;
 import exotic.app.planta.service.inventarios.SalidaAlmacenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -130,6 +131,20 @@ public class SalidaAlmacenResource {
         DispensacionNoPlanificadaDTO recomendacion = salidaAlmacenService.recomendarLotesParaDispensacionMultiple(
                 requestDTO.getItems());
         return ResponseEntity.ok(recomendacion);
+    }
+
+    /**
+     * Endpoint para buscar dispensaciones con filtros flexibles.
+     * Permite filtrar por ID de transacción, ID de orden de producción, y fechas (rango o específica).
+     *
+     * @param filtro DTO con los criterios de búsqueda
+     * @return Página de transacciones que cumplen con los filtros
+     */
+    @PostMapping("/historial_dispensacion_filter")
+    public ResponseEntity<Page<TransaccionAlmacen>> buscarDispensacionesFiltradas(
+            @RequestBody FiltroHistDispensacionDTO filtro) {
+        Page<TransaccionAlmacen> resultados = salidaAlmacenService.buscarDispensacionesFiltradas(filtro);
+        return ResponseEntity.ok(resultados);
     }
 
 

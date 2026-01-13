@@ -233,7 +233,8 @@ public class SemiTerService {
                         .map(insumo -> {
                             Producto inputProducto = insumo.getProducto();
                             if (inputProducto != null && inputProducto.getProductoId() != null) {
-                                insumo.setProducto(productoRepo.getReferenceById(inputProducto.getProductoId()));
+                                insumo.setProducto(productoRepo.findById(inputProducto.getProductoId())
+                                        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + inputProducto.getProductoId())));
                             }
                             return insumo;
                         })
@@ -264,7 +265,8 @@ public class SemiTerService {
                     .map(insumo -> {
                         Producto inputProducto = insumo.getProducto();
                         if (inputProducto != null && inputProducto.getProductoId() != null) {
-                            insumo.setProducto(productoRepo.getReferenceById(inputProducto.getProductoId()));
+                            insumo.setProducto(productoRepo.findById(inputProducto.getProductoId())
+                                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + inputProducto.getProductoId())));
                         }
                         return insumo;
                     })

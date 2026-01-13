@@ -27,6 +27,10 @@ import exotic.app.planta.service.produccion.ProduccionService;
 import exotic.app.planta.service.productos.ProductoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +84,13 @@ public class SalidaAlmacenService {
         OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(dispensacionDTO.getOrdenProduccionId())
                 .orElseThrow(() -> new RuntimeException("Orden de producción no encontrada con ID: " + dispensacionDTO.getOrdenProduccionId()));
 
+        // Validar que la orden no esté en estado TERMINADA (2) o CANCELADA (-1)
+        if (ordenProduccion.getEstadoOrden() == 2 || ordenProduccion.getEstadoOrden() == -1) {
+            throw new IllegalStateException("No se puede realizar dispensación para una orden " + 
+                (ordenProduccion.getEstadoOrden() == 2 ? "TERMINADA" : "CANCELADA") + 
+                ". Estado actual: " + ordenProduccion.getEstadoOrden());
+        }
+
         // Create the warehouse transaction
         TransaccionAlmacen transaccion = new TransaccionAlmacen();
         transaccion.setTipoEntidadCausante(TransaccionAlmacen.TipoEntidadCausante.OP);
@@ -97,7 +108,7 @@ public class SalidaAlmacenService {
                         dispensacionDTO.getUsuarioRealizadorIds().size(), usuariosRealizadores.size());
             }
             transaccion.setUsuariosResponsables(usuariosRealizadores);
-            
+
             // Para compatibilidad, usar el primer usuario realizador como user
             if (!usuariosRealizadores.isEmpty()) {
                 transaccion.setUser(usuariosRealizadores.get(0));
@@ -122,7 +133,7 @@ public class SalidaAlmacenService {
             // Get the product - from seguimiento if available, otherwise from lote or direct lookup
             Producto producto = null;
             OrdenSeguimiento seguimiento = null;
-            
+
             // Try to get the seguimiento if seguimientoId is provided and valid (> 0)
             if (item.getSeguimientoId() > 0) {
                 Optional<OrdenSeguimiento> seguimientoOpt = ordenSeguimientoRepo.findById(item.getSeguimientoId());
@@ -133,7 +144,7 @@ public class SalidaAlmacenService {
                     log.warn("Seguimiento no encontrado con ID: {}. Se buscará el producto por otros medios.", item.getSeguimientoId());
                 }
             }
-            
+
             // If producto is still null, try to get it from productoId (when seguimientoId is 0)
             if (producto == null && (item.getSeguimientoId() == 0 || item.getSeguimientoId() < 0)) {
                 if (item.getProductoId() != null && !item.getProductoId().isEmpty()) {
@@ -147,7 +158,7 @@ public class SalidaAlmacenService {
                     throw new RuntimeException("No se pudo determinar el producto para el item. Se requiere seguimientoId válido (> 0) o productoId válido cuando seguimientoId es 0.");
                 }
             }
-            
+
             // If still null, we need to throw an error
             if (producto == null) {
                 throw new RuntimeException("No se pudo determinar el producto para el item. Se requiere seguimientoId válido (> 0) o productoId válido.");
@@ -181,7 +192,34 @@ public class SalidaAlmacenService {
         transaccion.setMovimientosTransaccion(movimientos);
 
         // Save the transaction
-        return transaccionAlmacenHeaderRepo.save(transaccion);
+        TransaccionAlmacen transaccionGuardada = transaccionAlmacenHeaderRepo.save(transaccion);
+
+        // Logica de cambio de estado por dispensacion de materiales
+        int estadoActual = ordenProduccion.getEstadoOrden();
+        int nuevoEstado;
+
+        if (estadoActual == 0) {
+            // Si es la primera dispensación (estado 0), cambiar a estado 11
+            nuevoEstado = 11;
+        } else if (estadoActual >= 11) {
+            // Si ya hubo dispensaciones previas, incrementar el estado para indicar ajustes
+            nuevoEstado = estadoActual + 1;
+        } else {
+            // En otros casos (estados negativos o no esperados), no cambiar el estado
+            nuevoEstado = estadoActual;
+            log.warn("Estado de orden de producción no esperado para dispensación: {}. No se cambiará el estado.", estadoActual);
+        }
+
+        // Solo actualizar si hay cambio de estado
+        if (nuevoEstado != estadoActual) {
+            produccionService.updateEstadoOrdenProduccion(ordenProduccion.getOrdenId(), nuevoEstado);
+            log.info("Actualizado estado de orden de producción {} de {} a {}", ordenProduccion.getOrdenId(), estadoActual, nuevoEstado);
+        }
+
+        // Logica contable dispensacion
+        // Pendiente implementación de lógica contable para dispensaciones
+
+        return transaccionGuardada;
     }
 
 
@@ -505,11 +543,11 @@ public class SalidaAlmacenService {
         // Calcular información de paginación
         long totalElements = todosLotesDisponibles.size();
         int totalPages = (int) Math.ceil((double) totalElements / size);
-        
+
         // Aplicar paginación manual
         int startIndex = page * size;
         int endIndex = Math.min(startIndex + size, todosLotesDisponibles.size());
-        
+
         List<LoteRecomendadoDTO> lotesPaginados = startIndex < todosLotesDisponibles.size() 
             ? todosLotesDisponibles.subList(startIndex, endIndex)
             : new ArrayList<>();
@@ -660,24 +698,24 @@ public class SalidaAlmacenService {
         // Obtener la orden de producción
         OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenProduccionId)
             .orElseThrow(() -> new RuntimeException("Orden de producción no encontrada con ID: " + ordenProduccionId));
-        
+
         // Obtener el producto terminado de la orden
         Producto producto = ordenProduccion.getProducto();
         if (!(producto instanceof Terminado)) {
             throw new RuntimeException("El producto de la orden de producción debe ser un Terminado");
         }
-        
+
         // Obtener la cantidad de la orden (multiplicador)
         double cantidadOrden = ordenProduccion.getCantidadProducir();
-        
+
         // Obtener insumos desglosados recursivamente del producto terminado
         List<InsumoWithStockDTO> insumosRecursivos = productoService.getInsumosWithStock(producto.getProductoId());
-        
+
         // Aplanar la estructura recursiva y consolidar por producto
         Map<String, InsumoDesglosadoDTO> insumosConsolidados = new HashMap<>();
-        
+
         aplanarInsumos(insumosRecursivos, insumosConsolidados, cantidadOrden, 1.0);
-        
+
         return new ArrayList<>(insumosConsolidados.values());
     }
 
@@ -692,7 +730,7 @@ public class SalidaAlmacenService {
     ) {
         for (InsumoWithStockDTO insumo : insumos) {
             double cantidadTotal = insumo.getCantidadRequerida() * cantidadOrden * multiplicadorActual;
-            
+
             // Si tiene subinsumos (es semiterminado), procesarlos recursivamente
             if (insumo.getSubInsumos() != null && !insumo.getSubInsumos().isEmpty()) {
                 // Multiplicador para los subinsumos: cantidad requerida del semiterminado
@@ -701,7 +739,7 @@ public class SalidaAlmacenService {
             } else {
                 // Es un material base, agregarlo o consolidar cantidad
                 String productoId = insumo.getProductoId();
-                
+
                 if (consolidado.containsKey(productoId)) {
                     // Sumar a la cantidad existente
                     InsumoDesglosadoDTO existente = consolidado.get(productoId);
@@ -724,6 +762,86 @@ public class SalidaAlmacenService {
                 }
             }
         }
+    }
+
+    /**
+     * Busca dispensaciones (transacciones tipo OP) con filtros flexibles.
+     * Permite filtrar por ID de transacción, ID de orden de producción, y fechas (rango o específica).
+     *
+     * @param filtro DTO con los criterios de búsqueda
+     * @return Página de transacciones que cumplen con los filtros
+     * @throws RuntimeException si no se proporciona ningún filtro activo
+     */
+    public Page<TransaccionAlmacen> buscarDispensacionesFiltradas(FiltroHistDispensacionDTO filtro) {
+        // Validar que al menos un filtro esté activo
+        boolean tieneFiltroId = (filtro.getTipoFiltroId() != null && filtro.getTipoFiltroId() > 0);
+        boolean tieneFiltroFecha = (filtro.getTipoFiltroFecha() != null && filtro.getTipoFiltroFecha() > 0);
+
+        if (!tieneFiltroId && !tieneFiltroFecha) {
+            throw new RuntimeException("Debe proporcionar al menos un filtro activo (ID o fecha)");
+        }
+
+        // Preparar parámetros de ID
+        Integer transaccionId = null;
+        Integer ordenProduccionId = null;
+
+        if (tieneFiltroId) {
+            if (filtro.getTipoFiltroId() == 1) {
+                transaccionId = filtro.getTransaccionId();
+                if (transaccionId == null || transaccionId <= 0) {
+                    throw new RuntimeException("Debe proporcionar un ID de transacción válido");
+                }
+            } else if (filtro.getTipoFiltroId() == 2) {
+                ordenProduccionId = filtro.getOrdenProduccionId();
+                if (ordenProduccionId == null || ordenProduccionId <= 0) {
+                    throw new RuntimeException("Debe proporcionar un ID de orden de producción válido");
+                }
+            }
+        }
+
+        // Preparar parámetros de fecha
+        LocalDateTime fechaInicio = null;
+        LocalDateTime fechaFin = null;
+
+        if (tieneFiltroFecha) {
+            if (filtro.getTipoFiltroFecha() == 1) {
+                // Rango de fechas
+                if (filtro.getFechaInicio() == null || filtro.getFechaFin() == null) {
+                    throw new RuntimeException("Debe proporcionar ambas fechas (inicio y fin) para el rango");
+                }
+                if (filtro.getFechaInicio().isAfter(filtro.getFechaFin())) {
+                    throw new RuntimeException("La fecha de inicio no puede ser posterior a la fecha de fin");
+                }
+                // Convertir LocalDate a LocalDateTime (inicio del día para inicio, fin del día para fin)
+                fechaInicio = filtro.getFechaInicio().atStartOfDay();
+                fechaFin = filtro.getFechaFin().atTime(23, 59, 59, 999999999);
+            } else if (filtro.getTipoFiltroFecha() == 2) {
+                // Fecha específica
+                if (filtro.getFechaEspecifica() == null) {
+                    throw new RuntimeException("Debe proporcionar una fecha específica");
+                }
+                // Convertir LocalDate a LocalDateTime (rango del día completo)
+                fechaInicio = filtro.getFechaEspecifica().atStartOfDay();
+                fechaFin = filtro.getFechaEspecifica().atTime(23, 59, 59, 999999999);
+            }
+        }
+
+        // Construir Pageable con ordenamiento por fechaTransaccion DESC
+        Pageable pageable = PageRequest.of(
+                filtro.getPage(),
+                filtro.getSize(),
+                Sort.by("fechaTransaccion").descending()
+        );
+
+        // Ejecutar búsqueda
+        return transaccionAlmacenHeaderRepo.findDispensacionesFiltradas(
+                TransaccionAlmacen.TipoEntidadCausante.OP,
+                transaccionId,
+                ordenProduccionId,
+                fechaInicio,
+                fechaFin,
+                pageable
+        );
     }
 
 

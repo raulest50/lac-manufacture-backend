@@ -105,6 +105,63 @@ public class AuthResource {
     }
 
     /**
+     * Returns complete information about the currently authenticated user
+     * including full user data and access levels
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // Obtener el nombre de usuario del principal
+        String username = authentication.getName();
+
+        // Buscar el usuario en la base de datos para obtener sus datos completos
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        // Crear el objeto de usuario sin la contraseña
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("id", user.getId());
+        userData.put("cedula", user.getCedula());
+        userData.put("username", user.getUsername());
+        userData.put("nombreCompleto", user.getNombreCompleto());
+        userData.put("email", user.getEmail());
+        userData.put("cel", user.getCel());
+        userData.put("direccion", user.getDireccion());
+        userData.put("fechaNacimiento", user.getFechaNacimiento());
+        userData.put("estado", user.getEstado());
+
+        // Crear lista de accesos con niveles
+        List<Map<String, Object>> accesosList = new ArrayList<>();
+        for (Acceso acceso : user.getAccesos()) {
+            Map<String, Object> accesoData = new HashMap<>();
+            accesoData.put("id", acceso.getId());
+            accesoData.put("nivel", acceso.getNivel());
+            accesoData.put("moduloAcceso", acceso.getModuloAcceso().name());
+            accesosList.add(accesoData);
+        }
+
+        // Crear una lista de autoridades con nivel (para compatibilidad)
+        List<Map<String, Object>> authoritiesWithLevel = new ArrayList<>();
+        for (Acceso acceso : user.getAccesos()) {
+            Map<String, Object> authorityWithLevel = new HashMap<>();
+            authorityWithLevel.put("authority", "ACCESO_" + acceso.getModuloAcceso().name());
+            authorityWithLevel.put("nivel", String.valueOf(acceso.getNivel()));
+            authoritiesWithLevel.add(authorityWithLevel);
+        }
+
+        // Construir la respuesta completa
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", userData);
+        response.put("accesos", accesosList);
+        response.put("authorities", authoritiesWithLevel);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Endpoint for requesting a password reset.
      * If a user with the given email exists, an email with a reset link will be sent.
      * 
