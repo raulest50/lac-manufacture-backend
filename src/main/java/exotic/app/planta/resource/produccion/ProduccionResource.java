@@ -11,6 +11,7 @@ import exotic.app.planta.model.produccion.dto.OrdenSeguimientoDTO;
 import exotic.app.planta.service.produccion.ProduccionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -141,17 +143,44 @@ public class ProduccionResource {
 
     /**
      * Obtiene todas las órdenes de producción en estado abierto (0) o en curso (1)
-     * utilizando paginación.
+     * utilizando paginación. Si se proporciona ordenId, busca solo esa orden.
      * 
      * @param page Número de página (por defecto 0)
      * @param size Tamaño de página (por defecto 10)
+     * @param ordenId ID opcional de la orden de producción a buscar
      * @return Página de DTOs de órdenes de producción
      */
     @GetMapping("/dispensacion_odp_consulta")
     public ResponseEntity<Page<OrdenProduccionDTO>> getOrdenesProduccionOpenOrInProgress(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer ordenId
     ) {
+        // Si se proporciona ordenId, buscar solo esa orden
+        if (ordenId != null) {
+            OrdenProduccionDTO orden = produccionService.getOrdenProduccionByIdForDispensacion(ordenId);
+            if (orden != null) {
+                // Retornar como Page con un solo elemento
+                Pageable pageable = PageRequest.of(0, 1);
+                Page<OrdenProduccionDTO> resultado = new PageImpl<>(
+                    Collections.singletonList(orden),
+                    pageable,
+                    1
+                );
+                return ResponseEntity.ok(resultado);
+            } else {
+                // Orden no encontrada o no está en estado válido, retornar página vacía
+                Pageable pageable = PageRequest.of(0, size);
+                Page<OrdenProduccionDTO> resultado = new PageImpl<>(
+                    Collections.emptyList(),
+                    pageable,
+                    0
+                );
+                return ResponseEntity.ok(resultado);
+            }
+        }
+        
+        // Comportamiento original: obtener todas las órdenes
         Pageable pageable = PageRequest.of(page, size, Sort.by("fechaCreacion").descending());
         Page<OrdenProduccionDTO> resultados = produccionService.getOrdenesProduccionOpenOrInProgress(pageable);
         return ResponseEntity.ok(resultados);

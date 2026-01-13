@@ -166,6 +166,33 @@ public class ProduccionService {
         return ordenesPage.map(this::convertToDto);
     }
 
+    /**
+     * Obtiene una orden de producción por ID si está en estado abierto (0) o en progreso (1).
+     * 
+     * @param ordenId ID de la orden de producción
+     * @return DTO de la orden de producción si existe y está en estado válido, null en caso contrario
+     */
+    public OrdenProduccionDTO getOrdenProduccionByIdForDispensacion(Integer ordenId) {
+        if (ordenId == null) {
+            return null;
+        }
+        
+        Optional<OrdenProduccion> ordenOpt = ordenProduccionRepo.findById(ordenId);
+        if (ordenOpt.isEmpty()) {
+            return null;
+        }
+        
+        OrdenProduccion orden = ordenOpt.get();
+        int estadoOrden = orden.getEstadoOrden();
+        
+        // Solo retornar si está en estado abierto (0) o en progreso (1)
+        if (estadoOrden != 0 && estadoOrden != 1) {
+            return null;
+        }
+        
+        return convertToDto(orden);
+    }
+
     // Helper method to map OrdenProduccion to OrdenProduccionDTO
     private OrdenProduccionDTO convertToDto(OrdenProduccion orden) {
         OrdenProduccionDTO dto = new OrdenProduccionDTO();
