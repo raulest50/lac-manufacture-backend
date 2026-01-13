@@ -758,6 +758,7 @@ public class SalidaAlmacenService {
                             ? "MATERIAL" 
                             : "SEMITERMINADO"
                     );
+                    nuevo.setInventareable(insumo.getInventareable() != null ? insumo.getInventareable() : true);
                     consolidado.put(productoId, nuevo);
                 }
             }

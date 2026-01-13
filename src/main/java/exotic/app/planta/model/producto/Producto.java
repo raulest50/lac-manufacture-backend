@@ -85,6 +85,10 @@ public abstract class Producto {
      *
      * true: si pasa por almacen.
      * false: no pasa por alamacen
+     * 
+     * IMPORTANTE: Al ser un campo boolean primitivo, Lombok genera el método
+     * isInventareable() en lugar de getInventareable(). Siempre use
+     * isInventareable() para acceder a esta propiedad.
      *
     */
     @Column

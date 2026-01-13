@@ -14,6 +14,7 @@ public class InsumoWithStockDTO {
     private double stockActual;
     private TipoProducto tipoProducto; // Nuevo campo para el tipo de producto
     private String tipoUnidades; // Unidad de medida (KG, L, U, etc.)
+    private Boolean inventareable; // Indica si el producto es inventariable (true) o no (false, como el agua)
 
     // Nueva lista para almacenar los insumos de un semielaborado
     private List<InsumoWithStockDTO> subInsumos = new ArrayList<>();

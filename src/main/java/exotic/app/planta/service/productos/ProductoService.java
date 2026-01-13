@@ -272,6 +272,7 @@ public class ProductoService {
             dto.setCantidadRequerida(insumo.getCantidadRequerida());
             dto.setStockActual(stockActual);
             dto.setTipoUnidades(insumoProducto.getTipoUnidades());
+            dto.setInventareable(insumoProducto.isInventareable());
 
             // Establecer el tipo de producto basado en la instancia
             if (insumoProducto instanceof Material) {
