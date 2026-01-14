@@ -109,15 +109,15 @@ public class SalidaAlmacenService {
             }
             transaccion.setUsuariosResponsables(usuariosRealizadores);
 
-            // Para compatibilidad, usar el primer usuario realizador como user
+            // Para compatibilidad, usar el primer usuario realizador como usuarioAprobador
             if (!usuariosRealizadores.isEmpty()) {
-                transaccion.setUser(usuariosRealizadores.get(0));
+                transaccion.setUsuarioAprobador(usuariosRealizadores.get(0));
             }
         } else {
             // Si no hay usuarios realizadores, usar el usuarioId para compatibilidad
             User user = userRepository.findById(Long.valueOf(dispensacionDTO.getUsuarioId()))
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dispensacionDTO.getUsuarioId()));
-            transaccion.setUser(user);
+            transaccion.setUsuarioAprobador(user);
         }
 
         // Asignar usuario aprobador si se proporciona
@@ -597,7 +597,7 @@ public class SalidaAlmacenService {
         // Get the current user
         User user = userRepository.findById(Long.valueOf(dispensacionDTO.getUsuarioId()))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dispensacionDTO.getUsuarioId()));
-        transaccion.setUser(user);
+        transaccion.setUsuarioAprobador(user);
 
         // Create the movements
         List<Movimiento> movimientos = new ArrayList<>();

@@ -11,6 +11,7 @@ import exotic.app.planta.model.inventarios.TransaccionAlmacen;
 import exotic.app.planta.model.producto.dto.ProductoStockDTO;
 import exotic.app.planta.service.inventarios.MovimientosService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/movimientos")
 @RequiredArgsConstructor
+@Slf4j
 public class MovimientosResource {
 
     private final MovimientosService movimientoService;
@@ -103,6 +105,14 @@ public class MovimientosResource {
     public ResponseEntity<?> createDocIngreso(
             @RequestPart("docIngresoDTA") IngresoOCM_DTA docIngresoDTO,
             @RequestPart("file") MultipartFile file) {
+        log.info("Recibiendo solicitud de ingreso OCM. userId: {}, ordenCompraId: {}, file: {}", 
+                docIngresoDTO.getUserId(), 
+                docIngresoDTO.getOrdenCompraMateriales() != null ? docIngresoDTO.getOrdenCompraMateriales().getOrdenCompraId() : "null",
+                file.getOriginalFilename());
+        log.debug("Payload completo - IngresoOCM_DTA: userId={}, observaciones={}, transaccionAlmacen presente={}", 
+                docIngresoDTO.getUserId(),
+                docIngresoDTO.getObservaciones(),
+                docIngresoDTO.getTransaccionAlmacen() != null);
         return movimientoService.createDocIngreso(docIngresoDTO, file);
     }
 

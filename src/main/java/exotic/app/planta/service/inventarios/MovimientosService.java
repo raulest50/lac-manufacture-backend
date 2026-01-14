@@ -166,7 +166,7 @@ public class MovimientosService {
         if (ajusteInventarioDTO.getUsername() != null && !ajusteInventarioDTO.getUsername().isEmpty()) {
             Optional<User> userOpt = userRepository.findByUsername(ajusteInventarioDTO.getUsername());
             if (userOpt.isPresent()) {
-                transaccion.setUser(userOpt.get());
+                transaccion.setUsuarioAprobador(userOpt.get());
             } else {
                 // Si no se encuentra el usuario, registramos un warning pero continuamos
                 log.warn("Usuario no encontrado con username: " + ajusteInventarioDTO.getUsername());
@@ -220,6 +220,7 @@ public class MovimientosService {
      */
     @Transactional
     public ResponseEntity<?> createDocIngreso(IngresoOCM_DTA ingresoOCM_dta, MultipartFile file) {
+        log.info("Iniciando creación de documento de ingreso OCM. userId: {}", ingresoOCM_dta.getUserId());
         try {
             // Create folder based on current date (yyyyMMdd)
             String currentDateFolder = LocalDate.now()
@@ -240,16 +241,23 @@ public class MovimientosService {
             // Set the URL (or path) of the saved file.
             ingresoOCM.setUrlDocSoporte(filePath.toString());
 
-            // Set the user if userId is provided
+            // Set the usuarioAprobador if userId is provided
             if (ingresoOCM_dta.getUserId() != null && !ingresoOCM_dta.getUserId().isEmpty()) {
                 try {
                     Long userId = Long.parseLong(ingresoOCM_dta.getUserId());
+                    log.debug("Buscando usuario con ID: {}", userId);
                     User user = userRepository.findById(userId)
                             .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
-                    ingresoOCM.setUser(user);
+                    ingresoOCM.setUsuarioAprobador(user);
+                    log.debug("Usuario aprobador asignado correctamente: {}", user.getUsername());
                 } catch (NumberFormatException e) {
                     log.error("Error al convertir userId a Long: " + ingresoOCM_dta.getUserId(), e);
+                } catch (RuntimeException e) {
+                    log.error("Error al asignar usuario aprobador: {}", e.getMessage(), e);
+                    throw e;
                 }
+            } else {
+                log.warn("No se proporcionó userId en el DTO de ingreso OCM");
             }
 
             // Set the back-reference for each Movimiento and create Lote for each one
@@ -485,7 +493,7 @@ public class MovimientosService {
         // Get the current user
         User user = userRepository.findById(Long.valueOf(backflushDTO.getUsuarioId()))
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + backflushDTO.getUsuarioId()));
-        transaccion.setUser(user);
+        transaccion.setUsuarioAprobador(user);
 
         // Create the movement
         Movimiento movimiento = new Movimiento();
@@ -552,7 +560,7 @@ public class MovimientosService {
         // Get the current user
         User user = userRepository.findById(Long.valueOf(backflushDTO.getUsuarioId()))
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + backflushDTO.getUsuarioId()));
-        transaccion.setUser(user);
+        transaccion.setUsuarioAprobador(user);
 
         // Create movements for each item
         List<Movimiento> movimientos = new ArrayList<>();

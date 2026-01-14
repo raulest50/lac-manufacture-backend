@@ -40,12 +40,6 @@
          */
         private String urlDocSoporte;
 
-        // Bidirectional relationship with Users
-        @ManyToOne
-        @JoinColumn(name = "usuario_id")  // This column will hold the foreign key
-        @JsonBackReference
-        private User user;
-
         /**
          * Estado contable de la transacción
          */
@@ -84,7 +78,6 @@
                 joinColumns = @JoinColumn(name = "transaccion_id"),
                 inverseJoinColumns = @JoinColumn(name = "usuario_id")
         )
-        @JsonManagedReference
         private List<User> usuariosResponsables;
 
         /**
@@ -94,7 +87,7 @@
          */
         @ManyToOne
         @JoinColumn(name = "usuario_aprobador_id")
-        @JsonBackReference
+        @JsonBackReference(value = "aprobador-transacciones")
         private User usuarioAprobador;
 
         public TransaccionAlmacen(IngresoOCM_DTA ingresoOCM_dta) {
