@@ -96,7 +96,7 @@ public class SalidaAlmacenService {
 
         // Create the warehouse transaction
         TransaccionAlmacen transaccion = new TransaccionAlmacen();
-        transaccion.setTipoEntidadCausante(TransaccionAlmacen.TipoEntidadCausante.OP);
+        transaccion.setTipoEntidadCausante(TransaccionAlmacen.TipoEntidadCausante.OD);
         transaccion.setIdEntidadCausante(ordenProduccion.getOrdenId());
         transaccion.setObservaciones(dispensacionDTO.getObservaciones());
 
@@ -833,59 +833,6 @@ public class SalidaAlmacenService {
      * @throws RuntimeException si no se proporciona ningún filtro activo
      */
     public Page<TransaccionAlmacen> buscarDispensacionesFiltradas(FiltroHistDispensacionDTO filtro) {
-        // Validar que al menos un filtro esté activo
-        boolean tieneFiltroId = (filtro.getTipoFiltroId() != null && filtro.getTipoFiltroId() > 0);
-        boolean tieneFiltroFecha = (filtro.getTipoFiltroFecha() != null && filtro.getTipoFiltroFecha() > 0);
-
-        if (!tieneFiltroId && !tieneFiltroFecha) {
-            throw new RuntimeException("Debe proporcionar al menos un filtro activo (ID o fecha)");
-        }
-
-        // Preparar parámetros de ID
-        Integer transaccionId = null;
-        Integer ordenProduccionId = null;
-
-        if (tieneFiltroId) {
-            if (filtro.getTipoFiltroId() == 1) {
-                transaccionId = filtro.getTransaccionId();
-                if (transaccionId == null || transaccionId <= 0) {
-                    throw new RuntimeException("Debe proporcionar un ID de transacción válido");
-                }
-            } else if (filtro.getTipoFiltroId() == 2) {
-                ordenProduccionId = filtro.getOrdenProduccionId();
-                if (ordenProduccionId == null || ordenProduccionId <= 0) {
-                    throw new RuntimeException("Debe proporcionar un ID de orden de producción válido");
-                }
-            }
-        }
-
-        // Preparar parámetros de fecha
-        LocalDateTime fechaInicio = null;
-        LocalDateTime fechaFin = null;
-
-        if (tieneFiltroFecha) {
-            if (filtro.getTipoFiltroFecha() == 1) {
-                // Rango de fechas
-                if (filtro.getFechaInicio() == null || filtro.getFechaFin() == null) {
-                    throw new RuntimeException("Debe proporcionar ambas fechas (inicio y fin) para el rango");
-                }
-                if (filtro.getFechaInicio().isAfter(filtro.getFechaFin())) {
-                    throw new RuntimeException("La fecha de inicio no puede ser posterior a la fecha de fin");
-                }
-                // Convertir LocalDate a LocalDateTime (inicio del día para inicio, fin del día para fin)
-                fechaInicio = filtro.getFechaInicio().atStartOfDay();
-                fechaFin = filtro.getFechaFin().atTime(23, 59, 59, 999999999);
-            } else if (filtro.getTipoFiltroFecha() == 2) {
-                // Fecha específica
-                if (filtro.getFechaEspecifica() == null) {
-                    throw new RuntimeException("Debe proporcionar una fecha específica");
-                }
-                // Convertir LocalDate a LocalDateTime (rango del día completo)
-                fechaInicio = filtro.getFechaEspecifica().atStartOfDay();
-                fechaFin = filtro.getFechaEspecifica().atTime(23, 59, 59, 999999999);
-            }
-        }
-
         // Construir Pageable con ordenamiento por fechaTransaccion DESC
         Pageable pageable = PageRequest.of(
                 filtro.getPage(),
@@ -893,15 +840,181 @@ public class SalidaAlmacenService {
                 Sort.by("fechaTransaccion").descending()
         );
 
-        // Ejecutar búsqueda
-        return transaccionAlmacenHeaderRepo.findDispensacionesFiltradas(
-                TransaccionAlmacen.TipoEntidadCausante.OP,
-                transaccionId,
-                ordenProduccionId,
-                fechaInicio,
-                fechaFin,
+        // Determinar qué filtros están activos (tipo > 0)
+        boolean tieneFiltroId = (filtro.getTipoFiltroId() != null && filtro.getTipoFiltroId() > 0);
+        boolean tieneFiltroFecha = (filtro.getTipoFiltroFecha() != null && filtro.getTipoFiltroFecha() > 0);
+
+        // Si ambos filtros están en "Ninguno" (0), usar método simple que trae todos los registros
+        if (!tieneFiltroId && !tieneFiltroFecha) {
+            return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteOrderByFechaTransaccionDesc(
+                    TransaccionAlmacen.TipoEntidadCausante.OD,
+                    pageable
+            );
+        }
+
+        // Validar y preparar parámetros de fecha (si hay filtro de fecha activo)
+        LocalDateTime fechaInicio = null;
+        LocalDateTime fechaFin = null;
+        
+        if (tieneFiltroFecha) {
+            if (filtro.getTipoFiltroFecha() == 1) {
+                // Rango de fechas - si faltan fechas, usar método simple
+                if (filtro.getFechaInicio() == null || filtro.getFechaFin() == null) {
+                    return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteOrderByFechaTransaccionDesc(
+                            TransaccionAlmacen.TipoEntidadCausante.OD,
+                            pageable
+                    );
+                }
+                if (filtro.getFechaInicio().isAfter(filtro.getFechaFin())) {
+                    throw new RuntimeException("La fecha de inicio no puede ser posterior a la fecha de fin");
+                }
+                fechaInicio = filtro.getFechaInicio().atStartOfDay();
+                fechaFin = filtro.getFechaFin().atTime(23, 59, 59, 999999999);
+            } else if (filtro.getTipoFiltroFecha() == 2) {
+                // Fecha específica - si falta fecha, usar método simple
+                if (filtro.getFechaEspecifica() == null) {
+                    return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteOrderByFechaTransaccionDesc(
+                            TransaccionAlmacen.TipoEntidadCausante.OD,
+                            pageable
+                    );
+                }
+                fechaInicio = filtro.getFechaEspecifica().atStartOfDay();
+                fechaFin = filtro.getFechaEspecifica().atTime(23, 59, 59, 999999999);
+            }
+        }
+
+        // Caso 1: Solo filtro de ID (transaccionId)
+        if (tieneFiltroId && !tieneFiltroFecha) {
+            if (filtro.getTipoFiltroId() == 1) {
+                Integer transaccionId = filtro.getTransaccionId();
+                // Si el ID está vacío o inválido, usar método simple
+                if (transaccionId == null || transaccionId <= 0) {
+                    return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteOrderByFechaTransaccionDesc(
+                            TransaccionAlmacen.TipoEntidadCausante.OD,
+                            pageable
+                    );
+                }
+                return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteAndTransaccionId(
+                        TransaccionAlmacen.TipoEntidadCausante.OD,
+                        transaccionId,
+                        pageable
+                );
+            } else if (filtro.getTipoFiltroId() == 2) {
+                Integer ordenProduccionId = filtro.getOrdenProduccionId();
+                // Si el ID está vacío o inválido, usar método simple
+                if (ordenProduccionId == null || ordenProduccionId <= 0) {
+                    return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteOrderByFechaTransaccionDesc(
+                            TransaccionAlmacen.TipoEntidadCausante.OD,
+                            pageable
+                    );
+                }
+                return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteAndOrdenProduccionId(
+                        TransaccionAlmacen.TipoEntidadCausante.OD,
+                        ordenProduccionId,
+                        pageable
+                );
+            }
+        }
+
+        // Caso 2: Solo filtro de fecha (ya validado arriba)
+        if (!tieneFiltroId && tieneFiltroFecha) {
+            return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteAndFechaBetween(
+                    TransaccionAlmacen.TipoEntidadCausante.OD,
+                    fechaInicio,
+                    fechaFin,
+                    pageable
+            );
+        }
+
+        // Caso 3: Ambos filtros activos
+        if (tieneFiltroId && tieneFiltroFecha) {
+            if (filtro.getTipoFiltroId() == 1) {
+                Integer transaccionId = filtro.getTransaccionId();
+                // Si el ID está vacío o inválido, usar solo filtro de fecha
+                if (transaccionId == null || transaccionId <= 0) {
+                    return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteAndFechaBetween(
+                            TransaccionAlmacen.TipoEntidadCausante.OD,
+                            fechaInicio,
+                            fechaFin,
+                            pageable
+                    );
+                }
+                return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteAndTransaccionIdAndFechaBetween(
+                        TransaccionAlmacen.TipoEntidadCausante.OD,
+                        transaccionId,
+                        fechaInicio,
+                        fechaFin,
+                        pageable
+                );
+            } else if (filtro.getTipoFiltroId() == 2) {
+                Integer ordenProduccionId = filtro.getOrdenProduccionId();
+                // Si el ID está vacío o inválido, usar solo filtro de fecha
+                if (ordenProduccionId == null || ordenProduccionId <= 0) {
+                    return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteAndFechaBetween(
+                            TransaccionAlmacen.TipoEntidadCausante.OD,
+                            fechaInicio,
+                            fechaFin,
+                            pageable
+                    );
+                }
+                return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteAndOrdenProduccionIdAndFechaBetween(
+                        TransaccionAlmacen.TipoEntidadCausante.OD,
+                        ordenProduccionId,
+                        fechaInicio,
+                        fechaFin,
+                        pageable
+                );
+            }
+        }
+
+        // Fallback: retornar todas las dispensaciones (método simple)
+        return transaccionAlmacenHeaderRepo.findByTipoEntidadCausanteOrderByFechaTransaccionDesc(
+                TransaccionAlmacen.TipoEntidadCausante.OD,
                 pageable
         );
+    }
+
+    /**
+     * Convierte una entidad TransaccionAlmacen a su DTO de respuesta.
+     * Evita relaciones circulares que causan problemas de serialización JSON.
+     *
+     * @param transaccion Entidad TransaccionAlmacen a convertir
+     * @return DTO sin relaciones circulares
+     */
+    private TransaccionAlmacenResponseDTO convertirATransaccionAlmacenResponseDTO(TransaccionAlmacen transaccion) {
+        TransaccionAlmacenResponseDTO dto = new TransaccionAlmacenResponseDTO();
+        dto.setTransaccionId(transaccion.getTransaccionId());
+        dto.setFechaTransaccion(transaccion.getFechaTransaccion());
+        dto.setIdEntidadCausante(transaccion.getIdEntidadCausante());
+        dto.setTipoEntidadCausante(transaccion.getTipoEntidadCausante() != null 
+                ? transaccion.getTipoEntidadCausante().name() 
+                : null);
+        dto.setObservaciones(transaccion.getObservaciones());
+        dto.setEstadoContable(transaccion.getEstadoContable() != null 
+                ? transaccion.getEstadoContable().name() 
+                : null);
+
+        // Convertir usuario aprobador si existe
+        if (transaccion.getUsuarioAprobador() != null) {
+            TransaccionAlmacenResponseDTO.UsuarioAprobadorDTO usuarioDTO = 
+                    new TransaccionAlmacenResponseDTO.UsuarioAprobadorDTO();
+            usuarioDTO.setUserId(transaccion.getUsuarioAprobador().getId());
+            usuarioDTO.setNombre(transaccion.getUsuarioAprobador().getNombreCompleto());
+            dto.setUsuarioAprobador(usuarioDTO);
+        }
+
+        return dto;
+    }
+
+    /**
+     * Busca dispensaciones filtradas y las convierte a DTOs para evitar problemas de serialización.
+     *
+     * @param filtro DTO con los criterios de búsqueda
+     * @return Página de DTOs de transacciones que cumplen con los filtros
+     */
+    public Page<TransaccionAlmacenResponseDTO> buscarDispensacionesFiltradasDTO(FiltroHistDispensacionDTO filtro) {
+        Page<TransaccionAlmacen> resultados = buscarDispensacionesFiltradas(filtro);
+        return resultados.map(this::convertirATransaccionAlmacenResponseDTO);
     }
 
 

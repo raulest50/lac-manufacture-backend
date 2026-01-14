@@ -62,3 +62,6 @@ entity-summary.txt
 *.patch
 
 .cursor
+
+hs_err_pid15740.log
+replay_pid15740.log

@@ -87,7 +87,7 @@ public interface TransaccionAlmacenHeaderRepo extends JpaRepository<TransaccionA
     );
 
     /**
-     * Busca dispensaciones (transacciones tipo OP) con filtros dinámicos.
+     * Busca dispensaciones (transacciones tipo OD) con filtros dinámicos.
      * Permite filtrar por ID de transacción, ID de orden de producción, y fechas.
      * Los parámetros opcionales se manejan con condiciones NULL-safe.
      *
@@ -108,6 +108,94 @@ public interface TransaccionAlmacenHeaderRepo extends JpaRepository<TransaccionA
     Page<TransaccionAlmacen> findDispensacionesFiltradas(
         @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
         @Param("transaccionId") Integer transaccionId,
+        @Param("ordenProduccionId") Integer ordenProduccionId,
+        @Param("fechaInicio") LocalDateTime fechaInicio,
+        @Param("fechaFin") LocalDateTime fechaFin,
+        Pageable pageable
+    );
+
+    /**
+     * Busca todas las dispensaciones (transacciones tipo OD) sin filtros adicionales.
+     * Usado cuando no se especifican filtros de ID o fecha.
+     *
+     * @param tipoEntidadCausante Tipo de entidad causante (OD para dispensaciones)
+     * @param pageable Configuración de paginación
+     * @return Página de transacciones ordenadas por fecha descendente
+     */
+    Page<TransaccionAlmacen> findByTipoEntidadCausanteOrderByFechaTransaccionDesc(
+        TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
+        Pageable pageable
+    );
+
+    /**
+     * Busca dispensaciones filtradas solo por ID de transacción.
+     */
+    @Query("SELECT t FROM TransaccionAlmacen t WHERE " +
+           "t.tipoEntidadCausante = :tipoEntidadCausante AND " +
+           "t.transaccionId = :transaccionId " +
+           "ORDER BY t.fechaTransaccion DESC")
+    Page<TransaccionAlmacen> findByTipoEntidadCausanteAndTransaccionId(
+        @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
+        @Param("transaccionId") Integer transaccionId,
+        Pageable pageable
+    );
+
+    /**
+     * Busca dispensaciones filtradas solo por ID de orden de producción.
+     */
+    @Query("SELECT t FROM TransaccionAlmacen t WHERE " +
+           "t.tipoEntidadCausante = :tipoEntidadCausante AND " +
+           "t.idEntidadCausante = :ordenProduccionId " +
+           "ORDER BY t.fechaTransaccion DESC")
+    Page<TransaccionAlmacen> findByTipoEntidadCausanteAndOrdenProduccionId(
+        @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
+        @Param("ordenProduccionId") Integer ordenProduccionId,
+        Pageable pageable
+    );
+
+    /**
+     * Busca dispensaciones filtradas solo por rango de fechas.
+     */
+    @Query("SELECT t FROM TransaccionAlmacen t WHERE " +
+           "t.tipoEntidadCausante = :tipoEntidadCausante AND " +
+           "t.fechaTransaccion >= :fechaInicio AND " +
+           "t.fechaTransaccion <= :fechaFin " +
+           "ORDER BY t.fechaTransaccion DESC")
+    Page<TransaccionAlmacen> findByTipoEntidadCausanteAndFechaBetween(
+        @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
+        @Param("fechaInicio") LocalDateTime fechaInicio,
+        @Param("fechaFin") LocalDateTime fechaFin,
+        Pageable pageable
+    );
+
+    /**
+     * Busca dispensaciones filtradas por ID de transacción y rango de fechas.
+     */
+    @Query("SELECT t FROM TransaccionAlmacen t WHERE " +
+           "t.tipoEntidadCausante = :tipoEntidadCausante AND " +
+           "t.transaccionId = :transaccionId AND " +
+           "t.fechaTransaccion >= :fechaInicio AND " +
+           "t.fechaTransaccion <= :fechaFin " +
+           "ORDER BY t.fechaTransaccion DESC")
+    Page<TransaccionAlmacen> findByTipoEntidadCausanteAndTransaccionIdAndFechaBetween(
+        @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
+        @Param("transaccionId") Integer transaccionId,
+        @Param("fechaInicio") LocalDateTime fechaInicio,
+        @Param("fechaFin") LocalDateTime fechaFin,
+        Pageable pageable
+    );
+
+    /**
+     * Busca dispensaciones filtradas por ID de orden de producción y rango de fechas.
+     */
+    @Query("SELECT t FROM TransaccionAlmacen t WHERE " +
+           "t.tipoEntidadCausante = :tipoEntidadCausante AND " +
+           "t.idEntidadCausante = :ordenProduccionId AND " +
+           "t.fechaTransaccion >= :fechaInicio AND " +
+           "t.fechaTransaccion <= :fechaFin " +
+           "ORDER BY t.fechaTransaccion DESC")
+    Page<TransaccionAlmacen> findByTipoEntidadCausanteAndOrdenProduccionIdAndFechaBetween(
+        @Param("tipoEntidadCausante") TransaccionAlmacen.TipoEntidadCausante tipoEntidadCausante,
         @Param("ordenProduccionId") Integer ordenProduccionId,
         @Param("fechaInicio") LocalDateTime fechaInicio,
         @Param("fechaFin") LocalDateTime fechaFin,

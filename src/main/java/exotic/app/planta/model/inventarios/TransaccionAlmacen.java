@@ -99,11 +99,13 @@
             // El usuario se asignará en el servicio
         }
 
+
         public enum TipoEntidadCausante{
             OCM, // orden de compra de materiales
             OP, // orden de produccion
             OTA, // orden de tranferencia de almacen
             OAA, // orden de ajuste de almacen
+            OD, // orden de dispensacion
         }
 
         /**

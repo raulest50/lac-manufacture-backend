@@ -137,14 +137,15 @@ public class SalidaAlmacenResource {
     /**
      * Endpoint para buscar dispensaciones con filtros flexibles.
      * Permite filtrar por ID de transacción, ID de orden de producción, y fechas (rango o específica).
+     * Retorna DTOs para evitar problemas de serialización JSON con relaciones circulares.
      *
      * @param filtro DTO con los criterios de búsqueda
-     * @return Página de transacciones que cumplen con los filtros
+     * @return Página de DTOs de transacciones que cumplen con los filtros
      */
     @PostMapping("/historial_dispensacion_filter")
-    public ResponseEntity<Page<TransaccionAlmacen>> buscarDispensacionesFiltradas(
+    public ResponseEntity<Page<TransaccionAlmacenResponseDTO>> buscarDispensacionesFiltradas(
             @RequestBody FiltroHistDispensacionDTO filtro) {
-        Page<TransaccionAlmacen> resultados = salidaAlmacenService.buscarDispensacionesFiltradas(filtro);
+        Page<TransaccionAlmacenResponseDTO> resultados = salidaAlmacenService.buscarDispensacionesFiltradasDTO(filtro);
         return ResponseEntity.ok(resultados);
     }
 
