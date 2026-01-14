@@ -83,15 +83,16 @@ public class SalidaAlmacenResource {
     /**
      * Obtiene la lista completa desglosada de todos los materiales base necesarios
      * para una orden de producción, descomponiendo recursivamente los semiterminados.
-     *
+     * Incluye también los materiales de empaque del CasePack.
+     * 
      * @param ordenProduccionId ID de la orden de producción
-     * @return Lista plana de materiales base con cantidades totales requeridas
+     * @return DTO con insumos de receta e insumos de empaque
      */
     @GetMapping("/orden-produccion/{ordenProduccionId}/insumos-desglosados")
-    public ResponseEntity<java.util.List<InsumoDesglosadoDTO>> getInsumosDesglosados(
+    public ResponseEntity<InsumosDesglosadosResponseDTO> getInsumosDesglosados(
             @PathVariable int ordenProduccionId) {
-        java.util.List<InsumoDesglosadoDTO> insumos = salidaAlmacenService.getInsumosDesglosados(ordenProduccionId);
-        return ResponseEntity.ok(insumos);
+        InsumosDesglosadosResponseDTO response = salidaAlmacenService.getInsumosDesglosados(ordenProduccionId);
+        return ResponseEntity.ok(response);
     }
 
 

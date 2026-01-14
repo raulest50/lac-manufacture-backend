@@ -7,6 +7,9 @@ import exotic.app.planta.model.inventarios.Movimiento;
 import exotic.app.planta.model.inventarios.TransaccionAlmacen;
 import exotic.app.planta.model.inventarios.dto.*;
 import exotic.app.planta.model.producto.Terminado;
+import exotic.app.planta.model.producto.manufacturing.packaging.CasePack;
+import exotic.app.planta.model.producto.manufacturing.packaging.InsumoEmpaque;
+import exotic.app.planta.model.producto.Material;
 import exotic.app.planta.model.master.configs.MasterDirective;
 import exotic.app.planta.model.produccion.OrdenProduccion;
 import exotic.app.planta.model.produccion.OrdenSeguimiento;
@@ -690,11 +693,12 @@ public class SalidaAlmacenService {
     /**
      * Obtiene la lista completa desglosada de todos los materiales base necesarios
      * para una orden de producción, descomponiendo recursivamente los semiterminados.
+     * Incluye también los materiales de empaque del CasePack.
      * 
      * @param ordenProduccionId ID de la orden de producción
-     * @return Lista plana de materiales base con cantidades totales requeridas
+     * @return DTO con insumos de receta e insumos de empaque
      */
-    public List<InsumoDesglosadoDTO> getInsumosDesglosados(int ordenProduccionId) {
+    public InsumosDesglosadosResponseDTO getInsumosDesglosados(int ordenProduccionId) {
         // Obtener la orden de producción
         OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenProduccionId)
             .orElseThrow(() -> new RuntimeException("Orden de producción no encontrada con ID: " + ordenProduccionId));
@@ -704,6 +708,8 @@ public class SalidaAlmacenService {
         if (!(producto instanceof Terminado)) {
             throw new RuntimeException("El producto de la orden de producción debe ser un Terminado");
         }
+
+        Terminado terminado = (Terminado) producto;
 
         // Obtener la cantidad de la orden (multiplicador)
         double cantidadOrden = ordenProduccion.getCantidadProducir();
@@ -716,7 +722,60 @@ public class SalidaAlmacenService {
 
         aplanarInsumos(insumosRecursivos, insumosConsolidados, cantidadOrden, 1.0);
 
-        return new ArrayList<>(insumosConsolidados.values());
+        // Obtener materiales de empaque
+        List<InsumoDesglosadoDTO> insumosEmpaque = obtenerInsumosEmpaque(terminado, cantidadOrden);
+
+        // Crear respuesta con ambas listas
+        InsumosDesglosadosResponseDTO response = new InsumosDesglosadosResponseDTO();
+        response.setInsumosReceta(new ArrayList<>(insumosConsolidados.values()));
+        response.setInsumosEmpaque(insumosEmpaque);
+
+        return response;
+    }
+
+    /**
+     * Obtiene los materiales de empaque del CasePack del producto terminado.
+     * 
+     * @param terminado Producto terminado con CasePack
+     * @param cantidadOrden Cantidad a producir de la orden
+     * @return Lista de materiales de empaque desglosados
+     */
+    private List<InsumoDesglosadoDTO> obtenerInsumosEmpaque(Terminado terminado, double cantidadOrden) {
+        List<InsumoDesglosadoDTO> insumosEmpaque = new ArrayList<>();
+
+        // Verificar si el terminado tiene CasePack y materiales de empaque
+        if (terminado.getCasePack() == null || terminado.getCasePack().getInsumosEmpaque() == null) {
+            return insumosEmpaque; // Retornar lista vacía si no hay materiales de empaque
+        }
+
+        CasePack casePack = terminado.getCasePack();
+        
+        for (InsumoEmpaque insumoEmpaque : casePack.getInsumosEmpaque()) {
+            Material material = insumoEmpaque.getMaterial();
+            if (material == null) {
+                continue; // Saltar si el material es null
+            }
+
+            // Calcular cantidad total: cantidad del insumo de empaque * cantidad de la orden
+            double cantidadTotal = insumoEmpaque.getCantidad() * cantidadOrden;
+
+            // Crear DTO para el material de empaque
+            InsumoDesglosadoDTO dto = new InsumoDesglosadoDTO();
+            dto.setProductoId(material.getProductoId());
+            dto.setProductoNombre(material.getNombre());
+            dto.setCantidadTotalRequerida(cantidadTotal);
+            // Usar uom del insumo de empaque si existe, sino usar tipoUnidades del material
+            dto.setTipoUnidades(insumoEmpaque.getUom() != null && !insumoEmpaque.getUom().isEmpty() 
+                ? insumoEmpaque.getUom() 
+                : (material.getTipoUnidades() != null ? material.getTipoUnidades() : "U"));
+            dto.setTipoProducto("MATERIAL_EMPAQUE"); // Diferenciador para materiales de empaque
+            dto.setInventareable(material.isInventareable());
+            dto.setSeguimientoId(null); // Los materiales de empaque no tienen seguimientoId
+
+            insumosEmpaque.add(dto);
+        }
+
+        return insumosEmpaque;
     }
 
     /**
