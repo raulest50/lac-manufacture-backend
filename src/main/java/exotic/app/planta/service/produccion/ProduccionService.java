@@ -155,8 +155,8 @@ public class ProduccionService {
     }
 
     /**
-     * Obtiene todas las órdenes de producción en estado abierto (0) o en curso (1)
-     * 
+     * Obtiene todas las órdenes de producción que no están terminadas (2) ni canceladas (-1).
+     *
      * @param pageable Información de paginación
      * @return Página de DTOs de órdenes de producción
      */
@@ -167,8 +167,8 @@ public class ProduccionService {
     }
 
     /**
-     * Obtiene una orden de producción por ID si está en estado abierto (0) o en progreso (1).
-     * 
+     * Obtiene una orden de producción por ID si no está terminada (2) ni cancelada (-1).
+     *
      * @param ordenId ID de la orden de producción
      * @return DTO de la orden de producción si existe y está en estado válido, null en caso contrario
      */
@@ -185,8 +185,8 @@ public class ProduccionService {
         OrdenProduccion orden = ordenOpt.get();
         int estadoOrden = orden.getEstadoOrden();
 
-        // Solo retornar si está en estado abierto (0) o en progreso (1)
-        if (estadoOrden != 0 && estadoOrden != 1) {
+        // Solo retornar si no está terminada (2) ni cancelada (-1)
+        if (estadoOrden == 2 || estadoOrden == -1) {
             return null;
         }
 

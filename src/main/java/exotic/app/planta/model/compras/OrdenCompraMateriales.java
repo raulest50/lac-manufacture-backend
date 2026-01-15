@@ -44,9 +44,9 @@ public class OrdenCompraMateriales {
     @JsonManagedReference
     private List<ItemOrdenCompra> itemsOrdenCompra;
 
-    private int subTotal;
-    private int ivaCOP;
-    private int totalPagar;
+    private long subTotal;
+    private long ivaCOP;
+    private long totalPagar;
 
     /**
      * 0: credito

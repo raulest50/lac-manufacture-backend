@@ -142,9 +142,9 @@ public class ProduccionResource {
     }
 
     /**
-     * Obtiene todas las órdenes de producción en estado abierto (0) o en curso (1)
+     * Obtiene todas las órdenes de producción que no estén terminadas (2) ni canceladas (-1)
      * utilizando paginación. Si se proporciona ordenId, busca solo esa orden.
-     * 
+     *
      * @param page Número de página (por defecto 0)
      * @param size Tamaño de página (por defecto 10)
      * @param ordenId ID opcional de la orden de producción a buscar
