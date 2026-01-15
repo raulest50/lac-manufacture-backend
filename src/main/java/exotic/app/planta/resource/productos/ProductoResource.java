@@ -10,6 +10,7 @@ import exotic.app.planta.model.producto.Material;
 import exotic.app.planta.model.producto.Producto;
 import exotic.app.planta.model.producto.SemiTerminado;
 import exotic.app.planta.model.producto.Terminado;
+import exotic.app.planta.model.producto.manufacturing.packaging.dto.CasePackResponseDTO;
 import exotic.app.planta.service.productos.ProductoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -151,6 +152,16 @@ public class ProductoResource {
         return productoService.findProductoById(productoId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/terminado/{productoId}/case-pack")
+    public ResponseEntity<CasePackResponseDTO> getCasePackByTerminadoId(@PathVariable String productoId) {
+        Optional<Terminado> terminadoOpt = productoService.findTerminadoByProductoId(productoId);
+        if (terminadoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        CasePackResponseDTO dto = CasePackResponseDTO.fromCasePack(terminadoOpt.get().getCasePack());
+        return ResponseEntity.ok(dto);
     }
 
 
