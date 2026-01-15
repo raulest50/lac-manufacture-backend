@@ -6,6 +6,7 @@ import exotic.app.planta.model.inventarios.Lote;
 import exotic.app.planta.model.inventarios.Movimiento;
 import exotic.app.planta.model.inventarios.TransaccionAlmacen;
 import exotic.app.planta.model.inventarios.dto.*;
+import exotic.app.planta.model.producto.manufacturing.packaging.dto.CasePackResponseDTO;
 import exotic.app.planta.model.producto.Terminado;
 import exotic.app.planta.model.producto.manufacturing.packaging.CasePack;
 import exotic.app.planta.model.producto.manufacturing.packaging.InsumoEmpaque;
@@ -734,6 +735,46 @@ public class SalidaAlmacenService {
     }
 
     /**
+     * Endpoint combinado creado para soportar dispensaciones parciales y visualización por semiterminados.
+     * Históricamente se aplanaban insumos, pero el proceso requiere preservar la jerarquía y
+     * mostrar historial de dispensaciones asociadas a la ODP en una sola llamada.
+     */
+    public DispensacionResumenDTO getDispensacionResumen(int ordenProduccionId) {
+        OrdenProduccion ordenProduccion = ordenProduccionRepo.findById(ordenProduccionId)
+                .orElseThrow(() -> new RuntimeException("Orden de producción no encontrada con ID: " + ordenProduccionId));
+
+        Producto producto = ordenProduccion.getProducto();
+        if (!(producto instanceof Terminado)) {
+            throw new RuntimeException("El producto de la orden de producción debe ser un Terminado");
+        }
+
+        Terminado terminado = (Terminado) producto;
+        double cantidadOrden = ordenProduccion.getCantidadProducir();
+
+        List<InsumoWithStockDTO> insumosRecursivos = productoService.getInsumosWithStock(producto.getProductoId());
+        List<InsumoRecursivoDTO> insumosReceta = construirInsumosRecursivos(insumosRecursivos, cantidadOrden, 1.0);
+
+        List<InsumoDesglosadoDTO> insumosEmpaque = obtenerInsumosEmpaqueBase(terminado);
+        CasePackResponseDTO casePack = CasePackResponseDTO.fromCasePack(terminado.getCasePack());
+
+        List<TransaccionAlmacen> transacciones = transaccionAlmacenHeaderRepo
+                .findByTipoEntidadCausanteAndIdEntidadCausanteWithMovimientos(
+                        TransaccionAlmacen.TipoEntidadCausante.OD,
+                        ordenProduccionId
+                );
+        List<TransaccionAlmacenDetalleDTO> historial = transacciones.stream()
+                .map(this::convertirATransaccionAlmacenDetalleDTO)
+                .collect(Collectors.toList());
+
+        DispensacionResumenDTO response = new DispensacionResumenDTO();
+        response.setInsumosReceta(insumosReceta);
+        response.setInsumosEmpaque(insumosEmpaque);
+        response.setCasePack(casePack);
+        response.setHistorialDispensaciones(historial);
+        return response;
+    }
+
+    /**
      * Obtiene los materiales de empaque del CasePack del producto terminado.
      * 
      * @param terminado Producto terminado con CasePack
@@ -776,6 +817,110 @@ public class SalidaAlmacenService {
         }
 
         return insumosEmpaque;
+    }
+
+    /**
+     * Obtiene materiales de empaque sin aplicar el multiplicador de la orden (cantidad base).
+     */
+    private List<InsumoDesglosadoDTO> obtenerInsumosEmpaqueBase(Terminado terminado) {
+        List<InsumoDesglosadoDTO> insumosEmpaque = new ArrayList<>();
+        if (terminado.getCasePack() == null || terminado.getCasePack().getInsumosEmpaque() == null) {
+            return insumosEmpaque;
+        }
+
+        CasePack casePack = terminado.getCasePack();
+        for (InsumoEmpaque insumoEmpaque : casePack.getInsumosEmpaque()) {
+            Material material = insumoEmpaque.getMaterial();
+            if (material == null) {
+                continue;
+            }
+
+            InsumoDesglosadoDTO dto = new InsumoDesglosadoDTO();
+            dto.setProductoId(material.getProductoId());
+            dto.setProductoNombre(material.getNombre());
+            dto.setCantidadTotalRequerida(insumoEmpaque.getCantidad());
+            dto.setTipoUnidades(insumoEmpaque.getUom() != null && !insumoEmpaque.getUom().isEmpty()
+                    ? insumoEmpaque.getUom()
+                    : (material.getTipoUnidades() != null ? material.getTipoUnidades() : "U"));
+            dto.setTipoProducto("MATERIAL_EMPAQUE");
+            dto.setInventareable(material.isInventareable());
+            dto.setSeguimientoId(null);
+            insumosEmpaque.add(dto);
+        }
+
+        return insumosEmpaque;
+    }
+
+    private List<InsumoRecursivoDTO> construirInsumosRecursivos(
+            List<InsumoWithStockDTO> insumos,
+            double cantidadOrden,
+            double multiplicadorActual
+    ) {
+        List<InsumoRecursivoDTO> resultado = new ArrayList<>();
+        for (InsumoWithStockDTO insumo : insumos) {
+            double cantidadTotal = insumo.getCantidadRequerida() * cantidadOrden * multiplicadorActual;
+            InsumoRecursivoDTO dto = new InsumoRecursivoDTO();
+            dto.setInsumoId(insumo.getInsumoId());
+            dto.setProductoId(insumo.getProductoId());
+            dto.setProductoNombre(insumo.getProductoNombre());
+            dto.setCantidadTotalRequerida(cantidadTotal);
+            dto.setTipoUnidades(insumo.getTipoUnidades() != null ? insumo.getTipoUnidades() : "KG");
+            dto.setTipoProducto(
+                    insumo.getTipoProducto() == InsumoWithStockDTO.TipoProducto.M
+                            ? "MATERIAL"
+                            : "SEMITERMINADO"
+            );
+            dto.setInventareable(insumo.getInventareable() != null ? insumo.getInventareable() : true);
+
+            if (insumo.getSubInsumos() != null && !insumo.getSubInsumos().isEmpty()) {
+                double nuevoMultiplicador = multiplicadorActual * insumo.getCantidadRequerida();
+                dto.setSubInsumos(construirInsumosRecursivos(insumo.getSubInsumos(), cantidadOrden, nuevoMultiplicador));
+            }
+            resultado.add(dto);
+        }
+        return resultado;
+    }
+
+    private TransaccionAlmacenDetalleDTO convertirATransaccionAlmacenDetalleDTO(TransaccionAlmacen transaccion) {
+        TransaccionAlmacenResponseDTO base = convertirATransaccionAlmacenResponseDTO(transaccion);
+        TransaccionAlmacenDetalleDTO detalle = new TransaccionAlmacenDetalleDTO();
+        detalle.setTransaccionId(base.getTransaccionId());
+        detalle.setFechaTransaccion(base.getFechaTransaccion());
+        detalle.setIdEntidadCausante(base.getIdEntidadCausante());
+        detalle.setTipoEntidadCausante(base.getTipoEntidadCausante());
+        detalle.setObservaciones(base.getObservaciones());
+        detalle.setEstadoContable(base.getEstadoContable());
+        detalle.setUsuarioAprobador(base.getUsuarioAprobador());
+
+        List<MovimientoDetalleDTO> movimientos = (transaccion.getMovimientosTransaccion() == null)
+                ? new ArrayList<>()
+                : transaccion.getMovimientosTransaccion().stream()
+                    .map(movimiento -> {
+                        MovimientoDetalleDTO dto = new MovimientoDetalleDTO();
+                        dto.setMovimientoId(movimiento.getMovimientoId());
+                        if (movimiento.getProducto() != null) {
+                            dto.setProductoId(movimiento.getProducto().getProductoId());
+                            dto.setProductoNombre(movimiento.getProducto().getNombre());
+                            dto.setTipoUnidades(movimiento.getProducto().getTipoUnidades());
+                        }
+                        dto.setCantidad(movimiento.getCantidad());
+                        dto.setTipoMovimiento(movimiento.getTipoMovimiento() != null
+                                ? movimiento.getTipoMovimiento().name()
+                                : null);
+                        dto.setAlmacen(movimiento.getAlmacen() != null
+                                ? movimiento.getAlmacen().name()
+                                : null);
+                        dto.setFechaMovimiento(movimiento.getFechaMovimiento());
+                        if (movimiento.getLote() != null) {
+                            dto.setBatchNumber(movimiento.getLote().getBatchNumber());
+                            dto.setProductionDate(movimiento.getLote().getProductionDate());
+                            dto.setExpirationDate(movimiento.getLote().getExpirationDate());
+                        }
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+        detalle.setMovimientos(movimientos);
+        return detalle;
     }
 
     /**

@@ -95,6 +95,19 @@ public class SalidaAlmacenResource {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Endpoint combinado (histórico):
+     * Se crea para evitar el aplanado de insumos y permitir dispensaciones parciales
+     * con validación de histórico en una sola llamada. Retorna receta no aplanada,
+     * materiales de empaque base y el historial de dispensaciones con movimientos.
+     */
+    @GetMapping("/orden-produccion/{ordenProduccionId}/dispensacion-resumen")
+    public ResponseEntity<DispensacionResumenDTO> getDispensacionResumen(
+            @PathVariable int ordenProduccionId) {
+        DispensacionResumenDTO response = salidaAlmacenService.getDispensacionResumen(ordenProduccionId);
+        return ResponseEntity.ok(response);
+    }
+
 
     /**
      * Endpoint para crear una dispensación asociada a una orden de producción.
